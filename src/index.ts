@@ -2,10 +2,28 @@ import {Plugin} from "esbuild";
 import * as path from "path";
 import {Options, renderSync} from "sass";
 
-export type SassPluginOptions = {}
+export type SassPluginOptions = Options & {
+    format?: "lit-css" | undefined
+}
 
-export function sassPlugin(options: SassPluginOptions): Plugin {
-    const sassOption: Options = {};
+const cssResultModule = cssText => `\
+import {css} from "lit-element";
+export default css\`
+${cssText.replace(/([$`\\])/g, "\\$1")}\`;
+`;
+
+const styleModule = cssText => `\
+document.head
+    .appendChild(document.createElement("style"))
+    .appendChild(document.createTextNode(\`
+${cssText.replace(/([$`\\])/g, "\\$1")}\`));
+`;
+
+function makeModule(contents: string, format: "lit-css"|"style"|undefined) {
+    return format === "style" ? styleModule(contents) : cssResultModule(contents);
+}
+
+export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     return {
         name: "sass-plugin",
         setup(build) {
@@ -14,11 +32,15 @@ export function sassPlugin(options: SassPluginOptions): Plugin {
             });
             build.onLoad({filter: /./, namespace: "sass"}, args => {
                 const {css} = renderSync({
-                    ...sassOption,
+                    ...options,
                     file: args.path
                 });
                 const contents = css.toString("utf-8");
-                return {contents: contents, loader: "css"};
+                if (options.format) {
+                    return {contents: makeModule(contents, options.format), loader: "js", resolveDir: path.dirname(args.path)};
+                } else {
+                    return {contents: contents, loader: "css"};
+                }
             });
         }
     };

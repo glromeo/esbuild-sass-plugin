@@ -28,4 +28,5 @@ describe("relying on css-loader", function () {
             "  padding: 4px;\n" +
             "}");
     });
+
 });
