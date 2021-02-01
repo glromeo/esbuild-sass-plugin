@@ -1,11 +1,32 @@
 {
   "name": "esbuild-sass-plugin",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "keywords": [],
-  "author": "",
+  "version": "1.0.1",
+  "description": "esbuild plugin for sass/scss files supporting both css loader and css result import (lit-element)",
+  "main": "lib/index.js",
+  "keywords": [
+    "esbuild",
+    "plugin",
+    "sass",
+    "scss",
+    "LICENSE",
+    "README.MD",
+    "tsconfig.json"
+  ],
+  "files": [
+    "lib",
+    "src",
+    "test"
+  ],
+  "author": "Gianluca Romeo <glromeo@gmail.com> (https://github.com/glromeo/esbuild-sass-plugin)",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/glromeo/esbuild-sass-plugin/issues"
+  },
+  "homepage": "https://github.com/glromeo/esbuild-sass-plugin#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/glromeo/esbuild-sass-plugin.git"
+  },
   "scripts": {
     "setup": "cd test/fixture && yarn install && cd ../..",
     "build": "tsc",
