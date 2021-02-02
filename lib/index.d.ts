@@ -1,3 +1,6 @@
 import { Plugin } from "esbuild";
-export declare type SassPluginOptions = {};
-export declare function sassPlugin(options: SassPluginOptions): Plugin;
+import { Options } from "sass";
+export declare type SassPluginOptions = Options & {
+    format?: "lit-css" | "style" | undefined;
+};
+export declare function sassPlugin(options?: SassPluginOptions): Plugin;

@@ -3,6 +3,9 @@ import * as path from "path";
 import {Options, renderSync} from "sass";
 
 export type SassPluginOptions = Options & {
+    basedir?: string
+    include?: string[]
+    exclude?: string[]
     format?: "lit-css" | "style" | undefined
 }
 
@@ -24,12 +27,17 @@ function makeModule(contents: string, format: "lit-css" | "style") {
 }
 
 export function sassPlugin(options: SassPluginOptions = {}): Plugin {
+    const basedir = options.basedir ?? process.cwd();
+    const accept = options.include ?
     return {
         name: "sass-plugin",
         setup(build) {
-            build.onResolve({filter: /\.(sass|scss)$/}, args => {
+            build.onResolve({filter: /\.(s[ac]ss|css)$/}, args => {
                 let paths = options.includePaths ? [args.resolveDir, ...options.includePaths] : [args.resolveDir];
-                return {path: require.resolve(args.path, {paths}), namespace: "sass"};
+                let path = require.resolve(args.path, {paths});
+                if (accept(path)) {
+                    return {path: path, namespace: "sass"};
+                }
             });
             build.onLoad({filter: /./, namespace: "sass"}, args => {
                 const {css} = renderSync({
