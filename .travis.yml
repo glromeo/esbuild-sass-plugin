@@ -1,0 +1,13 @@
+git:
+  depth: 1
+language: node_js
+node_js:
+  - '15'
+cache: yarn
+install:
+  - yarn install
+script:
+  - yarn setup
+  - yarn build
+  - yarn test
+
