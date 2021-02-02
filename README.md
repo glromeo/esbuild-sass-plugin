@@ -71,5 +71,5 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 
 MIT
 
-[travis-url]: https://travis-ci.org/glromeo/esbuild-sass-plugin
-[travis-image]: https://travis-ci.org/glromeo/esbuild-sass-plugin.svg?branch=main
+[travis-url]: https://travis-ci.com/glromeo/esbuild-sass-plugin
+[travis-image]: https://travis-ci.com/glromeo/esbuild-sass-plugin.svg?branch=main
