@@ -5,7 +5,8 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
-    "react",
-    "lit-element"
+    "bootstrap",
+    "lit-element",
+    "react"
   ]
 }

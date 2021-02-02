@@ -1,5 +1,7 @@
 ![logo created with https://cooltext.com](https://images.cooltext.com/5500652.png)
 
+[![Build Status][travis-image]][travis-url]
+
 A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
 ##### Main Features
 * css loader
@@ -36,3 +38,10 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 ```
 ... coming soon
 ```
+
+### License
+
+MIT
+
+[travis-url]: https://travis-ci.org/glromeo/esbuild-sass-plugin
+[travis-image]: https://travis-ci.org/glromeo/esbuild-sass-plugin.svg?branch=main

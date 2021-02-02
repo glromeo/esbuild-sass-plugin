@@ -3,7 +3,7 @@ import * as path from "path";
 import {Options, renderSync} from "sass";
 
 export type SassPluginOptions = Options & {
-    format?: "lit-css" | undefined
+    format?: "lit-css" | "style" | undefined
 }
 
 const cssResultModule = cssText => `\
@@ -19,7 +19,7 @@ document.head
 ${cssText.replace(/([$`\\])/g, "\\$1")}\`));
 `;
 
-function makeModule(contents: string, format: "lit-css"|"style"|undefined) {
+function makeModule(contents: string, format: "lit-css" | "style") {
     return format === "style" ? styleModule(contents) : cssResultModule(contents);
 }
 
@@ -28,7 +28,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         name: "sass-plugin",
         setup(build) {
             build.onResolve({filter: /\.(sass|scss)$/}, args => {
-                return {path: path.resolve(args.resolveDir, args.path), namespace: "sass"};
+                let paths = options.includePaths ? [args.resolveDir, ...options.includePaths] : [args.resolveDir];
+                return {path: require.resolve(args.path, {paths}), namespace: "sass"};
             });
             build.onLoad({filter: /./, namespace: "sass"}, args => {
                 const {css} = renderSync({
@@ -37,7 +38,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 });
                 const contents = css.toString("utf-8");
                 if (options.format) {
-                    return {contents: makeModule(contents, options.format), loader: "js", resolveDir: path.dirname(args.path)};
+                    return {
+                        contents: makeModule(contents, options.format),
+                        loader: "js",
+                        resolveDir: path.dirname(args.path)
+                    };
                 } else {
                     return {contents: contents, loader: "css"};
                 }
