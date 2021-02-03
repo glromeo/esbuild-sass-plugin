@@ -1,3 +1,12 @@
 .container {
-  border: 10px solid white;
+  display: flex;
+  flex-direction: column;
+}
+
+.banner {
+  font-family: sans-serif;
+  border: 5px solid red;
+  padding: 20px;
+  background: black;
+  color: red;
 }

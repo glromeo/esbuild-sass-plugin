@@ -1,13 +1,3 @@
-import {customElement, html, LitElement} from "lit-element/lit-element.js";
+import "./hello-world";
 
-import styles from "./styles.scss";
-
-@customElement("hello-world")
-export default class HelloWorld extends LitElement {
-
-    static styles = styles
-
-    render() {
-        return html`<div class="Hello"><h1 class="banner">Hello World!</h1></div>`;
-    }
-}
+import "./index.scss";
