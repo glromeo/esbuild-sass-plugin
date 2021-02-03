@@ -25,7 +25,7 @@ await esbuild.build({
 ```
 this will use `loader: "css"` and your transpiled sass will be included in index.css.
 
-If you specify `format: "style"` then the stylesheet will be dynamically added to the page. 
+If you specify `type: "style"` then the stylesheet will be dynamically added to the page. 
 
 Alternatively you can import a **lit-element** css result:
 ```javascript
@@ -42,12 +42,12 @@ export default class HelloWorld extends LitElement {
     }
 }
 ```
-if you specify the format `"lit-css"` like this: 
+if you specify the type `"lit-css"` like this: 
 ```javascript
 await esbuild.build({
     ...
     plugins: [sassPlugin({
-        format: "lit-css",
+        type: "lit-css",
         ... // other options for sass.renderSync(...)
     })]
 });

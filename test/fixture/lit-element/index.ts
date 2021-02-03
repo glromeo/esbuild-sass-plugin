@@ -1,6 +1,6 @@
 import {customElement, html, LitElement} from "lit-element";
 
-import styles from "./styles.scss";
+import styles from "./src/styles.scss";
 
 @customElement("hello-world")
 export default class HelloWorld extends LitElement {

@@ -54,12 +54,14 @@
   },
   "dependencies": {
     "esbuild": "^0.8.39",
+    "picomatch": "^2.2.2",
     "sass": "^1.32.5"
   },
   "devDependencies": {
     "@types/chai": "^4.2.14",
     "@types/mocha": "^8.2.0",
     "@types/node": "^14.14.22",
+    "@types/picomatch": "^2.2.1",
     "@types/sass": "^1.16.0",
     "chai": "^4.2.0",
     "mocha": "^8.2.1",

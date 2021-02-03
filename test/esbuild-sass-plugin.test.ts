@@ -33,27 +33,44 @@ describe("esbuild sass plugin tests", function () {
     it("lit-element component (import css result)", async function () {
 
         await esbuild.build({
-            entryPoints: ["./test/fixture/lit-element/index.ts"],
+            entryPoints: ["./test/fixture/lit-element/src/index.ts"],
             bundle: true,
             format: "esm",
             sourcemap: true,
             outdir: "./test/fixture/lit-element/out",
             define: {"process.env.NODE_ENV": "\"development\""},
             plugins: [sassPlugin({
-                format: "lit-css",
+                type: {
+                    "style": ["**/src/index.scss"],
+                    "lit-css": ["**"]
+                },
                 includePaths: [path.resolve(__dirname, "fixture/lit-element")]
             })]
         });
 
         let cssBundle = fs.readFileSync("./test/fixture/lit-element/out/index.js", "utf-8");
-        expect(cssBundle).to.have.string("HelloWorld.styles = styles_default;");
-        expect(cssBundle).to.have.string(
-            "var styles_default = css`\n" +
-            ".Hello .banner {\n" +
-            "  color: #7ec1ff;\n" +
+        expect(cssBundle).to.have.string("var hello_world_default = css`\n" +
+            ".banner {\n" +
+            "  font-family: sans-serif;\n" +
+            "  color: blue;\n" +
             "  background: black;\n" +
-            "  border: 2px solid red;\n" +
-            "}`;");
+            "  border: 5px solid blue;\n" +
+            "  padding: 20px;\n" +
+            "}`;\n");
+        expect(cssBundle).to.have.string("HelloWorld.styles = hello_world_default;");
+        expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(`\n" +
+            ".container {\n" +
+            "  display: flex;\n" +
+            "  flex-direction: column;\n" +
+            "}\n" +
+            "\n" +
+            ".banner {\n" +
+            "  font-family: sans-serif;\n" +
+            "  border: 5px solid red;\n" +
+            "  padding: 20px;\n" +
+            "  background: black;\n" +
+            "  color: red;\n" +
+            "}`));\n");
     });
 
     it("boostrap sass (adding style elements)", async function () {
@@ -66,7 +83,7 @@ describe("esbuild sass plugin tests", function () {
             outdir: "./test/fixture/bootstrap/out",
             define: {"process.env.NODE_ENV": "\"development\""},
             plugins: [sassPlugin({
-                format: "style",
+                type: "style",
                 includePaths: [path.resolve(__dirname, "fixture/bootstrap")]
             })]
         });
