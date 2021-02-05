@@ -44,7 +44,7 @@ const colorValues = Object.values(JSON.parse(readFileSync("./css-colors.json", "
 const tile = (row, col, r, c) => `
 import {customElement, html, LitElement, property} from "lit-element";
 
-// import bootstrap from "bootstrap/scss/bootstrap.scss";
+import bootstrap from "bootstrap/scss/bootstrap.scss";
 import styles from "./style_${r * 24 + c}.scss";
 
 @customElement("tile-${row[2]}${col[2]}")
@@ -56,8 +56,8 @@ export default class Tile${row[0]}${col[0]} extends LitElement {
 
     render() {
         return html\`
-            <div class="tile flex-column" title=\${this.title}>
-                <div class="flex-row">
+            <div class="tile d-flex flex-column" title=\${this.title}>
+                <div class="d-flex flex-row">
                     <div class="letter">${row[1]}</div>
                     <div class="letter">${col[2]}</div>
                 </div>
@@ -77,16 +77,17 @@ ${alphabet.map((col, c) => {
     saveGeneratedFile(`./${row[2]}/${col[1]}/style_${r * 24 + c}.scss`, `
         .tile {
             color: ${colors[Math.floor(Math.random() * colors.length)]};
-            background-color: lighten(${colors[Math.floor(Math.random() * colors.length)]}, 50%);
-            border: 2px solid darken(${colors[Math.floor(Math.random() * colors.length)]}, 50%);
+            background-color: lighten(${colors[Math.floor(Math.random() * colors.length)]}, 20%);
+            border: 4px solid darken(${colors[Math.floor(Math.random() * colors.length)]}, 20%);
+            margin: 1px;
             .letter {
                 padding: 10px;
-                font-size: 12px;
+                font-size: 15px;
             }
         }
         .number {
             padding: 10px;
-            font-size: 10px;
+            font-size: 20px;
         }
     `);
     return `import "./${col[1]}/tile_${r * 24 + c}.ts";`;
@@ -94,6 +95,8 @@ ${alphabet.map((col, c) => {
 `;
 
 const grid = `
+import {customElement, html, LitElement, property} from "lit-element";
+
 /**
  * Grid
  */
@@ -103,8 +106,23 @@ ${alphabet.map((row, r) => {
     return `import "${filename}";`;
 }).join("\n")}
 
-export default function () {
-    console.log("ready.")    
+import "../index.scss"; // TODO: resolve bootstrap to the same scss module
+
+@customElement("benchmark-component")
+class BenchmarkComponent extends LitElement {
+
+    createRenderRoot() {
+      return this;
+    }
+
+    render() {
+        return html\`
+            <div class="d-flex flex-column">${alphabet.map((row, r) => `
+                <div class="d-flex flex-row"> ${alphabet.map((col, c) => `
+                    <tile-${row[2]}${col[2]}></tile-${row[2]}${col[2]}>`).join("")}
+                </div>`).join("")}
+            </div>\`;
+    }
 }
 `;
 

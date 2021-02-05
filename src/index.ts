@@ -63,13 +63,14 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     cache.set(args.path, {mtimeMs, result});
                     return result;
                 }
-            }
+            };
         }
         return callback;
     }
 
     function transform(file) {
         const {css} = renderSync({
+            importer: url => ({file: url.replace(/^~/, "node_modules/")}), // TODO: implement proper resolution
             ...options,
             file
         });
@@ -90,7 +91,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             });
             build.onLoad({filter: /./, namespace: "sass"}, caching(({path}) => {
                 let contents = path.endsWith(".css") ? readFileSync(path, "utf-8") : transform(path);
-                let type = typeOf(path);
+                let type = typeOf(path.replace(/\\/g, "/"));
                 return type === "css" ? {
                     contents: contents,
                     loader: "css" as Loader
