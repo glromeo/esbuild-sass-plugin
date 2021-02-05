@@ -57,10 +57,17 @@ Look in the `test` folder for more usage examples.
 
 The **options** passed to the plugin are a superset of the sass [Options](https://sass-lang.com/documentation/js-api#options).
 
+### CACHING
+
+It greatly improves the performance in incremental builds or watch mode.
+
+It has to be enabled with `cache: true` in the options. 
+
 ### TODO:
 
 * css in js modules
 * refactor the options
+* speed improvements
 
 ### Benchmarks
 ```
