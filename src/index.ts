@@ -1,12 +1,17 @@
-import {Plugin} from "esbuild";
+import {Loader, OnLoadArgs, OnLoadResult, Plugin} from "esbuild";
+import {readFileSync, statSync} from "fs";
 import {dirname, resolve} from "path";
 import picomatch from "picomatch";
-import {readFileSync} from "fs";
 import {Options, renderSync} from "sass";
 
 export type SassPluginOptions = Options & {
     basedir?: string
     type?: string | Record<string, string[]>
+    cache?: boolean
+}
+
+type CachedLoadResult = OnLoadResult & {
+    mtimeMs: number
 }
 
 const cssResultModule = cssText => `\
@@ -36,6 +41,33 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 ? Object.entries(options.type!).map(([key, value]) => [key, picomatch(value)])
                 : null;
 
+    const typeOf = types !== null
+        ? path => {
+            for (const [type, accepts] of types) if (accepts(path)) {
+                return type;
+            }
+            return "css";
+        }
+        : path => "css";
+
+    function caching(callback: (args: OnLoadArgs) => OnLoadResult) {
+        if (options.cache) {
+            const cache = new Map<string, { mtimeMs: number, result: OnLoadResult }>();
+            return args => {
+                let {mtimeMs} = statSync(args.path);
+                let cached = cache.get(args.path);
+                if (cached && cached.mtimeMs === mtimeMs) {
+                    return cached.result;
+                } else {
+                    const result = callback(args);
+                    cache.set(args.path, {mtimeMs, result});
+                    return result;
+                }
+            }
+        }
+        return callback;
+    }
+
     function transform(file) {
         const {css} = renderSync({
             ...options,
@@ -56,26 +88,18 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 let resolved = require.resolve(path, {paths});
                 return {path: resolved, namespace: "sass"};
             });
-            build.onLoad({filter: /./, namespace: "sass"}, ({path}) => {
+            build.onLoad({filter: /./, namespace: "sass"}, caching(({path}) => {
                 let contents = path.endsWith(".css") ? readFileSync(path, "utf-8") : transform(path);
-                if (types) {
-                    for (const [type, accepts] of types) {
-                        if (accepts(path)) {
-                            if (type === "css") {
-                                return {contents: contents, loader: "css"};
-                            } else {
-                                return {
-                                    contents: makeModule(contents, type),
-                                    loader: "js",
-                                    resolveDir: dirname(path)
-                                };
-                            }
-                        }
-                    }
-                } else {
-                    return {contents: contents, loader: "css"};
-                }
-            });
+                let type = typeOf(path);
+                return type === "css" ? {
+                    contents: contents,
+                    loader: "css" as Loader
+                } : {
+                    contents: makeModule(contents, type),
+                    loader: "js" as Loader,
+                    resolveDir: dirname(path)
+                };
+            }));
         }
     };
 }

@@ -1,12 +1,19 @@
 {
   "name": "fixtures",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "serve.js",
   "license": "MIT",
   "private": true,
   "workspaces": [
+    "benchmark",
     "bootstrap",
     "lit-element",
     "react"
-  ]
+  ],
+  "scripts": {
+    "serve-benchmark": "node serve benchmark",
+    "serve-bootstrap": "node serve bootstrap",
+    "serve-lit-element": "node serve lit-element",
+    "serve-react": "node serve react"
+  }
 }
