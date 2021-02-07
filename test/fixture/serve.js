@@ -29,7 +29,7 @@ watcher.on("ready", async function () {
         entryPoints: [require.resolve(`./${fixture}`)],
         bundle: true,
         format: "esm",
-        sourcemap: true,
+        sourcemap: false,
         outdir: out,
         define: {"process.env.NODE_ENV": "\"development\""},
         incremental: true,

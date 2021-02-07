@@ -1,7 +1,7 @@
 {
-    "type": {
-        "style": ["**/src/index.scss"],
-        "lit-css": ["**"]
-    },
-    "cache": true
+  "type": [
+    ["style", "src/index.scss"],
+    ["lit-css"]
+  ],
+  "cache": true
 }

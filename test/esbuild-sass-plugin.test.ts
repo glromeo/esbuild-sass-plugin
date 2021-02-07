@@ -40,10 +40,11 @@ describe("esbuild sass plugin tests", function () {
             outdir: "./test/fixture/lit-element/out",
             define: {"process.env.NODE_ENV": "\"development\""},
             plugins: [sassPlugin({
-                type: {
-                    "style": ["**/src/index.scss"],
-                    "lit-css": ["**"]
-                },
+                basedir: path.join(__dirname, "test", "fixture"),
+                type: [
+                    ["style", "src/index.scss"],
+                    ["lit-css"]
+                ],
                 includePaths: [path.resolve(__dirname, "fixture/lit-element")]
             })]
         });

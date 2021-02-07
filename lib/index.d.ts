@@ -1,8 +1,9 @@
 import { Plugin } from "esbuild";
-import { Options } from "sass";
-export declare type SassPluginOptions = Options & {
+import * as sass from "sass";
+export declare type SassPluginOptions = sass.Options & {
     basedir?: string;
-    type?: string | Record<string, string[]>;
+    type?: string | ([string] | [string, string | [string] | [string, string]])[];
     cache?: boolean;
+    picomatch?: any;
 };
 export declare function sassPlugin(options?: SassPluginOptions): Plugin;

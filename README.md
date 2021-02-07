@@ -3,9 +3,10 @@
 [![Build Status][travis-image]][travis-url]
 
 A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
+
 ##### Main Features
-* css loader
-* css result modules or dynamic style added to main page
+* defaults to using the `css loader`
+* `css result` modules or `dynamic style` added to main page
 * uses [dart sass](https://www.npmjs.com/package/sass)
 
 ### Install
@@ -55,7 +56,37 @@ await esbuild.build({
 
 Look in the `test` folder for more usage examples.
 
+### Options
+
 The **options** passed to the plugin are a superset of the sass [Options](https://sass-lang.com/documentation/js-api#options).
+
+|Option|Type|Default|
+|---|---|---|
+|cache|boolean|true|
+|type|string or array|`"css"`|
+
+If you want to have different loaders for different parts of your code you can pass `type` an array. 
+
+Each item is going
+to be: 
+* the type (one of: `css`, `lit-css` or `style`)
+* a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two. 
+
+e.g.
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        type: [                                     // this is somehow like a case 'switch'...
+            ["css", "bootstrap/**"],                // ...all bootstrap scss files (args.path) 
+            ["style", ["src/nomod/**"]],            // ...all files imported from files in 'src/nomod' (args.importer) 
+            ["style", ["**/index.ts","**/*.scss"]], // all scss files imported from files name index.ts (both params)
+            ["lit-css"]                             // this matches all, similar to a case 'default'
+        ],
+    })]
+})
+```
+**NOTE**: last type applies to all the files that don't match any matchers.
 
 ### CACHING
 
@@ -63,16 +94,31 @@ It greatly improves the performance in incremental builds or watch mode.
 
 It has to be enabled with `cache: true` in the options. 
 
+### Benchmarks
+Given 24 x 24 = 576 lit-element files & 576 imported css styles
+#### cache: true
+```
+initial build: 2.033s
+incremental build: 1.199s     (one ts modified)
+incremental build: 512.429ms  (same ts modified again)
+incremental build: 448.871ms  (one scss modified)
+incremental build: 448.92ms   (same scss modified)
+```
+#### cache: false
+```
+initial build: 1.961s
+incremental build: 1.986s     (touch 1 ts)
+incremental build: 1.336s     (touch 1 ts)
+incremental build: 1.069s     (touch 1 scss)
+incremental build: 1.061s     (touch 1 scss)
+
+```
+
 ### TODO:
 
 * css in js modules
 * refactor the options
-* speed improvements
-
-### Benchmarks
-```
-... coming soon
-```
+* (more?) speed improvements
 
 ### License
 
