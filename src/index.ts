@@ -1,6 +1,6 @@
 import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
 import {readFileSync, statSync} from "fs";
-import {dirname, resolve} from "path";
+import path, {dirname, resolve} from "path";
 import picomatch from "picomatch";
 import * as sass from "sass";
 
@@ -37,10 +37,11 @@ function makeModule(contents: string, type: string) {
 
 export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
+    if (!options.basedir) {
+        options.basedir = process.cwd();
+    }
     if (!options.picomatch) {
-        options.picomatch = {
-            unixify: true
-        };
+        options.picomatch = {unixify: true};
     }
 
     const type: string = typeof options.type === "string" ? options.type : "css";
@@ -87,9 +88,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         return require.resolve(path, {paths});
     }
 
+    const moduleDirectory = path.join(options.basedir!,"node_modules").replace(/\\/g, "/");
+
     function renderSync(file) {
         const {css} = sass.renderSync({
-            importer: url => ({file: url.replace(/^~/, "node_modules/")}),
+            importer: url => ({file: url.replace(/^~/, moduleDirectory)}),
             ...options,
             file
         });
