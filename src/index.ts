@@ -7,7 +7,7 @@ import * as sass from "sass";
 export type SassPluginOptions = sass.Options & {
     basedir?: string
     type?: string | ([string] | [string, string | [string] | [string, string]])[]
-    cache?: boolean
+    cache?: Map<string, Map<string, CachedResult>>|boolean
     picomatch?: any
 }
 
@@ -99,6 +99,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         return css.toString("utf-8");
     }
 
+    const cache = !options.cache
+        ? null
+        : options.cache instanceof Map
+            ? options.cache
+            : new Map<string, Map<string, CachedResult>>();
+
     return {
         name: "sass-plugin",
         setup: function (build) {
@@ -112,8 +118,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 transform: (filename: string, type: string) => OnLoadResult
             ) => (args) => OnLoadResult;
 
-            if (options.cache !== false) {
-                const cache = new Map<string, Map<string, CachedResult>>();
+            if (cache) {
                 cached = (resolve, transform) => ({pluginData: args}: OnLoadArgs) => {
                     let group = cache.get(args.resolveDir);
                     if (!group) {

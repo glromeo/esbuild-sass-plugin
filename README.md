@@ -94,6 +94,18 @@ It greatly improves the performance in incremental builds or watch mode.
 
 It has to be enabled with `cache: true` in the options. 
 
+You can pass your own map instead of true if you want to recycle it across different builds.
+```javascript
+const pluginCache = new Map();
+
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({cache: pluginCache})],
+    ...
+})
+```
+
+
 ### Benchmarks
 Given 24 x 24 = 576 lit-element files & 576 imported css styles
 #### cache: true
