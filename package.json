@@ -1,6 +1,6 @@
 {
   "name": "esbuild-sass-plugin",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "esbuild plugin for sass/scss files supporting both css loader and css result import (lit-element)",
   "main": "lib/index.js",
   "keywords": [
@@ -14,8 +14,7 @@
   ],
   "files": [
     "lib",
-    "src",
-    "test"
+    "src"
   ],
   "author": "Gianluca Romeo <glromeo@gmail.com> (https://github.com/glromeo/esbuild-sass-plugin)",
   "license": "ISC",
