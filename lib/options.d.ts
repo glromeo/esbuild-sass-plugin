@@ -1,6 +1,6 @@
 import { OnLoadResult } from "esbuild";
 import { Importer, types } from "sass";
-export declare type Index = {
+export declare type Options = {
     implementation?: string;
     basedir?: string;
     type?: string | ([string] | [string, string | [string] | [string, string]])[];
@@ -27,4 +27,3 @@ export declare type CachedResult = {
     mtimeMs: number;
     result: OnLoadResult;
 };
-export { sassPlugin } from "./plugin";

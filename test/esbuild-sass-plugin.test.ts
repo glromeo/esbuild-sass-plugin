@@ -19,9 +19,7 @@ describe("esbuild sass plugin tests", function () {
         });
 
         let cssBundle = fs.readFileSync("./test/fixture/react/out/index.css", "utf-8");
-        expect(cssBundle).to.have.string("code {\n" +
-            "  font-family: source-code-pro, Menlo, Monaco, Consolas, \"Courier New\", monospace;\n" +
-            "}");
+        expect(cssBundle).to.have.string("@-ms-viewport { width: device-width; }");
         expect(cssBundle).to.have.string(
             ".App .header {\n" +
             "  color: blue;\n" +

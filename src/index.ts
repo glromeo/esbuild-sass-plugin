@@ -1,168 +1,142 @@
-import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
-import {readFileSync, statSync} from "fs";
-import path, {dirname, resolve} from "path";
-import picomatch from "picomatch";
-import * as sass from "sass";
+import {OnLoadResult} from "esbuild";
+import {Importer, types} from "sass";
 
-export type SassPluginOptions = sass.Options & {
+export type Index = {
+
+    /**
+     * "sass" for dart-sass (compiled to javascript, slow) or "node-sass" (libsass, fast yet deprecated)
+     * You can pass the module name of any other implementation as long as it is API compatible
+     *
+     * @default "sass"
+     */
+    implementation?: string
+
+    /**
+     * Directory that paths will be relative to.
+     *
+     * @default process.cwd()
+     */
     basedir?: string
+
+    /**
+     * Type of module wrapper to use
+     *
+     * @default css files will be passed to css loader
+     */
     type?: string | ([string] | [string, string | [string] | [string, string]])[]
-    cache?: Map<string, Map<string, CachedResult>>|boolean
+
+    /**
+     * Enable the cache or pass your own Map to recycle its contents although
+     * it's advisable to use esbuild incremental or watch for repeated builds
+     *
+     * @default true
+     */
+    cache?: Map<string, Map<string, CachedResult>> | boolean
+
+    /**
+     *
+     */
     picomatch?: any
+
+    /**
+     * Handles when the @import directive is encountered.
+     *
+     * A custom importer allows extension of the sass engine in both a synchronous and asynchronous manner.
+     *
+     * @default undefined
+     */
+    importer?: Importer | Importer[];
+
+    /**
+     * Holds a collection of custom functions that may be invoked by the sass files being compiled.
+     *
+     * @default undefined
+     */
+    functions?: { [key: string]: (...args: types.SassType[]) => types.SassType | void };
+
+    /**
+     * An array of paths that should be looked in to attempt to resolve your @import declarations.
+     * When using `data`, it is recommended that you use this.
+     *
+     * @default []
+     */
+    includePaths?: string[];
+
+    /**
+     * Enable Sass Indented Syntax for parsing the data string or file.
+     *
+     * @default false
+     */
+    indentedSyntax?: boolean;
+
+    /**
+     * Used to determine whether to use space or tab character for indentation.
+     *
+     * @default 'space'
+     */
+    indentType?: 'space' | 'tab';
+
+    /**
+     * Used to determine the number of spaces or tabs to be used for indentation.
+     *
+     * @default 2
+     */
+    indentWidth?: number;
+
+    /**
+     * Used to determine which sequence to use for line breaks.
+     *
+     * @default 'lf'
+     */
+    linefeed?: 'cr' | 'crlf' | 'lf' | 'lfcr';
+
+    /**
+     * Determines the output format of the final CSS style.
+     *
+     * @default 'expanded'
+     */
+    outputStyle?: 'compressed' | 'expanded';
+
+    /**
+     * Enables the outputting of a source map.
+     *
+     * @default undefined
+     */
+    sourceMap?: boolean | string;
+
+    /**
+     * Includes the contents in the source map information.
+     *
+     * @default false
+     */
+    sourceMapContents?: boolean;
+
+    /**
+     * Embeds the source map as a data URI.
+     *
+     * @default false
+     */
+    sourceMapEmbed?: boolean;
+
+    /**
+     * The value will be emitted as `sourceRoot` in the source map information.
+     *
+     * @default undefined
+     */
+    sourceMapRoot?: string;
 }
 
-type CachedResult = {
+
+export type CachedResult = {
+
     filename: string
+
     type: string
+
     mtimeMs: number
+
     result: OnLoadResult
 };
 
-const cssResultModule = cssText => `\
-import {css} from "lit-element";
-export default css\`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`;
-`;
 
-const styleModule = cssText => `\
-document.head
-    .appendChild(document.createElement("style"))
-    .appendChild(document.createTextNode(\`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`));
-`;
-
-function makeModule(contents: string, type: string) {
-    return type === "style" ? styleModule(contents) : cssResultModule(contents);
-}
-
-export function sassPlugin(options: SassPluginOptions = {}): Plugin {
-
-    if (!options.basedir) {
-        options.basedir = process.cwd();
-    }
-    if (!options.picomatch) {
-        options.picomatch = {unixify: true};
-    }
-
-    const type: string = typeof options.type === "string" ? options.type : "css";
-
-    const matchers: [string, (args: OnResolveArgs) => boolean][] | false = Array.isArray(options.type)
-        && options.type.map(function ([type, pattern]) {
-            if (Array.isArray(pattern)) {
-                const importerMatcher = picomatch("**/" + pattern[0], options.picomatch);
-                const pathMatcher = pattern[1] ? picomatch("**/" + pattern[1], options.picomatch) : null;
-                if (pathMatcher) {
-                    return [
-                        type, (args: OnResolveArgs) => importerMatcher(args.importer) && pathMatcher(resolve(args.resolveDir, args.path))
-                    ];
-                } else {
-                    return [
-                        type, (args: OnResolveArgs) => importerMatcher(args.importer)
-                    ];
-                }
-            } else {
-                if (pattern) {
-                    const pathMatcher = picomatch("**/" + pattern, options.picomatch);
-                    return [type, (args: OnResolveArgs) => pathMatcher(resolve(args.resolveDir, args.path))];
-                } else {
-                    return [type, () => true];
-                }
-            }
-        });
-
-    const typeOf = matchers
-        ? (args: OnResolveArgs) => {
-            for (const [type, isMatch] of matchers) if (isMatch(args)) {
-                return type;
-            }
-            return type;
-        }
-        : () => type;
-
-    function pathResolve({resolveDir, path}: OnResolveArgs) {
-        return resolve(resolveDir, path);
-    }
-
-    function requireResolve({resolveDir, path}: OnResolveArgs) {
-        const paths = options.includePaths ? [resolveDir, ...options.includePaths] : [resolveDir];
-        return require.resolve(path, {paths});
-    }
-
-    const moduleDirectory = path.join(options.basedir!,"node_modules").replace(/\\/g, "/");
-
-    function renderSync(file) {
-        const {css} = sass.renderSync({
-            importer: url => ({file: url.replace(/^~/, moduleDirectory)}),
-            ...options,
-            file
-        });
-        return css.toString("utf-8");
-    }
-
-    const cache = !options.cache
-        ? null
-        : options.cache instanceof Map
-            ? options.cache
-            : new Map<string, Map<string, CachedResult>>();
-
-    return {
-        name: "sass-plugin",
-        setup: function (build) {
-
-            build.onResolve({filter: /\.(s[ac]ss|css)$/}, (args) => {
-                return {path: args.path, namespace: "sass", pluginData: args};
-            });
-
-            let cached: (
-                resolve: (args: OnResolveArgs) => string,
-                transform: (filename: string, type: string) => OnLoadResult
-            ) => (args) => OnLoadResult;
-
-            if (cache) {
-                cached = (resolve, transform) => ({pluginData: args}: OnLoadArgs) => {
-                    let group = cache.get(args.resolveDir);
-                    if (!group) {
-                        group = new Map();
-                        cache.set(args.resolveDir, group);
-                    }
-                    let cached = group.get(args.path);
-                    if (cached) {
-                        let {filename, mtimeMs, result} = cached;
-                        let stats = statSync(filename);
-                        if (stats.mtimeMs <= mtimeMs) {
-                            return cached.result;
-                        }
-                        cached.result = transform(filename, cached.type);
-                        return result;
-                    } else {
-                    }
-                    let filename = resolve(args);
-                    let type = typeOf(args);
-                    let result = transform(filename, type);
-                    let {mtimeMs} = statSync(filename);
-                    group.set(args.path, {filename, type, mtimeMs, result});
-                    return result;
-                };
-            } else {
-                cached = (resolve, transform) => ({pluginData: args}: OnLoadArgs) => {
-                    return transform(resolve(args), typeOf(args));
-                };
-            }
-
-            function transform(path: string, type: string): OnLoadResult {
-                let contents = path.endsWith(".css") ? readFileSync(path, "utf-8") : renderSync(path);
-                return type === "css" ? {
-                    contents: contents,
-                    loader: "css" as Loader
-                } : {
-                    contents: makeModule(contents, type),
-                    loader: "js" as Loader,
-                    resolveDir: dirname(path)
-                };
-            }
-
-            build.onLoad({filter: /^\.\.?\//, namespace: "sass"}, cached(pathResolve, transform));
-            build.onLoad({filter: /^([^.]|\.\.?[^/])/, namespace: "sass"}, cached(requireResolve, transform));
-        }
-    };
-}
+export {sassPlugin} from "./plugin";

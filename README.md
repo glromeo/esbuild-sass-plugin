@@ -7,7 +7,7 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
 ##### Main Features
 * defaults to using the `css loader`
 * `css result` modules or `dynamic style` added to main page
-* uses [dart sass](https://www.npmjs.com/package/sass)
+* comes with [dart sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
 
 ### Install
 ```bash
@@ -62,8 +62,9 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 
 |Option|Type|Default|
 |---|---|---|
-|cache|boolean|true|
+|cache|boolean or Map|true|
 |type|string or array|`"css"`|
+|implementation|string|`"sass"`|
 
 If you want to have different loaders for different parts of your code you can pass `type` an array. 
 
@@ -87,6 +88,22 @@ await esbuild.build({
 })
 ```
 **NOTE**: last type applies to all the files that don't match any matchers.
+
+### Use node-sass instead of sass
+Remember to add the dependency
+```bash
+npm i esbuild-sass-plugin node-sass
+```
+and to specify the implementation in the options:
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        implementation: "node-sass",
+        ... // other options for sass.renderSync(...)
+    })]
+});
+```
 
 ### CACHING
 
@@ -123,8 +140,16 @@ incremental build: 1.986s     (touch 1 ts)
 incremental build: 1.336s     (touch 1 ts)
 incremental build: 1.069s     (touch 1 scss)
 incremental build: 1.061s     (touch 1 scss)
-
 ```
+#### node-sass
+```
+initial build: 1.030s
+incremental build: 468.677ms  (one ts modified) 
+incremental build: 347.55ms   (same ts modified again)
+incremental build: 401.264ms  (one scss modified)
+incremental build: 364.649ms  (same scss modified)
+```
+
 
 ### TODO:
 
