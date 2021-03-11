@@ -153,7 +153,8 @@ export function sassPlugin(options: Index = {}): Plugin {
                 let contents = path.endsWith(".css") ? readFileSync(path, "utf-8") : renderSync(path);
                 return type === "css" ? {
                     contents: contents,
-                    loader: "css" as Loader
+                    loader: "css" as Loader,
+                    resolveDir: dirname(path)
                 } : {
                     contents: makeModule(contents, type),
                     loader: "js" as Loader,
