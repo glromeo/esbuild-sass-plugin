@@ -1,11 +1,11 @@
 import * as chai from "chai";
 import {expect} from "chai";
+
+import chaiString from "chai-string";
 import * as esbuild from "esbuild";
 import * as fs from "fs";
 import * as path from "path";
 import {sassPlugin} from "../src";
-
-import chaiString from "chai-string";
 
 chai.use(chaiString);
 
@@ -163,7 +163,7 @@ describe("esbuild sass plugin tests", function () {
             plugins: [sassPlugin({
                 type: "lit-css",
                 async transform(css, resolveDir) {
-                    const {outputFiles:[out]} = await esbuild.build({
+                    const {outputFiles: [out]} = await esbuild.build({
                         stdin: {
                             contents: css,
                             resolveDir,
@@ -178,7 +178,7 @@ describe("esbuild sass plugin tests", function () {
                             ".ttf": "dataurl",
                             ".svg": "dataurl",
                             ".otf": "dataurl"
-                        },
+                        }
                     });
                     return out.text;
                 }
@@ -197,11 +197,11 @@ describe("esbuild sass plugin tests", function () {
         const absWorkingDir = path.resolve(__dirname, "fixture/post-css");
         process.chdir(absWorkingDir);
 
-        const postcss = require(require.resolve("postcss", {paths:[absWorkingDir]}));
-        const autoprefixer = require(require.resolve("autoprefixer", {paths:[absWorkingDir]}));
-        const postcssPresetEnv = require(require.resolve("postcss-preset-env", {paths:[absWorkingDir]}));
+        const postcss = require(require.resolve("postcss", {paths: [absWorkingDir]}));
+        const autoprefixer = require(require.resolve("autoprefixer", {paths: [absWorkingDir]}));
+        const postcssPresetEnv = require(require.resolve("postcss-preset-env", {paths: [absWorkingDir]}));
 
-        const postCSS = postcss([autoprefixer, postcssPresetEnv({stage:0})]);
+        const postCSS = postcss([autoprefixer, postcssPresetEnv({stage: 0})]);
 
         await esbuild.build({
             entryPoints: ["./src/app.css"],
@@ -213,16 +213,55 @@ describe("esbuild sass plugin tests", function () {
             },
             plugins: [sassPlugin({
                 async transform(source) {
-                    const {css} = await postCSS.process(source, {from:undefined});
+                    const {css} = await postCSS.process(source, {from: undefined});
                     return css;
                 }
             })]
         });
 
         let expected = fs.readFileSync("./dest/app.css", "utf-8");
-        expected = expected.replace(/url\("img\/background(-2x)?.jpg"\)/g,"url()")
+        expected = expected.replace(/url\("img\/background(-2x)?.jpg"\)/g, "url()");
         let actual = fs.readFileSync("./out/app.css", "utf-8");
-        actual = actual.slice(actual.indexOf("\n")+1).replace(/url\(data:image\/jpeg;base64,\)/g,"url()")
+        actual = actual.slice(actual.indexOf("\n") + 1).replace(/url\(data:image\/jpeg;base64,\)/g, "url()");
         expect(actual.replace(/;/g, "")).to.equalIgnoreSpaces(expected.replace(/;/g, ""));
+    });
+
+    it("cache test", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "fixture/cache");
+        process.chdir(absWorkingDir);
+
+        fs.writeFileSync("./index.sass", fs.readFileSync("./original.sass"));
+
+        const result = await esbuild.build({
+            entryPoints: ["./index.js"],
+            absWorkingDir,
+            outdir: "./out",
+            bundle: true,
+            incremental: true,
+            plugins: [sassPlugin({cache: true})]
+        });
+
+        expect(fs.readFileSync("./out/index.css", "utf-8").replace(/\/\*.+\*\//g, "")).to.equalIgnoreSpaces(`
+            body { font: 100% Helvetica, sans-serif; color: #333; }
+        `);
+
+        fs.writeFileSync("./index.sass", fs.readFileSync("./original.sass"));
+
+        await result.rebuild();
+
+        expect(fs.readFileSync("./out/index.css", "utf-8").replace(/\/\*.+\*\//g, "")).to.equalIgnoreSpaces(`
+            body { font: 100% Helvetica, sans-serif; color: #333; }
+        `);
+
+        fs.writeFileSync("./index.sass", fs.readFileSync("./updated.sass"));
+
+        await result.rebuild();
+
+        expect(fs.readFileSync("./out/index.css", "utf-8").replace(/\/\*.+\*\//g, "")).to.equalIgnoreSpaces(`
+            body { font: 99% "Times New Roman", serif; color: #666; }
+        `);
+
+        result.rebuild.dispose();
     });
 });

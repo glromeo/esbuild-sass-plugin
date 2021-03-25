@@ -127,14 +127,14 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     }
                     let cached = group.get(args.path);
                     if (cached) {
-                        let {filename, mtimeMs, result} = cached;
+                        let {filename, type} = cached;
                         let stats = statSync(filename);
-                        if (stats.mtimeMs <= mtimeMs) {
+                        if (stats.mtimeMs <= cached.mtimeMs) {
                             return cached.result;
                         }
-                        cached.result = await transform(filename, cached.type);
-                        cached.mtimeMs = mtimeMs;
-                        return result;
+                        cached.result = await transform(filename, type);
+                        cached.mtimeMs = stats.mtimeMs;
+                        return cached.result;
                     }
                     let filename = resolve(args);
                     let type = typeOf(args);
