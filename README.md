@@ -97,36 +97,26 @@ async (css:string, resolveDir:string?) => string
 ``` 
 It's function which will be invoked before passing the css to esbuild or wrapping it in a module.
 
+#### PostCSS
 The simplest use case is to invoke PostCSS like this:
 ```javascript
-const autoprefixer = require('autoprefixer')
-const postcss = require('postcss')
-const precss = require('precss')
-const fs = require('fs')
+const postcss = require("postcss");
+const autoprefixer = require("autoprefixer");
+const postcssPresetEnv = require("postcss-preset-env");
 
-await esbuild.build({
-  entryPoints: ["./src/index.ts"],
-  outdir: "./out",
-  bundle: true,
-  format: "esm",
-  plugins: [sassPlugin({
-    type: "lit-css",
-    async transform(css, resolveDir) {
-        postcss([precss, autoprefixer])
-            .process(css, { from: 'src/app.css', to: 'dest/app.css' })
-            .then(result => {
-                fs.writeFile('dest/app.css', result.css, () => true)
-                if ( result.map ) {
-                    fs.writeFile('dest/app.css.map', result.map.toString(), () => true)
-                }
-            })
-    }
-  })]
+esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        async transform(source, resolveDir) {
+            const {css} = await postcss([autoprefixer, postcssPresetEnv({stage:0})]).process(source);
+            return css;
+        }
+    })]
 });
 ```
 
-
-It can be used to invoke esbuild to do some post processing of the css like in this example
+#### esbuild
+But it can be used to invoke esbuild to do some post processing of the css like in this example
 where I rely on esbuild to create data urls:
 ```javascript
 await esbuild.build({
