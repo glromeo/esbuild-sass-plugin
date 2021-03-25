@@ -2,7 +2,7 @@ import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
 import {readFileSync, statSync} from "fs";
 import {dirname, posix, resolve} from "path";
 import picomatch from "picomatch";
-import {CachedResult, Index} from "./index";
+import {CachedResult, SassPluginOptions} from "./index";
 import {findModuleDirectory, loadSass, moduleRelativeUrl} from "./utils";
 
 const cssResultModule = cssText => `\
@@ -26,7 +26,7 @@ function makeModule(contents: string, type: string) {
  *
  * @param options
  */
-export function sassPlugin(options: Index = {}): Plugin {
+export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
     if (!options.basedir) {
         options.basedir = process.cwd();
@@ -115,11 +115,11 @@ export function sassPlugin(options: Index = {}): Plugin {
 
             let cached: (
                 resolve: (args: OnResolveArgs) => string,
-                transform: (filename: string, type: string) => OnLoadResult
-            ) => (args) => OnLoadResult;
+                transform: (filename: string, type: string) => Promise<OnLoadResult>
+            ) => (args) => Promise<OnLoadResult>;
 
             if (cache) {
-                cached = (resolve, transform) => ({pluginData: args}: OnLoadArgs) => {
+                cached = (resolve, transform) => async ({pluginData: args}: OnLoadArgs) => {
                     let group = cache.get(args.resolveDir);
                     if (!group) {
                         group = new Map();
@@ -132,13 +132,13 @@ export function sassPlugin(options: Index = {}): Plugin {
                         if (stats.mtimeMs <= mtimeMs) {
                             return cached.result;
                         }
-                        cached.result = transform(filename, cached.type);
+                        cached.result = await transform(filename, cached.type);
+                        cached.mtimeMs = mtimeMs;
                         return result;
-                    } else {
                     }
                     let filename = resolve(args);
                     let type = typeOf(args);
-                    let result = transform(filename, type);
+                    let result = await transform(filename, type);
                     let {mtimeMs} = statSync(filename);
                     group.set(args.path, {filename, type, mtimeMs, result});
                     return result;
@@ -149,8 +149,11 @@ export function sassPlugin(options: Index = {}): Plugin {
                 };
             }
 
-            function transform(path: string, type: string): OnLoadResult {
+            async function transform(path: string, type: string): Promise<OnLoadResult> {
                 let contents = path.endsWith(".css") ? readFileSync(path, "utf-8") : renderSync(path);
+                if (options.transform) {
+                    contents = await options.transform(contents, dirname(path));
+                }
                 return type === "css" ? {
                     contents: contents,
                     loader: "css" as Loader,

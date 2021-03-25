@@ -65,6 +65,8 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 |cache|boolean or Map|true|
 |type|string or array|`"css"`|
 |implementation|string|`"sass"`|
+|transform|function|undefined|
+
 
 If you want to have different loaders for different parts of your code you can pass `type` an array. 
 
@@ -88,6 +90,79 @@ await esbuild.build({
 })
 ```
 **NOTE**: last type applies to all the files that don't match any matchers.
+
+### Transform Option
+```typescript
+async (css:string, resolveDir:string?) => string
+``` 
+It's function which will be invoked before passing the css to esbuild or wrapping it in a module.
+
+The simplest use case is to invoke PostCSS like this:
+```javascript
+const autoprefixer = require('autoprefixer')
+const postcss = require('postcss')
+const precss = require('precss')
+const fs = require('fs')
+
+await esbuild.build({
+  entryPoints: ["./src/index.ts"],
+  outdir: "./out",
+  bundle: true,
+  format: "esm",
+  plugins: [sassPlugin({
+    type: "lit-css",
+    async transform(css, resolveDir) {
+        postcss([precss, autoprefixer])
+            .process(css, { from: 'src/app.css', to: 'dest/app.css' })
+            .then(result => {
+                fs.writeFile('dest/app.css', result.css, () => true)
+                if ( result.map ) {
+                    fs.writeFile('dest/app.css.map', result.map.toString(), () => true)
+                }
+            })
+    }
+  })]
+});
+```
+
+
+It can be used to invoke esbuild to do some post processing of the css like in this example
+where I rely on esbuild to create data urls:
+```javascript
+await esbuild.build({
+  entryPoints: ["./src/index.ts"],
+  outdir: "./out",
+  bundle: true,
+  format: "esm",
+  plugins: [sassPlugin({
+    type: "lit-css",
+    async transform(css, resolveDir) {
+      const {outputFiles:[out]} = await esbuild.build({
+        stdin: {
+          contents: css,
+          resolveDir,
+          loader: "css"
+        },
+        bundle: true,
+        write: false,
+        format: "esm",
+        loader: {
+          ".eot": "dataurl",
+          ".woff": "dataurl",
+          ".ttf": "dataurl",
+          ".svg": "dataurl",
+          ".otf": "dataurl"
+        },
+      });
+      return out.text;
+    }
+  })]
+});
+```
+
+I am not really happy with this but I am waiting on esbuild to revamp its plugin api before finding another way to achieve the same result.
+
+Look at **open-iconic** test **fixture** for a working example.
 
 ### Use node-sass instead of sass
 Remember to add the dependency

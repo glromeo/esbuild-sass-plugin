@@ -1,3 +1,3 @@
 import { Plugin } from "esbuild";
-import { Index } from "./index";
-export declare function sassPlugin(options?: Index): Plugin;
+import { SassPluginOptions } from "./index";
+export declare function sassPlugin(options?: SassPluginOptions): Plugin;

@@ -7,7 +7,10 @@
   "workspaces": [
     "benchmark",
     "bootstrap",
+    "data-urls",
     "lit-element",
+    "open-iconic",
+    "post-css",
     "react"
   ],
   "scripts": {

@@ -1,9 +1,10 @@
 import { OnLoadResult } from "esbuild";
 import { Importer, types } from "sass";
-export declare type Index = {
+export declare type Type = "css" | "style" | "lit-css";
+export declare type SassPluginOptions = {
     implementation?: string;
     basedir?: string;
-    type?: string | ([string] | [string, string | [string] | [string, string]])[];
+    type?: Type | ([Type] | [Type, string | [string] | [string, string]])[];
     cache?: Map<string, Map<string, CachedResult>> | boolean;
     picomatch?: any;
     importer?: Importer | Importer[];
@@ -12,14 +13,15 @@ export declare type Index = {
     };
     includePaths?: string[];
     indentedSyntax?: boolean;
-    indentType?: 'space' | 'tab';
+    indentType?: "space" | "tab";
     indentWidth?: number;
-    linefeed?: 'cr' | 'crlf' | 'lf' | 'lfcr';
-    outputStyle?: 'compressed' | 'expanded';
+    linefeed?: "cr" | "crlf" | "lf" | "lfcr";
+    outputStyle?: "compressed" | "expanded";
     sourceMap?: boolean | string;
     sourceMapContents?: boolean;
     sourceMapEmbed?: boolean;
     sourceMapRoot?: string;
+    transform?: (css: string, resolveDir: string) => string | Promise<string>;
 };
 export declare type CachedResult = {
     filename: string;

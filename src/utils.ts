@@ -1,8 +1,8 @@
 import {existsSync} from "fs";
 import {dirname, join, relative} from "path";
-import {Index} from "./index";
+import {SassPluginOptions} from "./index";
 
-export function loadSass({implementation: module = "sass", basedir = process.cwd()}: Index) {
+export function loadSass({implementation: module = "sass", basedir = process.cwd()}: SassPluginOptions) {
     try {
         return require(require.resolve(module, {paths: [basedir]}));
     } catch (e) {
@@ -11,7 +11,7 @@ export function loadSass({implementation: module = "sass", basedir = process.cwd
     }
 }
 
-export function findModuleDirectory({basedir = process.cwd()}: Index) {
+export function findModuleDirectory({basedir = process.cwd()}: SassPluginOptions) {
     do {
         const path = join(basedir, "node_modules");
         if (existsSync(path)) {

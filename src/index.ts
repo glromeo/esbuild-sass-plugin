@@ -1,7 +1,9 @@
 import {OnLoadResult} from "esbuild";
 import {Importer, types} from "sass";
 
-export type Index = {
+export type Type = "css" | "style" | "lit-css"
+
+export type SassPluginOptions = {
 
     /**
      * "sass" for dart-sass (compiled to javascript, slow) or "node-sass" (libsass, fast yet deprecated)
@@ -23,7 +25,7 @@ export type Index = {
      *
      * @default css files will be passed to css loader
      */
-    type?: string | ([string] | [string, string | [string] | [string, string]])[]
+    type?: Type | ([Type] | [Type, string | [string] | [string, string]])[]
 
     /**
      * Enable the cache or pass your own Map to recycle its contents although
@@ -74,7 +76,7 @@ export type Index = {
      *
      * @default 'space'
      */
-    indentType?: 'space' | 'tab';
+    indentType?: "space" | "tab";
 
     /**
      * Used to determine the number of spaces or tabs to be used for indentation.
@@ -88,14 +90,14 @@ export type Index = {
      *
      * @default 'lf'
      */
-    linefeed?: 'cr' | 'crlf' | 'lf' | 'lfcr';
+    linefeed?: "cr" | "crlf" | "lf" | "lfcr";
 
     /**
      * Determines the output format of the final CSS style.
      *
      * @default 'expanded'
      */
-    outputStyle?: 'compressed' | 'expanded';
+    outputStyle?: "compressed" | "expanded";
 
     /**
      * Enables the outputting of a source map.
@@ -124,6 +126,13 @@ export type Index = {
      * @default undefined
      */
     sourceMapRoot?: string;
+
+    /**
+     * A function which will post process the css file before wrapping it in a module
+     *
+     * @default undefined
+     */
+    transform?: (css: string, resolveDir: string) => string | Promise<string>
 }
 
 
