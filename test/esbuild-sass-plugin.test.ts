@@ -11,6 +11,8 @@ chai.use(chaiString);
 
 describe("esbuild sass plugin tests", function () {
 
+    this.timeout(5000);
+
     it("react application (css loader)", async function () {
 
         await esbuild.build({
