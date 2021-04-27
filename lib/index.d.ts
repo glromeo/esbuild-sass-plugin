@@ -1,6 +1,6 @@
 import { OnLoadResult } from "esbuild";
 import { Importer, types } from "sass";
-export declare type Type = "css" | "style" | "lit-css";
+export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
     implementation?: string;
     basedir?: string;
