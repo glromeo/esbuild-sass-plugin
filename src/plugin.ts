@@ -5,6 +5,11 @@ import picomatch from "picomatch";
 import {CachedResult, SassPluginOptions} from "./index";
 import {findModuleDirectory, loadSass, moduleRelativeUrl} from "./utils";
 
+const cssTextModule = cssText => `\
+export default \`
+${cssText.replace(/([$`\\])/g, "\\$1")}\`;
+`;
+
 const cssResultModule = cssText => `\
 import {css} from "lit-element";
 export default css\`
@@ -19,7 +24,11 @@ ${cssText.replace(/([$`\\])/g, "\\$1")}\`));
 `;
 
 function makeModule(contents: string, type: string) {
-    return type === "style" ? styleModule(contents) : cssResultModule(contents);
+    if (type === "style") {
+        return styleModule(contents);
+    } else {
+        return type === "lit-css" ? cssResultModule(contents) : cssTextModule(contents);
+    }
 }
 
 /**
@@ -87,8 +96,14 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         process.exit(1);
     }
 
+    const NO_WATCHFILES = [];
+
+    function readCssFileSync(path: string) {
+        return {css: readFileSync(path, "utf-8"), watchFiles: NO_WATCHFILES};
+    }
+
     function renderSync(file) {
-        const {css} = sass.renderSync({
+        const {css, stats: {includedFiles: watchFiles}} = sass.renderSync({
             importer(url, prev) {
                 const relativeBaseUrl = moduleRelativeUrl(posix.dirname(prev), moduleDirectory);
                 return {file: url.replace(/^~/, relativeBaseUrl!)};
@@ -96,7 +111,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             ...options,
             file
         });
-        return css.toString("utf-8");
+        return {css: css.toString("utf-8"), watchFiles};
     }
 
     const cache = !options.cache
@@ -150,18 +165,20 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             }
 
             async function transform(path: string, type: string): Promise<OnLoadResult> {
-                let contents = path.endsWith(".css") ? readFileSync(path, "utf-8") : renderSync(path);
+                let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
                 if (options.transform) {
-                    contents = await options.transform(contents, dirname(path));
+                    css = await options.transform(css, dirname(path));
                 }
                 return type === "css" ? {
-                    contents: contents,
+                    contents: css,
                     loader: "css" as Loader,
-                    resolveDir: dirname(path)
+                    resolveDir: dirname(path),
+                    watchFiles
                 } : {
-                    contents: makeModule(contents, type),
+                    contents: makeModule(css, type),
                     loader: "js" as Loader,
-                    resolveDir: dirname(path)
+                    resolveDir: dirname(path),
+                    watchFiles
                 };
             }
 

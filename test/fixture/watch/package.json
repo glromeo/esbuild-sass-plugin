@@ -1,0 +1,10 @@
+{
+  "name": "watch-fixture",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "license": "MIT",
+  "scripts": {
+    "initial": "node initial.js",
+    "update": "node update.js"
+  }
+}

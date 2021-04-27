@@ -1,7 +1,7 @@
 import {OnLoadResult} from "esbuild";
 import {Importer, types} from "sass";
 
-export type Type = "css" | "style" | "lit-css"
+export type Type = "css" | "style" | "css-text" | "lit-css"
 
 export type SassPluginOptions = {
 

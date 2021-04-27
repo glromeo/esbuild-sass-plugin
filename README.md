@@ -6,9 +6,11 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
 
 ##### Main Features
 * defaults to using the `css loader`
-* `css result` modules or `dynamic style` added to main page
+* supports `constructable stylesheet` modules or `dynamic style` added to main page
 * comes with [dart sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
-
+* caching
+* PostCSS
+* watch mode 🥳
 ### Install
 ```bash
 npm i esbuild-sass-plugin
@@ -28,7 +30,34 @@ this will use `loader: "css"` and your transpiled sass will be included in index
 
 If you specify `type: "style"` then the stylesheet will be dynamically added to the page. 
 
-Alternatively you can import a **lit-element** css result:
+If you want to use the resulting css text as a string import you can use `type: "css-text"`
+
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        type: "css-text",
+        ... // other options for sass.renderSync(...)
+    })]
+});
+```
+...and in your module do something like
+```javascript
+...
+import cssText from "./styles.scss";
+...
+customElements.define("hello-world", class HelloWorld extends HTMLElement {
+
+    constructor() {
+        super();
+        this.attachShadow({mode: 'open'});
+        this.sheet = new CSSStyleSheet();
+        this.sheet.replaceSync(cssText);
+        this.shadowRoot.adoptedStyleSheets = [this.sheet];
+    }
+}
+```
+Or you can import a **lit-element** css result using `type: "lit-css"`
 ```javascript
 ...
 import styles from "./styles.scss";
@@ -42,16 +71,6 @@ export default class HelloWorld extends LitElement {
         ...
     }
 }
-```
-if you specify the type `"lit-css"` like this: 
-```javascript
-await esbuild.build({
-    ...
-    plugins: [sassPlugin({
-        type: "lit-css",
-        ... // other options for sass.renderSync(...)
-    })]
-});
 ```
 
 Look in the `test` folder for more usage examples.
@@ -72,7 +91,7 @@ If you want to have different loaders for different parts of your code you can p
 
 Each item is going
 to be: 
-* the type (one of: `css`, `lit-css` or `style`)
+* the type (one of: `css`, `css-text`, `lit-css` or `style`)
 * a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two. 
 
 e.g.

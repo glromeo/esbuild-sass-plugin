@@ -129,9 +129,7 @@ describe("esbuild sass plugin tests", function () {
         });
 
         let outCSS = fs.readFileSync("./out/styles.css", "utf-8");
-        expect(outCSS).to.have.string(
-            `url(./open-iconic-LIBGYRIE.eot?#iconic-sm) format("embedded-opentype")`
-        );
+        expect(outCSS).to.match(/url\(\.\/open-iconic-[^.]+\.eot\?#iconic-sm\) format\("embedded-opentype"\)/);
 
         await esbuild.build({
             entryPoints: ["./src/index.ts"],
@@ -263,5 +261,53 @@ describe("esbuild sass plugin tests", function () {
         `);
 
         result.rebuild.dispose();
+    });
+
+    it("watched files", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "fixture/watch");
+        process.chdir(absWorkingDir);
+
+        require("./fixture/watch/initial");
+        let count = 0;
+
+        const result = await esbuild.build({
+            entryPoints: ["./src/index.js"],
+            absWorkingDir,
+            outdir: "./out",
+            bundle: true,
+            plugins: [sassPlugin({type:"css-text"})],
+            watch: {
+                onRebuild(error, result) {
+                    count++;
+                }
+            }
+        });
+
+        expect(fs.readFileSync("./out/index.js", "utf-8")).to.match(/crimson/);
+
+        let {mtimeMs} = fs.statSync("./out/index.js");
+
+        await new Promise<void>((resolve, reject) => {
+
+            const timeout = setTimeout(reject, 10000);
+
+            setTimeout(function tryAgain() {
+                if (mtimeMs < fs.statSync("./out/index.js").mtimeMs) {
+                    clearTimeout(timeout);
+                    resolve();
+                } else {
+                    setTimeout(tryAgain, 1000);
+                }
+            }, 1000);
+
+            require("./fixture/watch/update");
+        });
+
+        expect(count).to.eq(1);
+
+        expect(fs.readFileSync("./out/index.js", "utf-8")).to.match(/cornflowerblue/);
+
+        result.stop!();
     });
 });
