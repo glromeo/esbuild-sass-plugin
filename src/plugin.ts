@@ -96,10 +96,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         process.exit(1);
     }
 
-    const NO_WATCHFILES = [];
-
     function readCssFileSync(path: string) {
-        return {css: readFileSync(path, "utf-8"), watchFiles: NO_WATCHFILES};
+        return {css: readFileSync(path, "utf-8"), watchFiles: [path]};
     }
 
     function renderSync(file) {
