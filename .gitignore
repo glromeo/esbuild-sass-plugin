@@ -109,3 +109,5 @@ dist
 /.idea/
 
 /test/fixture/cache/index.sass
+/test/fixture/watch/src/alternate-import.css
+/test/fixture/watch/src/banner-import.scss
