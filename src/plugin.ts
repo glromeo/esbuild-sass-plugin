@@ -1,5 +1,5 @@
 import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
-import {readFileSync, statSync} from "fs";
+import {promises as fsp, readFileSync} from "fs";
 import {dirname, posix, resolve} from "path";
 import picomatch from "picomatch";
 import {CachedResult, SassPluginOptions} from "./index";
@@ -140,20 +140,21 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     }
                     let cached = group.get(args.path);
                     if (cached) {
-                        let {filename, type} = cached;
-                        let stats = statSync(filename);
-                        if (stats.mtimeMs <= cached.mtimeMs) {
-                            return cached.result;
+                        let watchFiles = cached.result.watchFiles!;
+                        let stats = await Promise.all(watchFiles.map(filename => fsp.stat(filename)));
+                        for (const {mtimeMs} of stats) {
+                            if (mtimeMs > cached.mtimeMs) {
+                                cached.result = await transform(watchFiles[0], cached.type);
+                                cached.mtimeMs = Date.now();
+                                break;
+                            }
                         }
-                        cached.result = await transform(filename, type);
-                        cached.mtimeMs = stats.mtimeMs;
                         return cached.result;
                     }
                     let filename = resolve(args);
                     let type = typeOf(args);
                     let result = await transform(filename, type);
-                    let {mtimeMs} = statSync(filename);
-                    group.set(args.path, {filename, type, mtimeMs, result});
+                    group.set(args.path, {type, mtimeMs: Date.now(), result});
                     return result;
                 };
             } else {

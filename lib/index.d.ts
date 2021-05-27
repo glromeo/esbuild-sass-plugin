@@ -24,7 +24,6 @@ export declare type SassPluginOptions = {
     transform?: (css: string, resolveDir: string) => string | Promise<string>;
 };
 export declare type CachedResult = {
-    filename: string;
     type: string;
     mtimeMs: number;
     result: OnLoadResult;

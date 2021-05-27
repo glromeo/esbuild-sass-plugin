@@ -138,8 +138,6 @@ export type SassPluginOptions = {
 
 export type CachedResult = {
 
-    filename: string
-
     type: string
 
     mtimeMs: number

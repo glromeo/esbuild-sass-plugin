@@ -231,7 +231,7 @@ describe("esbuild sass plugin tests", function () {
         const absWorkingDir = path.resolve(__dirname, "fixture/cache");
         process.chdir(absWorkingDir);
 
-        fs.writeFileSync("./index.sass", fs.readFileSync("./original.sass"));
+        fs.writeFileSync("./index.sass", fs.readFileSync("./index-v1.sass"));
 
         const result = await esbuild.build({
             entryPoints: ["./index.js"],
@@ -246,7 +246,7 @@ describe("esbuild sass plugin tests", function () {
             body { font: 100% Helvetica, sans-serif; color: #333; }
         `);
 
-        fs.writeFileSync("./index.sass", fs.readFileSync("./original.sass"));
+        fs.writeFileSync("./index.sass", fs.readFileSync("./index-v1.sass"));
 
         await result.rebuild();
 
@@ -254,11 +254,22 @@ describe("esbuild sass plugin tests", function () {
             body { font: 100% Helvetica, sans-serif; color: #333; }
         `);
 
-        fs.writeFileSync("./index.sass", fs.readFileSync("./updated.sass"));
+        fs.writeFileSync("./dependency.sass", fs.readFileSync("./dependency-v1.sass"));
+        fs.writeFileSync("./index.sass", fs.readFileSync("./index-v2.sass"));
 
         await result.rebuild();
 
         expect(fs.readFileSync("./out/index.css", "utf-8").replace(/\/\*.+\*\//g, "")).to.equalIgnoreSpaces(`
+            body { background-color: red; } 
+            body { font: 99% "Times New Roman", serif; color: #666; }
+        `);
+
+        fs.writeFileSync("./dependency.sass", fs.readFileSync("./dependency-v2.sass"));
+
+        await result.rebuild();
+
+        expect(fs.readFileSync("./out/index.css", "utf-8").replace(/\/\*.+\*\//g, "")).to.equalIgnoreSpaces(`
+            body { background-color: blue; } 
             body { font: 99% "Times New Roman", serif; color: #666; }
         `);
 
