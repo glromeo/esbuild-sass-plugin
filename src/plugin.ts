@@ -141,7 +141,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     let cached = group.get(args.path);
                     if (cached) {
                         let watchFiles = cached.result.watchFiles!;
-                        let stats = await Promise.all(watchFiles.map(filename => fsp.stat(filename)));
+                        console.log("mtime", cached.mtimeMs);
+                        let stats = await Promise.all(watchFiles.map(async (filename, index) => {
+                            let s = await fsp.stat(filename);
+                            console.log(filename, index, s.mtimeMs);
+                            return s;
+                        }));
                         for (const {mtimeMs} of stats) {
                             if (mtimeMs > cached.mtimeMs) {
                                 cached.result = await transform(watchFiles[0], cached.type);
