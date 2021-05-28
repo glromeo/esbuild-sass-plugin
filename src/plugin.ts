@@ -1,9 +1,10 @@
 import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
 import {promises as fsp, readFileSync} from "fs";
-import {dirname, posix, resolve} from "path";
+import {dirname, resolve} from "path";
 import picomatch from "picomatch";
 import {CachedResult, SassPluginOptions} from "./index";
-import {findModuleDirectory, loadSass, moduleRelativeUrl} from "./utils";
+import {loadSass} from "./utils";
+import {createSassImporter} from "./importer";
 
 const cssTextModule = cssText => `\
 export default \`
@@ -81,35 +82,35 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         }
         : () => type;
 
-    function pathResolve({resolveDir, path}: OnResolveArgs) {
-        return resolve(resolveDir, path);
+    function pathResolve({resolveDir, path, importer}: OnResolveArgs) {
+        return resolve(resolveDir || dirname(importer), path);
     }
 
-    function requireResolve({resolveDir, path}: OnResolveArgs) {
+    function requireResolve({resolveDir, path, importer}: OnResolveArgs) {
+        if (!resolveDir) {
+            resolveDir = dirname(importer);
+        }
         const paths = options.includePaths ? [resolveDir, ...options.includePaths] : [resolveDir];
         return require.resolve(path, {paths});
-    }
-
-    const moduleDirectory = findModuleDirectory(options);
-    if (!moduleDirectory) {
-        console.error("Unable to find 'node_modules' from: " + options.basedir);
-        process.exit(1);
     }
 
     function readCssFileSync(path: string) {
         return {css: readFileSync(path, "utf-8"), watchFiles: [path]};
     }
 
+    const importer = createSassImporter(options);
+
     function renderSync(file) {
-        const {css, stats: {includedFiles: watchFiles}} = sass.renderSync({
-            importer(url, prev) {
-                const relativeBaseUrl = moduleRelativeUrl(posix.dirname(prev), moduleDirectory);
-                return {file: url.replace(/^~/, relativeBaseUrl!)};
-            },
-            ...options,
-            file
-        });
-        return {css: css.toString("utf-8"), watchFiles};
+        const {
+            css,
+            stats: {
+                includedFiles
+            }
+        } = sass.renderSync({importer, ...options, file});
+        return {
+            css: css.toString("utf-8"),
+            watchFiles: includedFiles
+        };
     }
 
     const cache = !options.cache

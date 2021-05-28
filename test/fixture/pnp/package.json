@@ -1,0 +1,25 @@
+{
+  "name": "yarn-esbuild-bug",
+  "version": "1.0.0",
+  "description": "esbuild-plugin-pnp bug reproduction",
+  "main": "index.js",
+  "author": "onox",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "node esbuild"
+  },
+  "dependencies": {
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
+  },
+  "devDependencies": {
+    "@yarnpkg/esbuild-plugin-pnp": "^1.0.0-rc.2",
+    "autoprefixer": "^10.2.6",
+    "esbuild": "^0.12.3",
+    "esbuild-plugin-postcss2": "^0.0.9",
+    "esbuild-sass-plugin": "^1.4.2",
+    "postcss": "^8.3.0",
+    "sass": "^1.34.0"
+  }
+}

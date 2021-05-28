@@ -1,6 +1,6 @@
 import * as chai from "chai";
 import {expect} from "chai";
-
+// @ts-ignore
 import chaiString from "chai-string";
 import * as esbuild from "esbuild";
 import * as fs from "fs";
