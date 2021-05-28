@@ -162,10 +162,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     }
                     let filename = resolve(args);
                     let type = typeOf(args);
+                    let mtimeMs = Date.now();
                     let result = await transform(filename, type);
                     group.set(args.path, {
                         type,
-                        mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+                        mtimeMs: mtimeMs,
                         result
                     });
                     return result;
