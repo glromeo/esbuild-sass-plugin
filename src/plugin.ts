@@ -1,5 +1,5 @@
 import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
-import {promises as fsp, readFileSync, Stats} from "fs";
+import {promises as fsp, readFileSync} from "fs";
 import {dirname, resolve} from "path";
 import picomatch from "picomatch";
 import {CachedResult, SassPluginOptions} from "./index";
@@ -119,14 +119,6 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             ? options.cache
             : new Map<string, Map<string, CachedResult>>();
 
-    function collectStats(watchFiles):Promise<Stats[]> {
-        return Promise.all(watchFiles.map(filename => fsp.stat(filename)));
-    }
-
-    function maxMtimeMs(stats: Stats[]) {
-        return stats.reduce((max, {mtimeMs}) => Math.max(max, mtimeMs), 0);
-    }
-
     return {
         name: "sass-plugin",
         setup: function (build) {
@@ -150,11 +142,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     let cached = group.get(args.path);
                     if (cached) {
                         let watchFiles = cached.result.watchFiles!;
-                        let stats = await collectStats(watchFiles);
+                        let stats = await Promise.all(watchFiles.map(filename => fsp.stat(filename)));
                         for (const {mtimeMs} of stats) {
                             if (mtimeMs > cached.mtimeMs) {
+                                let mtimeMs = Date.now();
                                 cached.result = await transform(watchFiles[0], cached.type);
-                                cached.mtimeMs = maxMtimeMs(stats);
+                                cached.mtimeMs = mtimeMs;
                                 break;
                             }
                         }
