@@ -6,6 +6,11 @@ export type Type = "css" | "style" | "css-text" | "lit-css"
 export type SassPluginOptions = {
 
     /**
+     *
+     */
+    exclude?: RegExp;
+
+    /**
      * "sass" for dart-sass (compiled to javascript, slow) or "node-sass" (libsass, fast yet deprecated)
      * You can pass the module name of any other implementation as long as it is API compatible
      *

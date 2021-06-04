@@ -85,6 +85,7 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 |type|string or array|`"css"`|
 |implementation|string|`"sass"`|
 |transform|function|undefined|
+|exclude|regex|undefined|
 
 
 If you want to have different loaders for different parts of your code you can pass `type` an array. 
@@ -109,6 +110,19 @@ await esbuild.build({
 })
 ```
 **NOTE**: last type applies to all the files that don't match any matchers.
+
+### Exclude Option
+Used to exclude paths from the plugin
+
+e.g.
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        exclude: /^http:\/\//,  // ignores urls
+    })]
+})
+```
 
 ### Transform Option
 ```typescript

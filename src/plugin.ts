@@ -127,13 +127,22 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         return stats.reduce((max, {mtimeMs}) => Math.max(max, mtimeMs), 0);
     }
 
+    function useExclude(callback) {
+        const exclude = options.exclude;
+        if (exclude) {
+            return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args)
+        } else {
+            return callback
+        }
+    }
+
     return {
         name: "sass-plugin",
         setup: function (build) {
 
-            build.onResolve({filter: /\.(s[ac]ss|css)$/}, (args) => {
+            build.onResolve({filter: /\.(s[ac]ss|css)$/}, useExclude((args) => {
                 return {path: args.path, namespace: "sass", pluginData: args};
-            });
+            }));
 
             let cached: (
                 resolve: (args: OnResolveArgs) => string,
