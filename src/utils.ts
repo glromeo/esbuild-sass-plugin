@@ -12,6 +12,6 @@ export function loadSass({implementation: module = "sass", basedir = process.cwd
 
 export function moduleRelativeUrl(basedir, pathname) {
     let url = relative(basedir, pathname).replace(/\\/g, "/");
-    return /^\.\.?\//.test(url) ? `${url}/` : `./${url}/`;
+    return /^\.\.?\//.test(url) ? url : `./${url}`;
 }
 
