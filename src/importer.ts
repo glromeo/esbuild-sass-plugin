@@ -1,29 +1,18 @@
 import {SassPluginOptions} from "./index";
-import {dirname, join, parse, posix} from "path";
-import {existsSync} from "fs";
+import resolve from "resolve";
 import {moduleRelativeUrl} from "./utils";
-
-function findModuleDirectory(basedir: string) {
-    const root = parse(basedir).root;
-    do {
-        const path = join(basedir, "node_modules");
-        if (existsSync(path)) {
-            return path;
-        } else {
-            basedir = dirname(basedir);
-        }
-    } while (basedir !== root);
-}
+import {posix} from "path";
 
 export function createSassImporter({basedir = process.cwd()}: SassPluginOptions) {
 
-    const moduleDirectory = findModuleDirectory(basedir);
-    if (!moduleDirectory) {
-        console.log("unable to find 'node_modules' in: " + basedir);
-    }
+    const opts = {basedir, extensions: [".scss", ".sass", ".css"]};
 
     return function importer(url, prev) {
-        const relativeBaseUrl = moduleRelativeUrl(posix.dirname(prev), moduleDirectory);
-        return {file: url.replace(/^~/, relativeBaseUrl!)};
+        if (url.startsWith("~")) {
+            const pathname = resolve.sync(url.slice(1), opts);
+            return {file: moduleRelativeUrl(posix.dirname(prev), pathname)};
+        } else {
+            return {file: url};
+        }
     }
 }
