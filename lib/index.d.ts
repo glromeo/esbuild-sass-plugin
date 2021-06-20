@@ -23,6 +23,7 @@ export declare type SassPluginOptions = {
     sourceMapEmbed?: boolean;
     sourceMapRoot?: string;
     transform?: (css: string, resolveDir: string) => string | Promise<string>;
+    quietDeps?: boolean;
 };
 export declare type CachedResult = {
     type: string;

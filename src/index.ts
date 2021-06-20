@@ -138,6 +138,11 @@ export type SassPluginOptions = {
      * @default undefined
      */
     transform?: (css: string, resolveDir: string) => string | Promise<string>
+
+    /**
+     *
+     */
+    quietDeps?: boolean
 }
 
 

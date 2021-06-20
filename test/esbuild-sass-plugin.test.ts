@@ -50,7 +50,8 @@ describe("esbuild sass plugin tests", function () {
                     ["style", "src/index.scss"],
                     ["lit-css"]
                 ],
-                includePaths: [path.resolve(__dirname, "fixture/lit-element")]
+                includePaths: [path.resolve(__dirname, "fixture/lit-element")],
+                quietDeps: true
             })]
         });
 
@@ -63,7 +64,7 @@ describe("esbuild sass plugin tests", function () {
             "  border: 5px solid blue;\n" +
             "  padding: 20px;\n" +
             "}`;\n");
-        expect(cssBundle).to.have.string("HelloWorld.styles = hello_world_default;");
+        expect(cssBundle).to.have.string(`__publicField(HelloWorld, "styles", hello_world_default);`);
         expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(`\n" +
             ".container {\n" +
             "  display: flex;\n" +
@@ -90,7 +91,8 @@ describe("esbuild sass plugin tests", function () {
             define: {"process.env.NODE_ENV": "\"development\""},
             plugins: [sassPlugin({
                 type: "style",
-                includePaths: [path.resolve(__dirname, "fixture/bootstrap")]
+                includePaths: [path.resolve(__dirname, "fixture/bootstrap")],
+                quietDeps: true
             })]
         });
 
@@ -101,7 +103,7 @@ describe("esbuild sass plugin tests", function () {
             "document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(`\n" +
             "@charset \"UTF-8\";\n" +
             "/*!\n" +
-            " * Bootstrap v4.6.0 (https://getbootstrap.com/)");
+            " * Bootstrap v5.0.1 (https://getbootstrap.com/)");
     });
 
     it("open-iconic (dealing with relative paths & data urls)", async function () {
