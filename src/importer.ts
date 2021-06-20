@@ -9,7 +9,6 @@ export function createSassImporter({basedir = process.cwd()}: SassPluginOptions)
         if (url.startsWith("~")) {
             url = url.slice(1);
         }
-        const pathname = resolve.sync(url, opts);
-        return {file: pathname};
+        return {file: resolve.sync(url, opts)};
     }
 }

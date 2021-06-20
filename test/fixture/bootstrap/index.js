@@ -1,4 +1,4 @@
-import "bootstrap/scss/bootstrap.scss"
+import "./entrypoint.scss";
 
 document.body.innerHTML = `
     <div class="alert alert-primary" role="alert">

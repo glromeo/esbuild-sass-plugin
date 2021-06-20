@@ -90,6 +90,7 @@ describe("esbuild sass plugin tests", function () {
             outdir: "./test/fixture/bootstrap/out",
             define: {"process.env.NODE_ENV": "\"development\""},
             plugins: [sassPlugin({
+                basedir: path.resolve(__dirname, "fixture"),
                 type: "style",
                 includePaths: [path.resolve(__dirname, "fixture/bootstrap")],
                 quietDeps: true
