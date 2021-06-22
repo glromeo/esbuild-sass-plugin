@@ -136,21 +136,26 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         }
     }
 
+    const RELATIVE_PATH = /^\.\.?\//;
+
     return {
         name: "sass-plugin",
         setup: function (build) {
 
             build.onResolve({filter: /\.(s[ac]ss|css)$/}, useExclude((args) => {
-                return {path: args.path, namespace: "sass", pluginData: args};
+                if (RELATIVE_PATH.test(args.path)) {
+                    return {path: pathResolve(args), namespace: "sass", pluginData: args};
+                } else {
+                    return {path: requireResolve(args), namespace: "sass", pluginData: args};
+                }
             }));
 
             let cached: (
-                resolve: (args: OnResolveArgs) => string,
                 transform: (filename: string, type: string) => Promise<OnLoadResult>
             ) => (args) => Promise<OnLoadResult>;
 
             if (cache) {
-                cached = (resolve, transform) => async ({pluginData: args}: OnLoadArgs) => {
+                cached = (transform) => async ({path, pluginData: args}: OnLoadArgs) => {
                     let group = cache.get(args.resolveDir);
                     if (!group) {
                         group = new Map();
@@ -169,9 +174,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                         }
                         return cached.result;
                     }
-                    let filename = resolve(args);
                     let type = typeOf(args);
-                    let result = await transform(filename, type);
+                    let result = await transform(path, type);
                     group.set(args.path, {
                         type,
                         mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
@@ -180,8 +184,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     return result;
                 };
             } else {
-                cached = (resolve, transform) => ({pluginData: args}: OnLoadArgs) => {
-                    return transform(resolve(args), typeOf(args));
+                cached = (transform) => ({path, pluginData: args}: OnLoadArgs) => {
+                    return transform(path, typeOf(args));
                 };
             }
 
@@ -203,8 +207,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 };
             }
 
-            build.onLoad({filter: /^\.\.?\//, namespace: "sass"}, cached(pathResolve, transform));
-            build.onLoad({filter: /^([^.]|\.\.?[^/])/, namespace: "sass"}, cached(requireResolve, transform));
+            build.onLoad({filter: /./, namespace: "sass"}, cached(transform));
         }
     };
 }
