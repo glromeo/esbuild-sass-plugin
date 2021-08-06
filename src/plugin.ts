@@ -194,7 +194,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 };
             }
 
-            const watchFilesCache = "watch" in build.initialOptions ? {} : null;
+            const lastWatchFiles = build.initialOptions.watch ? {} : null;
 
             async function transform(path: string, type: string): Promise<OnLoadResult> {
                 try {
@@ -203,8 +203,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                         css = await options.transform(css, dirname(path));
                     }
                     watchFiles = [...watchFiles];
-                    if (watchFilesCache) {
-                        watchFilesCache[path] = watchFiles;
+                    if (lastWatchFiles) {
+                        lastWatchFiles[path] = watchFiles;
                     }
                     return type === "css" ? {
                         contents: css,
@@ -220,7 +220,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 } catch (err) {
                     return {
                         errors: [{text: err.message}],
-                        watchFiles: watchFilesCache?.[path] ?? [path]
+                        watchFiles: lastWatchFiles?.[path] ?? [path]
                     }
                 }
             }
