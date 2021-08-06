@@ -1,5 +1,6 @@
-import "./stroke.scss";
+import React from "react";
+// import "./stroke.scss";
 
 export default function Stroke() {
-    return <div className="stroke" />
+    return <div className="red-stroke"/>;
 }

@@ -1,18 +1,21 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
-import "bootstrap/scss/bootstrap.scss";
-import styles from "./index.scss"
+import Red from "./red/stroke.jsx";
+import Green from "./green/stroke.jsx";
+import Blue from "./blue/stroke.jsx";
 
-const App = () => {
-  return <span>test</span>
+import "./index.scss";
+
+function App() {
+    return (
+        <div>
+            <Red/>
+            <Green/>
+            <Blue/>
+            <div className="stroke" />
+        </div>
+    );
 }
 
-ReactDOM.render(
-  <React.StrictMode>
-    <div className={styles.Root}>
-      <App/>
-    </div>
-  </React.StrictMode>,
-  document.getElementById("app")
-)
+ReactDOM.render(<App/>, document.getElementById("app"));
