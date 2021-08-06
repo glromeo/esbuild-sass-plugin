@@ -161,27 +161,32 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                         group = new Map();
                         cache.set(args.resolveDir, group);
                     }
-                    let cached = group.get(args.path);
-                    if (cached) {
-                        let watchFiles = cached.result.watchFiles!;
-                        let stats = await collectStats(watchFiles);
-                        for (const {mtimeMs} of stats) {
-                            if (mtimeMs > cached.mtimeMs) {
-                                cached.result = await transform(watchFiles[0], cached.type);
-                                cached.mtimeMs = maxMtimeMs(stats);
-                                break;
+                    try {
+                        let cached = group.get(args.path);
+                        if (cached) {
+                            let watchFiles = cached.result.watchFiles!;
+                            let stats = await collectStats(watchFiles);
+                            for (const {mtimeMs} of stats) {
+                                if (mtimeMs > cached.mtimeMs) {
+                                    cached.result = await transform(watchFiles[0], cached.type);
+                                    cached.mtimeMs = maxMtimeMs(stats);
+                                    break;
+                                }
                             }
+                            return cached.result;
                         }
-                        return cached.result;
+                        let type = typeOf(args);
+                        let result = await transform(path, type);
+                        group.set(args.path, {
+                            type,
+                            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+                            result
+                        });
+                        return result;
+                    } catch (error) {
+                        group.delete(args.path);
+                        throw error;
                     }
-                    let type = typeOf(args);
-                    let result = await transform(path, type);
-                    group.set(args.path, {
-                        type,
-                        mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
-                        result
-                    });
-                    return result;
                 };
             } else {
                 cached = (transform) => ({path, pluginData: args}: OnLoadArgs) => {
@@ -189,22 +194,35 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 };
             }
 
+            const watchFilesCache = "watch" in build.initialOptions ? {} : null;
+
             async function transform(path: string, type: string): Promise<OnLoadResult> {
-                let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
-                if (options.transform) {
-                    css = await options.transform(css, dirname(path));
+                try {
+                    let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
+                    if (options.transform) {
+                        css = await options.transform(css, dirname(path));
+                    }
+                    watchFiles = [...watchFiles];
+                    if (watchFilesCache) {
+                        watchFilesCache[path] = watchFiles;
+                    }
+                    return type === "css" ? {
+                        contents: css,
+                        loader: "css" as Loader,
+                        resolveDir: dirname(path),
+                        watchFiles
+                    } : {
+                        contents: makeModule(css, type),
+                        loader: "js" as Loader,
+                        resolveDir: dirname(path),
+                        watchFiles
+                    };
+                } catch (err) {
+                    return {
+                        errors: [{text: err.message}],
+                        watchFiles: watchFilesCache?.[path] ?? [path]
+                    }
                 }
-                return type === "css" ? {
-                    contents: css,
-                    loader: "css" as Loader,
-                    resolveDir: dirname(path),
-                    watchFiles
-                } : {
-                    contents: makeModule(css, type),
-                    loader: "js" as Loader,
-                    resolveDir: dirname(path),
-                    watchFiles
-                };
             }
 
             build.onLoad({filter: /./, namespace: "sass"}, cached(transform));

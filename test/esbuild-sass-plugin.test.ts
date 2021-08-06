@@ -13,6 +13,14 @@ describe("esbuild sass plugin tests", function () {
 
     this.timeout(5000);
 
+    let cwd;
+    beforeEach(function () {
+        cwd = process.cwd();
+    })
+    afterEach(function () {
+        process.chdir(cwd);
+    })
+
     it("react application (css loader)", async function () {
 
         await esbuild.build({
@@ -292,7 +300,7 @@ describe("esbuild sass plugin tests", function () {
             absWorkingDir,
             outdir: "./out",
             bundle: true,
-            plugins: [sassPlugin({type:"css-text"})],
+            plugins: [sassPlugin({type: "css-text"})],
             watch: {
                 onRebuild(error, result) {
                     count++;

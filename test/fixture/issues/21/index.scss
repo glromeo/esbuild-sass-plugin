@@ -1,0 +1,5 @@
+@use "sass:math";
+
+.sample {
+  z-index: math.div(10,2)
+}
