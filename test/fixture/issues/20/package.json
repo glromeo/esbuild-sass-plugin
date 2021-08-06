@@ -1,0 +1,14 @@
+{
+  "name": "retry",
+  "version": "1.0.0",
+  "description": "feature investigation",
+  "main": "index.js",
+  "author": "glromeo",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "node esbuild"
+  },
+  "dependencies": {
+  }
+}
