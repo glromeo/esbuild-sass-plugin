@@ -137,7 +137,7 @@ export type SassPluginOptions = {
      *
      * @default undefined
      */
-    transform?: (css: string, resolveDir: string) => string | Promise<string>
+    transform?: (css: string, resolveDir: string, filePath: string) => string | Promise<string>
 
     /**
      *
