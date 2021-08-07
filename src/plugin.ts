@@ -200,7 +200,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 try {
                     let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
                     if (options.transform) {
-                        css = await options.transform(css, dirname(path));
+                        css = await options.transform(css, dirname(path), path);
                     }
                     watchFiles = [...watchFiles];
                     if (lastWatchFiles) {
