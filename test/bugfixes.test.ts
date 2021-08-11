@@ -112,4 +112,23 @@ describe("tests covering github issues", function () {
         expect(fs.readFileSync("./sample.css", "utf-8")).to.match(/z-index: 5;/);
     });
 
+    it("issue #23", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "fixture/issues/23");
+        process.chdir(absWorkingDir);
+
+        await esbuild.build({
+            entryPoints: ["./index.js"],
+            absWorkingDir,
+            bundle: true,
+            outdir: "./out",
+            plugins: [sassPlugin({
+                type: "style",
+                quietDeps: true
+            })]
+        });
+
+        expect(fs.readFileSync("./out/index.js", "utf-8")).to.match(/background-color: #ae65ff;/);
+    });
+
 });
