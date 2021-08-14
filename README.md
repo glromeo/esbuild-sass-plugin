@@ -127,8 +127,8 @@ await esbuild.build({
 ```typescript
 async (css:string, resolveDir:string?) => string
 ``` 
-It's function which will be invoked before passing the css to esbuild or wrapping it in a module.
-It can be used to do postcss processing and/or to create modules
+It's a function which will be invoked before passing the css to esbuild or wrapping it in a module.\
+It can be used to do **postcss** processing and/or to create **modules** like in the following examples.
 
 #### PostCSS
 The simplest use case is to invoke PostCSS like this:
@@ -162,50 +162,12 @@ esbuild.build({
     })]
 });
 ```
->`postcss` and `postcss-modules` have to be added to your `package.json`.
+> `postcss` and `postcss-modules` have to be added to your `package.json`.
 
 Look into [fixture/css-modules](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/css-modules) for the complete example.
 
-NOTE: Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. This gives the flexibility to implement that helper function.
-
-#### esbuild
-The `transform` option can be used to invoke esbuild to do some post processing of the css like in this example
-where I rely on esbuild to create data urls:
-```javascript
-await esbuild.build({
-  entryPoints: ["./src/index.ts"],
-  outdir: "./out",
-  bundle: true,
-  format: "esm",
-  plugins: [sassPlugin({
-    type: "lit-css",
-    async transform(css, resolveDir) {
-      const {outputFiles:[out]} = await esbuild.build({
-        stdin: {
-          contents: css,
-          resolveDir,
-          loader: "css"
-        },
-        bundle: true,
-        write: false,
-        format: "esm",
-        loader: {
-          ".eot": "dataurl",
-          ".woff": "dataurl",
-          ".ttf": "dataurl",
-          ".svg": "dataurl",
-          ".otf": "dataurl"
-        },
-      });
-      return out.text;
-    }
-  })]
-});
-```
-
-I am not really happy with this but I am waiting on esbuild to revamp its plugin api before finding another way to achieve the same result.
-
-Look at **open-iconic** test **fixture** for a working example.
+> **NOTE:** Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. \
+> This gives the flexibility to implement that helper function.
 
 ### Use node-sass instead of sass
 Remember to add the dependency
