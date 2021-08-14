@@ -5,7 +5,7 @@ import chaiString from "chai-string";
 import * as esbuild from "esbuild";
 import * as fs from "fs";
 import * as path from "path";
-import {sassPlugin} from "../src";
+import {sassPlugin, postcssModules} from "../src";
 
 chai.use(chaiString);
 
@@ -73,8 +73,8 @@ describe("esbuild sass plugin tests", function () {
             "  padding: 20px;\n" +
             "}`;\n");
         expect(cssBundle).to.have.string(`__publicField(HelloWorld, "styles", hello_world_default);`);
-        expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(`\n" +
-            ".container {\n" +
+        expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(css2));");
+        expect(cssBundle).to.have.string("var css2 = `.container {\n" +
             "  display: flex;\n" +
             "  flex-direction: column;\n" +
             "}\n" +
@@ -85,7 +85,7 @@ describe("esbuild sass plugin tests", function () {
             "  padding: 20px;\n" +
             "  background: black;\n" +
             "  color: red;\n" +
-            "}`));\n");
+            "}`;");
     });
 
     it("boostrap sass (adding style elements)", async function () {
@@ -108,11 +108,8 @@ describe("esbuild sass plugin tests", function () {
         let cssBundle = fs.readFileSync("./test/fixture/bootstrap/out/index.js", "utf-8");
         expect(cssBundle).to.have.string("// test/fixture/bootstrap/index.js\n" +
             "document.body.innerHTML =");
-        expect(cssBundle).to.have.string(
-            "document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(`\n" +
-            "@charset \"UTF-8\";\n" +
-            "/*!\n" +
-            " * Bootstrap v5.0.1 (https://getbootstrap.com/)");
+        expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(css));\n");
+        expect(cssBundle).to.have.string("var css = `@charset \"UTF-8\";\n/*!\n * Bootstrap v5.1.0");
     });
 
     it("open-iconic (dealing with relative paths & data urls)", async function () {
@@ -333,5 +330,39 @@ describe("esbuild sass plugin tests", function () {
         expect(fs.readFileSync("./out/index.js", "utf-8")).to.match(/cornflowerblue/);
 
         result.stop!();
+    });
+
+    it("css modules", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "fixture/css-modules");
+        process.chdir(absWorkingDir);
+
+        await esbuild.build({
+            entryPoints: ["./src/index.js"],
+            absWorkingDir,
+            outdir: "./build/",
+            bundle: true,
+            format: "esm",
+            plugins: [
+                sassPlugin({
+                    transform: postcssModules({
+                        localsConvention: "camelCaseOnly"
+                    })
+                }),
+            ]
+        });
+
+        let cssBundle = fs.readFileSync("./build/index.js", "utf-8");
+        expect(cssBundle).to.containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"');
+        expect(cssBundle).to.containIgnoreSpaces(`
+            var common_module_default = {
+                "message": "_message_bxgcs_1"
+            };
+        `);
+        expect(cssBundle).to.containIgnoreSpaces(`
+            var example_module_default = {
+                "message": "_message_1vmzm_1"
+            };
+        `);
     });
 });

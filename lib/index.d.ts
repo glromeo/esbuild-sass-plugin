@@ -22,12 +22,13 @@ export declare type SassPluginOptions = {
     sourceMapContents?: boolean;
     sourceMapEmbed?: boolean;
     sourceMapRoot?: string;
-    transform?: (css: string, resolveDir: string, filePath: string) => string | Promise<string>;
+    transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>;
     quietDeps?: boolean;
 };
 export declare type CachedResult = {
-    type: string;
+    type: Type;
     mtimeMs: number;
     result: OnLoadResult;
 };
 export { sassPlugin } from "./plugin";
+export { makeModule, postcssModules } from "./utils";

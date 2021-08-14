@@ -137,7 +137,7 @@ export type SassPluginOptions = {
      *
      * @default undefined
      */
-    transform?: (css: string, resolveDir: string, filePath: string) => string | Promise<string>
+    transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>;
 
     /**
      *
@@ -148,7 +148,7 @@ export type SassPluginOptions = {
 
 export type CachedResult = {
 
-    type: string
+    type: Type
 
     mtimeMs: number
 
@@ -157,3 +157,4 @@ export type CachedResult = {
 
 
 export {sassPlugin} from "./plugin";
+export {makeModule, postcssModules} from "./utils";

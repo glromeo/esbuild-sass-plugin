@@ -1,36 +1,10 @@
-import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
+import {OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
 import {promises as fsp, readFileSync, Stats} from "fs";
 import {dirname, resolve} from "path";
 import picomatch from "picomatch";
-import {CachedResult, SassPluginOptions} from "./index";
-import {loadSass} from "./utils";
+import {CachedResult, SassPluginOptions, Type} from "./index";
+import {loadSass, makeModule} from "./utils";
 import {createSassImporter} from "./importer";
-
-const cssTextModule = cssText => `\
-export default \`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`;
-`;
-
-const cssResultModule = cssText => `\
-import {css} from "lit-element";
-export default css\`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`;
-`;
-
-const styleModule = cssText => `\
-document.head
-    .appendChild(document.createElement("style"))
-    .appendChild(document.createTextNode(\`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`));
-`;
-
-function makeModule(contents: string, type: string) {
-    if (type === "style") {
-        return styleModule(contents);
-    } else {
-        return type === "lit-css" ? cssResultModule(contents) : cssTextModule(contents);
-    }
-}
 
 /**
  *
@@ -47,7 +21,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
     const sass = loadSass(options);
 
-    const type: string = typeof options.type === "string" ? options.type : "css";
+    const type: Type = typeof options.type === "string" ? options.type : "css";
 
     const matchers: [string, (args: OnResolveArgs) => boolean][] | false = Array.isArray(options.type)
         && options.type.map(function ([type, pattern]) {
@@ -74,13 +48,13 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         });
 
     const typeOf = matchers
-        ? (args: OnResolveArgs) => {
+        ? (args: OnResolveArgs): Type => {
             for (const [type, isMatch] of matchers) if (isMatch(args)) {
-                return type;
+                return type as Type;
             }
             return type;
         }
-        : () => type;
+        : (): Type => type;
 
     function pathResolve({resolveDir, path, importer}: OnResolveArgs) {
         return resolve(resolveDir || dirname(importer), path);
@@ -119,7 +93,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             ? options.cache
             : new Map<string, Map<string, CachedResult>>();
 
-    function collectStats(watchFiles):Promise<Stats[]> {
+    function collectStats(watchFiles): Promise<Stats[]> {
         return Promise.all(watchFiles.map(filename => fsp.stat(filename)));
     }
 
@@ -151,7 +125,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             }));
 
             let cached: (
-                transform: (filename: string, type: string) => Promise<OnLoadResult>
+                transform: (filename: string, type: Type) => Promise<OnLoadResult>
             ) => (args) => Promise<OnLoadResult>;
 
             if (cache) {
@@ -196,24 +170,37 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
             const lastWatchFiles = build.initialOptions.watch ? {} : null;
 
-            async function transform(path: string, type: string): Promise<OnLoadResult> {
+            async function transform(path: string, type: Type): Promise<OnLoadResult> {
                 try {
                     let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
-                    if (options.transform) {
-                        css = await options.transform(css, dirname(path), path);
-                    }
+
                     watchFiles = [...watchFiles];
                     if (lastWatchFiles) {
                         lastWatchFiles[path] = watchFiles;
                     }
+
+                    if (options.transform) {
+                        const out: string | OnLoadResult = await options.transform(css, dirname(path), path);
+                        if (typeof out !== "string") {
+                            return {
+                                contents: out.contents,
+                                loader: out.loader,
+                                resolveDir: dirname(path),
+                                watchFiles
+                            }
+                        } else {
+                            css = out;
+                        }
+                    }
+
                     return type === "css" ? {
                         contents: css,
-                        loader: "css" as Loader,
+                        loader: "css",
                         resolveDir: dirname(path),
                         watchFiles
                     } : {
                         contents: makeModule(css, type),
-                        loader: "js" as Loader,
+                        loader: "js",
                         resolveDir: dirname(path),
                         watchFiles
                     };

@@ -12,12 +12,17 @@
     "open-iconic",
     "post-css",
     "react",
-    "issues"
+    "issues",
+    "css-modules"
   ],
   "scripts": {
     "serve-benchmark": "node serve benchmark",
     "serve-bootstrap": "node serve bootstrap",
     "serve-lit-element": "node serve lit-element",
     "serve-react": "node serve react"
+  },
+  "dependencies": {
+    "postcss": "^8.3.6",
+    "postcss-modules": "^4.2.2"
   }
 }
