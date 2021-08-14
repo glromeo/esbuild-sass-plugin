@@ -5,10 +5,10 @@
 A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
 
 ### Features
-* supports `constructable stylesheet` modules or `dynamic style` added to main page
+* support for `constructable stylesheet` to be used in custom elements or `dynamic style` to be added to the html page
 * comes with [dart sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
 * caching
-* PostCSS
+* **postCSS** & **css modules**
 
 ### Install
 ```bash
@@ -128,6 +128,7 @@ await esbuild.build({
 async (css:string, resolveDir:string?) => string
 ``` 
 It's function which will be invoked before passing the css to esbuild or wrapping it in a module.
+It can be used to do postcss processing and/or to create modules
 
 #### PostCSS
 The simplest use case is to invoke PostCSS like this:
@@ -147,8 +148,28 @@ esbuild.build({
 });
 ```
 
+#### CSS Modules
+A helper function is available to do all the work of calling postcss to create a css module. The usage is something like:
+```javascript
+const {sassPlugin, postcssModules} = require("esbuild-sass-plugin");
+
+esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        transform: postcssModules({
+            // ...put here the options for postcss-modules: https://github.com/madyankin/postcss-modules
+        })
+    })]
+});
+```
+>`postcss` and `postcss-modules` have to be added to your `package.json`.
+
+Look into [fixture/css-modules](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/css-modules) for the complete example.
+
+NOTE: Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. This gives the flexibility to implement that helper function.
+
 #### esbuild
-But it can be used to invoke esbuild to do some post processing of the css like in this example
+The `transform` option can be used to invoke esbuild to do some post processing of the css like in this example
 where I rely on esbuild to create data urls:
 ```javascript
 await esbuild.build({
