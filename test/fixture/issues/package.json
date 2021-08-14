@@ -1,0 +1,9 @@
+{
+  "name": "issues",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@aotearoan/sass-farbig": "^4.0.4"
+  }
+}

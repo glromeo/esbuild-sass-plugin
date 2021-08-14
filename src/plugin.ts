@@ -1,5 +1,5 @@
 import {Loader, OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
-import {promises as fsp, readFileSync} from "fs";
+import {promises as fsp, readFileSync, Stats} from "fs";
 import {dirname, resolve} from "path";
 import picomatch from "picomatch";
 import {CachedResult, SassPluginOptions} from "./index";
@@ -119,77 +119,113 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             ? options.cache
             : new Map<string, Map<string, CachedResult>>();
 
+    function collectStats(watchFiles):Promise<Stats[]> {
+        return Promise.all(watchFiles.map(filename => fsp.stat(filename)));
+    }
+
+    function maxMtimeMs(stats: Stats[]) {
+        return stats.reduce((max, {mtimeMs}) => Math.max(max, mtimeMs), 0);
+    }
+
+    function useExclude(callback) {
+        const exclude = options.exclude;
+        if (exclude) {
+            return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args)
+        } else {
+            return callback
+        }
+    }
+
+    const RELATIVE_PATH = /^\.\.?\//;
+
     return {
         name: "sass-plugin",
         setup: function (build) {
 
-            build.onResolve({filter: /\.(s[ac]ss|css)$/}, (args) => {
-                return {path: args.path, namespace: "sass", pluginData: args};
-            });
+            build.onResolve({filter: /\.(s[ac]ss|css)$/}, useExclude((args) => {
+                if (RELATIVE_PATH.test(args.path)) {
+                    return {path: pathResolve(args), namespace: "sass", pluginData: args};
+                } else {
+                    return {path: requireResolve(args), namespace: "sass", pluginData: args};
+                }
+            }));
 
             let cached: (
-                resolve: (args: OnResolveArgs) => string,
                 transform: (filename: string, type: string) => Promise<OnLoadResult>
             ) => (args) => Promise<OnLoadResult>;
 
             if (cache) {
-                cached = (resolve, transform) => async ({pluginData: args}: OnLoadArgs) => {
+                cached = (transform) => async ({path, pluginData: args}: OnLoadArgs) => {
                     let group = cache.get(args.resolveDir);
                     if (!group) {
                         group = new Map();
                         cache.set(args.resolveDir, group);
                     }
-                    let cached = group.get(args.path);
-                    if (cached) {
-                        let watchFiles = cached.result.watchFiles!;
-                        let stats = await Promise.all(watchFiles.map(filename => fsp.stat(filename)));
-                        for (const {mtimeMs} of stats) {
-                            if (mtimeMs > cached.mtimeMs) {
-                                let mtimeMs = Date.now();
-                                cached.result = await transform(watchFiles[0], cached.type);
-                                cached.mtimeMs = mtimeMs;
-                                break;
+                    try {
+                        let cached = group.get(args.path);
+                        if (cached) {
+                            let watchFiles = cached.result.watchFiles!;
+                            let stats = await collectStats(watchFiles);
+                            for (const {mtimeMs} of stats) {
+                                if (mtimeMs > cached.mtimeMs) {
+                                    cached.result = await transform(watchFiles[0], cached.type);
+                                    cached.mtimeMs = maxMtimeMs(stats);
+                                    break;
+                                }
                             }
+                            return cached.result;
                         }
-                        return cached.result;
+                        let type = typeOf(args);
+                        let result = await transform(path, type);
+                        group.set(args.path, {
+                            type,
+                            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+                            result
+                        });
+                        return result;
+                    } catch (error) {
+                        group.delete(args.path);
+                        throw error;
                     }
-                    let filename = resolve(args);
-                    let type = typeOf(args);
-                    let mtimeMs = Date.now();
-                    let result = await transform(filename, type);
-                    group.set(args.path, {
-                        type,
-                        mtimeMs: mtimeMs,
-                        result
-                    });
-                    return result;
                 };
             } else {
-                cached = (resolve, transform) => ({pluginData: args}: OnLoadArgs) => {
-                    return transform(resolve(args), typeOf(args));
+                cached = (transform) => ({path, pluginData: args}: OnLoadArgs) => {
+                    return transform(path, typeOf(args));
                 };
             }
+
+            const lastWatchFiles = build.initialOptions.watch ? {} : null;
 
             async function transform(path: string, type: string): Promise<OnLoadResult> {
-                let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
-                if (options.transform) {
-                    css = await options.transform(css, dirname(path));
+                try {
+                    let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
+                    if (options.transform) {
+                        css = await options.transform(css, dirname(path), path);
+                    }
+                    watchFiles = [...watchFiles];
+                    if (lastWatchFiles) {
+                        lastWatchFiles[path] = watchFiles;
+                    }
+                    return type === "css" ? {
+                        contents: css,
+                        loader: "css" as Loader,
+                        resolveDir: dirname(path),
+                        watchFiles
+                    } : {
+                        contents: makeModule(css, type),
+                        loader: "js" as Loader,
+                        resolveDir: dirname(path),
+                        watchFiles
+                    };
+                } catch (err) {
+                    return {
+                        errors: [{text: err.message}],
+                        watchFiles: lastWatchFiles?.[path] ?? [path]
+                    }
                 }
-                return type === "css" ? {
-                    contents: css,
-                    loader: "css" as Loader,
-                    resolveDir: dirname(path),
-                    watchFiles
-                } : {
-                    contents: makeModule(css, type),
-                    loader: "js" as Loader,
-                    resolveDir: dirname(path),
-                    watchFiles
-                };
             }
 
-            build.onLoad({filter: /^\.\.?\//, namespace: "sass"}, cached(pathResolve, transform));
-            build.onLoad({filter: /^([^.]|\.\.?[^/])/, namespace: "sass"}, cached(requireResolve, transform));
+            build.onLoad({filter: /./, namespace: "sass"}, cached(transform));
         }
     };
 }

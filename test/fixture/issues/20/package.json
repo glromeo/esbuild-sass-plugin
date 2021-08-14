@@ -1,0 +1,16 @@
+{
+  "name": "issue-20",
+  "version": "1.0.0",
+  "description": "issue investigation",
+  "main": "index.js",
+  "author": "glromeo",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "esbuild": "0.12.18",
+    "esbuild-sass-plugin": "1.4.8"
+  }
+}

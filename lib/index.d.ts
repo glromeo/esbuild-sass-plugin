@@ -2,6 +2,7 @@ import { OnLoadResult } from "esbuild";
 import { Importer, types } from "sass";
 export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
+    exclude?: RegExp;
     implementation?: string;
     basedir?: string;
     type?: Type | ([Type] | [Type, string | [string] | [string, string]])[];
@@ -21,7 +22,8 @@ export declare type SassPluginOptions = {
     sourceMapContents?: boolean;
     sourceMapEmbed?: boolean;
     sourceMapRoot?: string;
-    transform?: (css: string, resolveDir: string) => string | Promise<string>;
+    transform?: (css: string, resolveDir: string, filePath: string) => string | Promise<string>;
+    quietDeps?: boolean;
 };
 export declare type CachedResult = {
     type: string;

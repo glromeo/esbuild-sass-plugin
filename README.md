@@ -4,13 +4,12 @@
 
 A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
 
-##### Main Features
-* defaults to using the `css loader`
+### Features
 * supports `constructable stylesheet` modules or `dynamic style` added to main page
 * comes with [dart sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
 * caching
 * PostCSS
-* watch mode 🥳
+
 ### Install
 ```bash
 npm i esbuild-sass-plugin
@@ -85,6 +84,7 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 |type|string or array|`"css"`|
 |implementation|string|`"sass"`|
 |transform|function|undefined|
+|exclude|regex|undefined|
 
 
 If you want to have different loaders for different parts of your code you can pass `type` an array. 
@@ -109,6 +109,19 @@ await esbuild.build({
 })
 ```
 **NOTE**: last type applies to all the files that don't match any matchers.
+
+### Exclude Option
+Used to exclude paths from the plugin
+
+e.g.
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        exclude: /^http:\/\//,  // ignores urls
+    })]
+})
+```
 
 ### Transform Option
 ```typescript
@@ -233,17 +246,6 @@ incremental build: 347.55ms   (same ts modified again)
 incremental build: 401.264ms  (one scss modified)
 incremental build: 364.649ms  (same scss modified)
 ```
-
-
-### TODO:
-
-* css in js modules
-* refactor the options
-* (more?) speed improvements
-
-### License
-
-MIT
 
 [travis-url]: https://travis-ci.com/glromeo/esbuild-sass-plugin
 [travis-image]: https://travis-ci.com/glromeo/esbuild-sass-plugin.svg?branch=main

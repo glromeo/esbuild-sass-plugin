@@ -4,13 +4,13 @@
   "main": "src/generated/index.ts",
   "license": "MIT",
   "dependencies": {
-    "bootstrap": "^4.6.0",
-    "lit-element": "^2.4.0"
+    "bootstrap": "^5.0.1",
+    "lit-element": "^2.5.1"
   },
   "scripts": {
     "serve": "node ../serve benchmark"
   },
   "devDependencies": {
-    "node-sass": "^5.0.0"
+    "node-sass": "^6.0.0"
   }
 }

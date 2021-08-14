@@ -11,7 +11,8 @@
     "lit-element",
     "open-iconic",
     "post-css",
-    "react"
+    "react",
+    "issues"
   ],
   "scripts": {
     "serve-benchmark": "node serve benchmark",

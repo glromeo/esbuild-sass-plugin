@@ -4,7 +4,7 @@
   "main": "src/index.ts",
   "license": "MIT",
   "dependencies": {
-    "lit-element": "^2.4.0"
+    "lit-element": "^2.5.1"
   },
   "scripts": {
     "serve": "node ../serve lit-element"

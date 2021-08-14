@@ -1,0 +1,9 @@
+@use "sass:map";
+@import "~@aotearoan/sass-farbig";
+
+$color: #6c29d4;
+$palette: generate-palette($color);
+
+.body {
+  background-color: map.get($palette, "l1");
+}
