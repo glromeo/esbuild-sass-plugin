@@ -1,0 +1,10 @@
+{
+  "name": "issue-25",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "esbuild": "^0.12.20",
+    "esbuild-sass-plugin": "^1.5.0"
+  }
+}

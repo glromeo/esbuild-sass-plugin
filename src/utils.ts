@@ -43,7 +43,7 @@ export function makeModule(contents: string, type: Type) {
     }
 }
 
-export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string, includePaths: string[] | undefined }) {
+export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string, includePaths?: string[] | undefined }) {
 
     const includePaths = options.includePaths ?? [options.basedir ?? process.cwd()];
     const postcss: Postcss = requireModule("postcss", includePaths);
