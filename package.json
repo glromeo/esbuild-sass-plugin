@@ -27,7 +27,7 @@
     "url": "https://github.com/glromeo/esbuild-sass-plugin.git"
   },
   "scripts": {
-    "setup": "cd test/fixture && yarn install && cd ../..",
+    "setup": "cd test/fixture && yarn install && cd ../issues && yarn install && cd ../..",
     "build": "tsc",
     "build:watch": "tsc --watch",
     "test": "nyc mocha **/*.test.ts"

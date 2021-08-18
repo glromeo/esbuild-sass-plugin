@@ -3,17 +3,17 @@ import {Postcss} from "postcss";
 import PostcssModulesPlugin from "postcss-modules";
 import {OnLoadResult} from "esbuild";
 
-function requireModule(module:string, basedir:string = process.cwd()) {
+function requireModule(module: string, includePaths: string[] | undefined) {
     try {
-        return require(require.resolve(module, {paths: [basedir]}));
+        return require(require.resolve(module, includePaths ? {paths: includePaths} : {paths: [process.cwd()]}));
     } catch (e) {
         console.error(`Cannot find module '${module}', make sure it's installed. e.g. yarn add -D ${module}`, e);
         process.exit(1);
     }
 }
 
-export function loadSass({implementation: module = "sass", basedir = process.cwd()}: SassPluginOptions) {
-    return requireModule(module, basedir);
+export function loadSass({implementation: module = "sass", includePaths}: SassPluginOptions) {
+    return requireModule(module, includePaths);
 }
 
 const cssTextModule = cssText => `\
@@ -43,10 +43,11 @@ export function makeModule(contents: string, type: Type) {
     }
 }
 
-export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string }) {
+export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string, includePaths?: string[] | undefined }) {
 
-    const postcss: Postcss = requireModule("postcss", options.basedir);
-    const postcssModulesPlugin: PostcssModulesPlugin = requireModule("postcss-modules", options.basedir);
+    const includePaths = options.includePaths ?? [options.basedir ?? process.cwd()];
+    const postcss: Postcss = requireModule("postcss", includePaths);
+    const postcssModulesPlugin: PostcssModulesPlugin = requireModule("postcss-modules", includePaths);
 
     return async (source: string, dirname: string, path: string): Promise<OnLoadResult> => {
 
