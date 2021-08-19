@@ -8,7 +8,7 @@ function requireModule(module: string, includePaths: string[] | undefined) {
         return require(require.resolve(module, includePaths ? {paths: includePaths} : {paths: [process.cwd()]}));
     } catch (e) {
         try {
-            return require(module); // extra attempt at finding a co-located tools
+            return require(module); // extra attempt at finding a co-located tool
         } catch (ignored) {
         }
         console.error(`Cannot find module '${module}', make sure it's installed. e.g. yarn add -D ${module}`, e);
