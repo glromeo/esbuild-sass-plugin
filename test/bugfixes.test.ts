@@ -6,6 +6,7 @@ import * as esbuild from "esbuild";
 import * as fs from "fs";
 import * as path from "path";
 import {sassPlugin} from "../src";
+import {exec} from "child_process";
 
 chai.use(chaiString);
 
@@ -24,20 +25,20 @@ describe("tests covering github issues", function () {
     it("#18", async function () {
 
         await esbuild.build({
-            entryPoints: ["./test/fixture/issues/18/entrypoint.js"],
+            entryPoints: ["./test/issues/18/entrypoint.js"],
             bundle: true,
-            outdir: "./test/fixture/issues/18/out",
+            outdir: "./test/issues/18/out",
             plugins: [sassPlugin({})]
         });
 
-        let cssBundle = fs.readFileSync("./test/fixture/issues/18/out/entrypoint.css", "utf-8");
+        let cssBundle = fs.readFileSync("./test/issues/18/out/entrypoint.css", "utf-8");
         expect(cssBundle).to.containIgnoreSpaces(".component_a { background: blue; }");
         expect(cssBundle).to.containIgnoreSpaces(".component_b { background: yellow; }");
     });
 
     it("issue #20", async function () {
 
-        const absWorkingDir = path.resolve(__dirname, "fixture/issues/20");
+        const absWorkingDir = path.resolve(__dirname, "issues/20");
         process.chdir(absWorkingDir);
 
         fs.writeFileSync("dep.scss", `$primary-color: #333; body { padding: 0; color: $primary-color; }`);
@@ -82,7 +83,7 @@ describe("tests covering github issues", function () {
 
         await new Promise((resolve, reject) => {
             fs.writeFileSync("tmp.scss", `@use 'dep'; body {background-color: dep.$primary-color; color: red }`);
-            const interval = setInterval(()=>{
+            const interval = setInterval(() => {
                 if (step === 5) {
                     clearInterval(interval);
                     try {
@@ -99,7 +100,7 @@ describe("tests covering github issues", function () {
 
     it("issue #21", async function () {
 
-        const absWorkingDir = path.resolve(__dirname, "fixture/issues/21");
+        const absWorkingDir = path.resolve(__dirname, "issues/21");
         process.chdir(absWorkingDir);
 
         await esbuild.build({
@@ -114,7 +115,7 @@ describe("tests covering github issues", function () {
 
     it("issue #23", async function () {
 
-        const absWorkingDir = path.resolve(__dirname, "fixture/issues/23");
+        const absWorkingDir = path.resolve(__dirname, "issues/23");
         process.chdir(absWorkingDir);
 
         await esbuild.build({
@@ -129,6 +130,29 @@ describe("tests covering github issues", function () {
         });
 
         expect(fs.readFileSync("./out/index.js", "utf-8")).to.match(/background-color: #ae65ff;/);
+    });
+
+    it("issue #25", async function () {
+
+        const {exec} = require('child_process');
+
+        const absWorkingDir = path.resolve(__dirname, "issues/25");
+        process.chdir(absWorkingDir);
+
+        const includePath = path.resolve(__dirname, "fixture/node_modules");
+
+        await esbuild.build({
+            entryPoints: ["./index.js"],
+            absWorkingDir,
+            bundle: true,
+            outdir: "./out",
+            plugins: [sassPlugin({
+                implementation: "node-sass",
+                includePaths: [includePath]
+            })]
+        });
+
+        expect(fs.readFileSync("./out/index.css", "utf-8")).to.match(/background-color: red;/);
     });
 
 });

@@ -7,6 +7,10 @@ function requireModule(module: string, includePaths: string[] | undefined) {
     try {
         return require(require.resolve(module, includePaths ? {paths: includePaths} : {paths: [process.cwd()]}));
     } catch (e) {
+        try {
+            return require(module); // extra attempt at finding a co-located tool
+        } catch (ignored) {
+        }
         console.error(`Cannot find module '${module}', make sure it's installed. e.g. yarn add -D ${module}`, e);
         process.exit(1);
     }
@@ -43,7 +47,7 @@ export function makeModule(contents: string, type: Type) {
     }
 }
 
-export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string, includePaths: string[] | undefined }) {
+export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string, includePaths?: string[] | undefined }) {
 
     const includePaths = options.includePaths ?? [options.basedir ?? process.cwd()];
     const postcss: Postcss = requireModule("postcss", includePaths);

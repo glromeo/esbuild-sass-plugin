@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@aotearoan/sass-farbig": "^4.0.4"
+    "@aotearoan/sass-farbig": "^4.0.4",
+    "global-dirs": "^3.0.0"
   }
 }
