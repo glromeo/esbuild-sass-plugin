@@ -26,7 +26,7 @@ ${cssText.replace(/([$`\\])/g, "\\$1")}\`;
 `;
 
 const cssResultModule = cssText => `\
-import {css} from "lit-element";
+import {css} from "lit-element/lit-element.js";
 export default css\`
 ${cssText.replace(/([$`\\])/g, "\\$1")}\`;
 `;
