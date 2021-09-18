@@ -5,9 +5,10 @@ export type Type = "css" | "style" | "css-text" | "lit-css"
 
 export type SassPluginOptions = {
     /**
-     * Mapper function to custom resolve path
+     * Function to transform import path. Not just paths by @import 
+     * directive, but also paths imported by ts code.
      */
-    mapper?:(url: string) => string
+    importMapper?:(url: string) => string
 
     /**
      *

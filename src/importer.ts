@@ -1,7 +1,7 @@
 import {SassPluginOptions} from "./index";
 import resolve from "resolve";
 
-export function createSassImporter({basedir = process.cwd(), mapper }: SassPluginOptions) {
+export function createSassImporter({basedir = process.cwd(), importMapper }: SassPluginOptions) {
 
     const opts = {basedir, extensions: [".scss", ".sass", ".css"]};
 
@@ -9,8 +9,8 @@ export function createSassImporter({basedir = process.cwd(), mapper }: SassPlugi
         if (url.startsWith("~")) {
             url = url.slice(1);
         }
-        if (mapper) {
-            url = mapper(url)
+        if (importMapper) {
+            url = importMapper(url)
         }
         try {
             return {file: resolve.sync(url, opts)};

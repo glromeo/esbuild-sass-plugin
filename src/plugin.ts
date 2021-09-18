@@ -65,7 +65,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             resolveDir = dirname(importer);
         }
 
-        const mapper = options.mapper
+        const mapper = options.importMapper
         if(mapper) {
             path = mapper(path)
         }
