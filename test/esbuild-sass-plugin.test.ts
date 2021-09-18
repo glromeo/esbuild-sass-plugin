@@ -100,7 +100,6 @@ describe("esbuild sass plugin tests", function () {
             plugins: [sassPlugin({
                 basedir: path.resolve(__dirname, "fixture"),
                 type: "style",
-                includePaths: [path.resolve(__dirname, "fixture/bootstrap")],
                 quietDeps: true
             })]
         });

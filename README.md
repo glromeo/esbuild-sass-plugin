@@ -85,6 +85,7 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 |implementation|string|`"sass"`|
 |transform|function|undefined|
 |exclude|regex|undefined|
+|importMapper|function|undefined|
 
 
 If you want to have different loaders for different parts of your code you can pass `type` an array. 
@@ -119,6 +120,34 @@ await esbuild.build({
     ...
     plugins: [sassPlugin({
         exclude: /^http:\/\//,  // ignores urls
+    })]
+})
+```
+
+### ImportMapper Option
+Function to customize re-map import path, both `import` in ts code and `@import` 
+in scss coverd.   
+You can use this option to re-map import paths like tsconfig's `paths` option.   
+
+e.g.
+```json
+//tsconfig
+{
+  "compilerOptions": {
+    "baseUrl": ".", 
+    "paths": {
+      "@img/*": ["./assets/images/*"] //map image files
+    }
+  }
+}
+```
+Now you can resolve these paths with `importMapper`
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        importMapper: (path)=>
+          path.replace(/^@img\//,"./assets/images/")
     })]
 })
 ```
