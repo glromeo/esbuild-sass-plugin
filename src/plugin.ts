@@ -64,6 +64,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         if (!resolveDir) {
             resolveDir = dirname(importer);
         }
+
+        const mapper = options.mapper
+        if(mapper) {
+            path = mapper(path)
+        }
+
         const paths = options.includePaths ? [resolveDir, ...options.includePaths] : [resolveDir];
         return require.resolve(path, {paths});
     }

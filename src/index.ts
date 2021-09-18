@@ -4,6 +4,10 @@ import {Importer, types} from "sass";
 export type Type = "css" | "style" | "css-text" | "lit-css"
 
 export type SassPluginOptions = {
+    /**
+     * Mapper function to custom resolve path
+     */
+    mapper?:(url: string) => string
 
     /**
      *
