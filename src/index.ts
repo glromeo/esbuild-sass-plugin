@@ -4,6 +4,11 @@ import {Importer, types} from "sass";
 export type Type = "css" | "style" | "css-text" | "lit-css"
 
 export type SassPluginOptions = {
+    /**
+     * Function to transform import path. Not just paths by @import 
+     * directive, but also paths imported by ts code.
+     */
+    importMapper?:(url: string) => string
 
     /**
      *
