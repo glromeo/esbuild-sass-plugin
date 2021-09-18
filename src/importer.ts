@@ -5,7 +5,7 @@ export function createSassImporter({basedir = process.cwd(), importMapper }: Sas
 
     const opts = {basedir, extensions: [".scss", ".sass", ".css"]};
 
-    return function importer(url, prev) {
+    return function importer(url) {
         if (url.startsWith("~")) {
             url = url.slice(1);
         }

@@ -2,6 +2,7 @@ import { OnLoadResult } from "esbuild";
 import { Importer, types } from "sass";
 export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
+    importMapper?: (url: string) => string;
     exclude?: RegExp;
     implementation?: string;
     basedir?: string;
