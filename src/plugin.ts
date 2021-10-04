@@ -109,11 +109,15 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
     function useExclude(callback) {
         const exclude = options.exclude;
-        if (exclude) {
-            return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args)
-        } else {
-            return callback
-        }
+	const resolveDirExclude = options.resolveDirExclude;
+
+	const test = (args) => {
+	    if (exclude && exclude.test(args.path)) { return true }
+	    if (resolveDirExclude && resolveDirExclude.test(args.resolveDir)) { return true }
+	    return false;
+	}
+
+        return (args: OnResolveArgs) => test(args) ? null : callback(args)
     }
 
     const RELATIVE_PATH = /^\.\.?\//;
