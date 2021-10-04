@@ -364,4 +364,58 @@ describe("esbuild sass plugin tests", function () {
             };
         `);
     });
+
+    it("css modules & lit-element together", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "fixture/exclude");
+        process.chdir(absWorkingDir);
+
+        const IS_LIT_BRANCH = /\\lit$/;
+
+        await esbuild.build({
+            absWorkingDir,
+            entryPoints: ["./src/main.js"],
+            outdir: "./public",
+            bundle: true,
+            format: "esm",
+            plugins: [
+                sassPlugin({
+                    exclude: ({resolveDir}) => !IS_LIT_BRANCH.test(resolveDir),
+                    type: "lit-css"
+                }),
+                sassPlugin({
+                    exclude: ({path}) => !path.endsWith(".module.scss"),
+                    transform: postcssModules({
+                        localsConvention: "camelCaseOnly"
+                    }),
+                    type: "css"
+                }),
+            ]
+        });
+
+        let main = fs.readFileSync("./public/main.js", "utf-8");
+
+        expect(main).to.containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"');
+        expect(main).to.containIgnoreSpaces(`
+            var common_module_default = {
+                "message": "_message_bxgcs_1"
+            };
+        `);
+        expect(main).to.containIgnoreSpaces(`
+            var example_module_default = {
+                "message": "_message_kto8s_1"
+            };
+        `);
+
+        expect(main).to.containIgnoreSpaces(`
+            var styles_default = css\`
+            .message {
+              font-family: sans-serif;
+              color: white;
+              background-color: red;
+              border: 2px solid darkred;
+              padding: 8px;
+            }\`;
+        `);
+    });
 });

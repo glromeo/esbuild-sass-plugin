@@ -1,8 +1,11 @@
-import { OnLoadResult } from "esbuild";
+import { OnLoadResult, OnResolveArgs } from "esbuild";
 import { Importer, types } from "sass";
 export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
-    exclude?: RegExp;
+    exclude?: RegExp | ((args: OnResolveArgs) => boolean) | {
+        path?: RegExp;
+        resolveDir?: RegExp;
+    };
     implementation?: string;
     basedir?: string;
     type?: Type | ([Type] | [Type, string | [string] | [string, string]])[];

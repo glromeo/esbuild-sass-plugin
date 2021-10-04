@@ -6,6 +6,8 @@ import {CachedResult, SassPluginOptions, Type} from "./index";
 import {loadSass, makeModule} from "./utils";
 import {createSassImporter} from "./importer";
 
+let pluginIndex: number = 0;
+
 /**
  *
  * @param options
@@ -103,14 +105,20 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
     function useExclude(callback) {
         const exclude = options.exclude;
-        if (exclude) {
-            return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args)
+        if (exclude instanceof RegExp) {
+            return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args);
+        } else if (typeof exclude === "function") {
+            return (args: OnResolveArgs) => exclude(args) ? null : callback(args);
+        } else if (typeof exclude === "object") {
+            throw new Error("invalid exclude option");
         } else {
-            return callback
+            return callback;
         }
     }
 
     const RELATIVE_PATH = /^\.\.?\//;
+
+    const namespace = `sass-plugin-${pluginIndex++}`;
 
     return {
         name: "sass-plugin",
@@ -118,9 +126,9 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
             build.onResolve({filter: /\.(s[ac]ss|css)$/}, useExclude((args) => {
                 if (RELATIVE_PATH.test(args.path)) {
-                    return {path: pathResolve(args), namespace: "sass", pluginData: args};
+                    return {path: pathResolve(args), namespace, pluginData: args};
                 } else {
-                    return {path: requireResolve(args), namespace: "sass", pluginData: args};
+                    return {path: requireResolve(args), namespace, pluginData: args};
                 }
             }));
 
@@ -187,7 +195,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                                 loader: out.loader,
                                 resolveDir: dirname(path),
                                 watchFiles
-                            }
+                            };
                         } else {
                             css = out;
                         }
@@ -208,11 +216,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     return {
                         errors: [{text: err.message}],
                         watchFiles: lastWatchFiles?.[path] ?? [path]
-                    }
+                    };
                 }
             }
 
-            build.onLoad({filter: /./, namespace: "sass"}, cached(transform));
+            build.onLoad({filter: /./, namespace}, cached(transform));
         }
     };
 }

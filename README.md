@@ -81,44 +81,58 @@ The **options** passed to the plugin are a superset of the sass [Options](https:
 |Option|Type|Default|
 |---|---|---|
 |cache|boolean or Map|true|
-|type|string or array|`"css"`|
+|type|string or ~~array~~*|`"css"`|
 |implementation|string|`"sass"`|
 |transform|function|undefined|
-|exclude|regex|undefined|
+|exclude|regex or function|undefined|
 
 
-If you want to have different loaders for different parts of your code you can pass `type` an array. 
+> **WARNING**: _The **array** version of **type** is **deprecated**_
+> 
+> It was meant to have different loaders for different parts of the code passing an array to `type` where each item 
+> was:
+> * the type (one of: `css`, `css-text`, `lit-css` or `style`)
+> * a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two.
+> 
+> e.g. You can still do:
+>
+> ```javascript
+> await esbuild.build({
+>     ...
+>     plugins: [sassPlugin({
+>         type: [                                     // this is somehow like a case 'switch'...
+>             ["css", "bootstrap/**"],                // ...all bootstrap scss files (args.path) 
+>             ["style", ["src/nomod/**"]],            // ...all files imported from files in 'src/nomod' (args.importer) 
+>             ["style", ["**/index.ts","**/*.scss"]], // all scss files imported from files name index.ts (both params)
+>             ["lit-css"]                             // this matches all, similar to a case 'default'
+>         ],
+>     })]
+> })
+> ```
+> 
+> ...but **I am planning to remove this complicated way of defining different behaviours in v2.0** \
+> I haven't decided the new option format yet but, please, try and use the single string version of type \
+> and rely on exclude to switch behaviour if possible!
+> 
+> _have a look at the **exclude** fixture for an example_ where **lit css** and **css modules** are both used in the same app
 
-Each item is going
-to be: 
-* the type (one of: `css`, `css-text`, `lit-css` or `style`)
-* a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two. 
-
-e.g.
-```javascript
-await esbuild.build({
-    ...
-    plugins: [sassPlugin({
-        type: [                                     // this is somehow like a case 'switch'...
-            ["css", "bootstrap/**"],                // ...all bootstrap scss files (args.path) 
-            ["style", ["src/nomod/**"]],            // ...all files imported from files in 'src/nomod' (args.importer) 
-            ["style", ["**/index.ts","**/*.scss"]], // all scss files imported from files name index.ts (both params)
-            ["lit-css"]                             // this matches all, similar to a case 'default'
-        ],
-    })]
-})
-```
-**NOTE**: last type applies to all the files that don't match any matchers.
 
 ### Exclude Option
-Used to exclude paths from the plugin
-
-e.g.
+Used to exclude paths from the plugin. It can either be **a simple regex** and that applies to the path 
 ```javascript
 await esbuild.build({
     ...
     plugins: [sassPlugin({
         exclude: /^http:\/\//,  // ignores urls
+    })]
+})
+```
+**or a function** which receives the whole set of args that esbuild passes on resolve.
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        exclude: ({resolveDir}) => !/\\lit$/.test(resolveDir),  // ignores files outside lit directory
     })]
 })
 ```

@@ -12,7 +12,8 @@
     "open-iconic",
     "post-css",
     "react",
-    "css-modules"
+    "css-modules",
+    "exclude"
   ],
   "scripts": {
     "serve-benchmark": "node serve benchmark",
