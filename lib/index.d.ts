@@ -2,14 +2,17 @@ import { OnLoadResult, OnResolveArgs } from "esbuild";
 import { Importer, types } from "sass";
 export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
-    exclude?: RegExp | ((args: OnResolveArgs) => boolean);
+    importMapper?: (url: string) => string;
+    exclude?: RegExp | ((args: OnResolveArgs) => boolean) | {
+        path?: RegExp;
+        resolveDir?: RegExp;
+    };
     implementation?: string;
     basedir?: string;
     type?: Type | ([Type] | [Type, string | [string] | [string, string]])[];
     cache?: Map<string, Map<string, CachedResult>> | boolean;
     picomatch?: any;
     importer?: Importer | Importer[];
-    importMapper?: (url: string) => string;
     functions?: {
         [key: string]: (...args: types.SassType[]) => types.SassType | void;
     };

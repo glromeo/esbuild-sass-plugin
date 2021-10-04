@@ -64,7 +64,19 @@ describe("esbuild sass plugin tests", function () {
         });
 
         let cssBundle = fs.readFileSync("./test/fixture/lit-element/out/index.js", "utf-8");
-        expect(cssBundle).to.have.string("var hello_world_default = css`\n" +
+        expect(cssBundle).to.containIgnoreSpaces(`
+            var r = (t3, ...n6) => {
+              const o6 = t3.length === 1 ? t3[0] : n6.reduce((e5, n7, s5) => e5 + ((t4) => {
+                if (t4._$cssResult$ === true)
+                  return t4.cssText;
+                if (typeof t4 == "number")
+                  return t4;
+                throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+              })(n7) + t3[s5 + 1], t3[0]);
+              return new s(o6, e);
+            };
+        `)
+        expect(cssBundle).to.have.string("var hello_world_default = r`\n" +
             ".banner {\n" +
             "  font-family: sans-serif;\n" +
             "  color: blue;\n" +
@@ -73,8 +85,8 @@ describe("esbuild sass plugin tests", function () {
             "  padding: 20px;\n" +
             "}`;\n");
         expect(cssBundle).to.have.string(`__publicField(HelloWorld, "styles", hello_world_default);`);
-        expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(css2));");
-        expect(cssBundle).to.have.string("var css2 = `.container {\n" +
+        expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(css));");
+        expect(cssBundle).to.have.string("var css = `.container {\n" +
             "  display: flex;\n" +
             "  flex-direction: column;\n" +
             "}\n" +
@@ -108,7 +120,7 @@ describe("esbuild sass plugin tests", function () {
         expect(cssBundle).to.have.string("// test/fixture/bootstrap/index.js\n" +
             "document.body.innerHTML =");
         expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(css));\n");
-        expect(cssBundle).to.have.string("var css = `@charset \"UTF-8\";\n/*!\n * Bootstrap v5.1.0");
+        expect(cssBundle).to.have.string("var css = `@charset \"UTF-8\";\n/*!\n * Bootstrap v5.1.1");
     });
 
     it("open-iconic (dealing with relative paths & data urls)", async function () {
@@ -408,7 +420,7 @@ describe("esbuild sass plugin tests", function () {
         `);
 
         expect(main).to.containIgnoreSpaces(`
-            var styles_default = css\`
+            var styles_default = r\`
             .message {
               font-family: sans-serif;
               color: white;
