@@ -1,9 +1,10 @@
 import esbuild from "esbuild";
 import esbuildSassPlugin from "../../../lib/index.js";
+import {sep, posix} from "path";
 
 const {sassPlugin, postcssModules} = esbuildSassPlugin;
 
-const IS_LIT_BRANCH = /\\lit$/;
+const IS_LIT_BRANCH = sep === posix.sep ? /\/lit$/ : /\\lit$/;
 
 esbuild.build({
     entryPoints: ["./src/main.js"],

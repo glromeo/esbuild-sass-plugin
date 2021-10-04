@@ -6,6 +6,7 @@ import * as esbuild from "esbuild";
 import * as fs from "fs";
 import * as path from "path";
 import {sassPlugin, postcssModules} from "../src";
+import {posix, sep} from "path";
 
 chai.use(chaiString);
 
@@ -382,7 +383,7 @@ describe("esbuild sass plugin tests", function () {
         const absWorkingDir = path.resolve(__dirname, "fixture/exclude");
         process.chdir(absWorkingDir);
 
-        const IS_LIT_BRANCH = /\\lit$/;
+        const IS_LIT_BRANCH = sep === posix.sep ? /\/lit$/ : /\\lit$/;
 
         await esbuild.build({
             absWorkingDir,
