@@ -218,7 +218,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                         resolveDir: dirname(path),
                         watchFiles
                     };
-                } catch (err) {
+                } catch (err:any) {
                     return {
                         errors: [{text: err.message}],
                         watchFiles: lastWatchFiles?.[path] ?? [path]
