@@ -1,4 +1,4 @@
-![logo created with https://cooltext.com](https://images.cooltext.com/5500652.png)
+![cooltext394785080075403](https://user-images.githubusercontent.com/160981/136289874-26ce7269-ea08-47dd-be31-9bf0ef7a0b8d.png)
 
 [![Build Status][travis-image]][travis-url]
 
