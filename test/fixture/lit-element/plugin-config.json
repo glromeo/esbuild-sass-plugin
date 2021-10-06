@@ -1,6 +1,6 @@
 {
-    "type": {
-        "style": ["**/src/index.scss"],
-        "lit-css": ["**"]
-    }
+    "type": [
+        ["style", ["**/src/index.scss"]],
+        ["lit-css", ["**"]]
+    ]
 }
