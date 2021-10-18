@@ -1,18 +1,18 @@
-![logo created with https://cooltext.com](https://images.cooltext.com/5500652.png)
+![cooltext394785080075403](https://user-images.githubusercontent.com/160981/136289874-26ce7269-ea08-47dd-be31-9bf0ef7a0b8d.png)
 
 [![Build Status][travis-image]][travis-url]
 
-A plugin for [esbuild](https://esbuild.github.io/) to handle sass & scss files.
+A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
 
 ### Features
 * support for `constructable stylesheet` to be used in custom elements or `dynamic style` to be added to the html page
-* comes with [dart sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
+* comes with [Dart Sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
 * caching
-* **postCSS** & **css modules**
+* **PostCSS** & **CSS modules**
 
 ### Install
-```bash
-npm i esbuild-sass-plugin
+```console
+$ npm i esbuild-sass-plugin
 ```
 
 ### Usage
@@ -25,7 +25,7 @@ await esbuild.build({
     plugins: [sassPlugin()]
 });
 ```
-this will use `loader: "css"` and your transpiled sass will be included in index.css.
+this will use `loader: "css"` and your transpiled Sass will be included in index.css.
 
 If you specify `type: "style"` then the stylesheet will be dynamically added to the page. 
 
@@ -76,45 +76,50 @@ Look in the `test` folder for more usage examples.
 
 ### Options
 
-The **options** passed to the plugin are a superset of the sass [Options](https://sass-lang.com/documentation/js-api#options).
+The **options** passed to the plugin are a superset of the Sass [Options](https://sass-lang.com/documentation/js-api#options).
 
 |Option|Type|Default|
 |---|---|---|
 |cache|boolean or Map|true|
-|type|string or array|`"css"`|
+|type|string or ~~array~~*|`"css"`|
 |implementation|string|`"sass"`|
 |transform|function|undefined|
-|exclude|regex|undefined|
+|exclude|regex or function|undefined|
 |importMapper|function|undefined|
 
 
-If you want to have different loaders for different parts of your code you can pass `type` an array. 
+> **WARNING**: _The **array** version of **type** is **deprecated**_
+> 
+> It was meant to have different loaders for different parts of the code passing an array to `type` where each item 
+> was:
+> * the type (one of: `css`, `css-text`, `lit-css` or `style`)
+> * a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two.
+> 
+> e.g. You can still do:
+>
+> ```javascript
+> await esbuild.build({
+>     ...
+>     plugins: [sassPlugin({
+>         type: [                                     // this is somehow like a case 'switch'...
+>             ["css", "bootstrap/**"],                // ...all bootstrap SCSS files (args.path) 
+>             ["style", ["src/nomod/**"]],            // ...all files imported from files in 'src/nomod' (args.importer) 
+>             ["style", ["**/index.ts","**/*.scss"]], // all scss files imported from files name index.ts (both params)
+>             ["lit-css"]                             // this matches all, similar to a case 'default'
+>         ],
+>     })]
+> })
+> ```
+> 
+> ...but **I am planning to remove this complicated way of defining different behaviours in v2.0** \
+> I haven't decided the new option format yet but, please, try and use the single string version of type \
+> and rely on exclude to switch behaviour if possible!
+> 
+> _have a look at the **exclude** fixture for an example_ where **lit CSS** and **CSS modules** are both used in the same app
 
-Each item is going
-to be: 
-* the type (one of: `css`, `css-text`, `lit-css` or `style`)
-* a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two. 
-
-e.g.
-```javascript
-await esbuild.build({
-    ...
-    plugins: [sassPlugin({
-        type: [                                     // this is somehow like a case 'switch'...
-            ["css", "bootstrap/**"],                // ...all bootstrap scss files (args.path) 
-            ["style", ["src/nomod/**"]],            // ...all files imported from files in 'src/nomod' (args.importer) 
-            ["style", ["**/index.ts","**/*.scss"]], // all scss files imported from files name index.ts (both params)
-            ["lit-css"]                             // this matches all, similar to a case 'default'
-        ],
-    })]
-})
-```
-**NOTE**: last type applies to all the files that don't match any matchers.
 
 ### Exclude Option
-Used to exclude paths from the plugin
-
-e.g.
+Used to exclude paths from the plugin. It can either be **a simple regex** which applies to the path 
 ```javascript
 await esbuild.build({
     ...
@@ -123,25 +128,33 @@ await esbuild.build({
     })]
 })
 ```
+**or a function** which receives the whole set of args that esbuild passes on resolve.
+```javascript
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        exclude: ({resolveDir}) => !/\\lit$/.test(resolveDir),  // ignores files outside lit directory
+    })]
+})
+```
 
 ### ImportMapper Option
-Function to customize re-map import path, both `import` in ts code and `@import` 
-in scss coverd.   
+A function to customize/re-map the import path, both `import` statements in JavaScript/TypeScript code and `@import` 
+in Sass/SCSS are covered.   
 You can use this option to re-map import paths like tsconfig's `paths` option.   
 
-e.g.
+e.g. given this `tsconfig.json` which maps image files paths
 ```json
-//tsconfig
 {
   "compilerOptions": {
     "baseUrl": ".", 
     "paths": {
-      "@img/*": ["./assets/images/*"] //map image files
+      "@img/*": ["./assets/images/*"]
     }
   }
 }
 ```
-Now you can resolve these paths with `importMapper`
+now you can resolve these paths with `importMapper`
 ```javascript
 await esbuild.build({
     ...
@@ -157,7 +170,7 @@ await esbuild.build({
 async (css:string, resolveDir:string?) => string
 ``` 
 It's a function which will be invoked before passing the css to esbuild or wrapping it in a module.\
-It can be used to do **postcss** processing and/or to create **modules** like in the following examples.
+It can be used to do **PostCSS** processing and/or to create **modules** like in the following examples.
 
 #### PostCSS
 The simplest use case is to invoke PostCSS like this:
@@ -178,7 +191,7 @@ esbuild.build({
 ```
 
 #### CSS Modules
-A helper function is available to do all the work of calling postcss to create a css module. The usage is something like:
+A helper function is available to do all the work of calling PostCSS to create a CSS module. The usage is something like:
 ```javascript
 const {sassPlugin, postcssModules} = require("esbuild-sass-plugin");
 
@@ -198,10 +211,10 @@ Look into [fixture/css-modules](https://github.com/glromeo/esbuild-sass-plugin/t
 > **NOTE:** Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. \
 > This gives the flexibility to implement that helper function.
 
-### Use node-sass instead of sass
+### Use node-sass instead of Dart Sass
 Remember to add the dependency
-```bash
-npm i esbuild-sass-plugin node-sass
+```console
+$ npm i esbuild-sass-plugin node-sass
 ```
 and to specify the implementation in the options:
 ```javascript
@@ -214,13 +227,13 @@ await esbuild.build({
 });
 ```
 
-### CACHING
+### Caching
 
-It greatly improves the performance in incremental builds or watch mode.
+Chaching greatly improves the performance in incremental builds or watch mode.
 
-It has to be enabled with `cache: true` in the options. 
+It must be enabled with `cache: true` in the options. 
 
-You can pass your own map instead of true if you want to recycle it across different builds.
+You can pass your own map instead of `true` if you want to recycle it across different builds.
 ```javascript
 const pluginCache = new Map();
 
@@ -233,7 +246,7 @@ await esbuild.build({
 
 
 ### Benchmarks
-Given 24 x 24 = 576 lit-element files & 576 imported css styles
+Given 24 × 24 = 576 lit-element files & 576 imported CSS styles
 #### cache: true
 ```
 initial build: 2.033s

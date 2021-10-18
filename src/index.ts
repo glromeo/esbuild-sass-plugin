@@ -1,4 +1,4 @@
-import {OnLoadResult} from "esbuild";
+import {OnLoadResult, OnResolveArgs} from "esbuild";
 import {Importer, types} from "sass";
 
 export type Type = "css" | "style" | "css-text" | "lit-css"
@@ -13,7 +13,7 @@ export type SassPluginOptions = {
     /**
      *
      */
-    exclude?: RegExp;
+    exclude?: RegExp | ((args:OnResolveArgs) => boolean) | {path?:RegExp, resolveDir?:RegExp}
 
     /**
      * "sass" for dart-sass (compiled to javascript, slow) or "node-sass" (libsass, fast yet deprecated)
