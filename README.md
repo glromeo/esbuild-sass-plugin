@@ -226,6 +226,23 @@ await esbuild.build({
     })]
 });
 ```
+When compared to dart sass, node-sass is not only behind and lacking features but it's also 
+behaving slightly differently. If you experience [issues](https://github.com/glromeo/esbuild-sass-plugin/issues/34#issue-1029351164) 
+try and replace the built-in importer with [magic importer](https://www.npmjs.com/package/node-sass-magic-importer) 
+which is slower but better suited for node-sass
+
+```javascript
+const magicImporter = require('node-sass-magic-importer');
+
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        implementation: "node-sass",
+        importer: magicImporter()
+    })]
+});
+```
+
 
 ### Caching
 

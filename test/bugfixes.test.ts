@@ -17,10 +17,10 @@ describe("tests covering github issues", function () {
     let cwd;
     beforeEach(function () {
         cwd = process.cwd();
-    })
+    });
     afterEach(function () {
         process.chdir(cwd);
-    })
+    });
 
     it("#18", async function () {
 
@@ -134,8 +134,6 @@ describe("tests covering github issues", function () {
 
     it("issue #25", async function () {
 
-        const {exec} = require('child_process');
-
         const absWorkingDir = path.resolve(__dirname, "issues/25");
         process.chdir(absWorkingDir);
 
@@ -155,4 +153,41 @@ describe("tests covering github issues", function () {
         expect(fs.readFileSync("./out/index.css", "utf-8")).to.match(/background-color: red;/);
     });
 
+    it("issue #34", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "issues/34");
+        process.chdir(absWorkingDir);
+
+        const magicImporter = require(require.resolve("node-sass-magic-importer", {paths:[process.cwd()]}));
+
+        let importer = magicImporter();
+
+        await esbuild.build({
+            entryPoints: ["main.scss"],
+            absWorkingDir,
+            bundle: true,
+            plugins: [
+                sassPlugin({
+                    implementation: "node-sass"
+                })
+            ],
+            outfile: "builtin.css",
+        });
+
+        await esbuild.build({
+            entryPoints: ["main.scss"],
+            absWorkingDir,
+            bundle: true,
+            plugins: [
+                sassPlugin({
+                    implementation: "node-sass",
+                    importer: importer
+                })
+            ],
+            outfile: "magic.css",
+        });
+
+        expect(fs.readFileSync("./builtin.css", "utf-8").substring(102))
+            .eq(fs.readFileSync("./magic.css", "utf-8").substring(102));
+    });
 });

@@ -1,4 +1,4 @@
 import { SassPluginOptions } from "./index";
-export declare function createSassImporter({ basedir, importMapper }: SassPluginOptions): (url: any) => {
+export declare function createSassImporter({ basedir, importMapper, implementation }: SassPluginOptions): (url: any) => {
     file: string;
-};
+} | null;

@@ -1,10 +1,17 @@
 {
   "name": "issues",
   "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "dependencies": {
-    "@aotearoan/sass-farbig": "^4.0.4",
-    "global-dirs": "^3.0.0"
+  "private": true,
+  "workspaces": [
+    "18",
+    "20",
+    "21",
+    "23",
+    "25",
+    "34"
+  ],
+  "devDependencies": {
+    "esbuild": "^0.13.8",
+    "esbuild-sass-plugin": "^1.6.1"
   }
 }

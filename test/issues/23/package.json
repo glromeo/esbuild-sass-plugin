@@ -1,0 +1,11 @@
+{
+  "name": "issue-23",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@aotearoan/sass-farbig": "^4.0.4",
+    "global-dirs": "^3.0.0"
+  }
+}
