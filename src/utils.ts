@@ -1,5 +1,5 @@
 import {SassPluginOptions, Type} from "./index";
-import {Postcss} from "postcss";
+import {AcceptedPlugin, Postcss} from "postcss";
 import PostcssModulesPlugin from "postcss-modules";
 import {OnLoadResult} from "esbuild";
 
@@ -10,9 +10,9 @@ function requireModule(module: string, includePaths: string[] | undefined) {
         try {
             return require(module); // extra attempt at finding a co-located tool
         } catch (ignored) {
+            console.error(`Cannot find module '${module}', make sure it's installed. e.g. yarn add -D ${module}`, e);
+            process.exit(1);
         }
-        console.error(`Cannot find module '${module}', make sure it's installed. e.g. yarn add -D ${module}`, e);
-        process.exit(1);
     }
 }
 
@@ -47,7 +47,12 @@ export function makeModule(contents: string, type: Type) {
     }
 }
 
-export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { basedir?: string, includePaths?: string[] | undefined }) {
+export type PostcssModulesParams = Parameters<PostcssModulesPlugin>[0] & {
+    basedir?: string,
+    includePaths?: string[] | undefined
+};
+
+export function postcssModules(options: PostcssModulesParams, plugins: AcceptedPlugin[] = []) {
 
     const includePaths = options.includePaths ?? [options.basedir ?? process.cwd()];
     const postcss: Postcss = requireModule("postcss", includePaths);
@@ -57,12 +62,15 @@ export function postcssModules(options: Parameters<PostcssModulesPlugin>[0] & { 
 
         let cssModule;
 
-        const {css} = await postcss([postcssModulesPlugin({
-            ...options,
-            getJSON(cssFilename: string, json: { [name: string]: string }): void {
-                cssModule = JSON.stringify(json, null, 2);
-            }
-        })]).process(source, {from: undefined, map: false});
+        const {css} = await postcss([
+            postcssModulesPlugin({
+                ...options,
+                getJSON(cssFilename: string, json: { [name: string]: string }): void {
+                    cssModule = JSON.stringify(json, null, 2);
+                }
+            }),
+            ...plugins
+        ]).process(source, {from: path, map: false});
 
         return {
             contents: `${makeModule(css, "style")}export default ${cssModule};`,

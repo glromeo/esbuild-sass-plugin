@@ -1,6 +1,8 @@
 const { build } = require('esbuild');
-const { sassPlugin, postcssModules } = require('esbuild-sass-plugin');
+const { sassPlugin, postcssModules } = require('../../../../../lib');
 const { dtsPlugin } = require('esbuild-plugin-d.ts');
+
+const postcssUrl = require("postcss-url");
 
 build({
   bundle: true,
@@ -18,7 +20,12 @@ build({
   plugins: [
     sassPlugin({
       type: 'css-text',
-      transform: postcssModules({}),
+      transform: postcssModules({}, [
+        postcssUrl({
+          basePath: "../../",
+          url: 'inline'
+        })
+      ]),
     }),
     dtsPlugin(),
   ],

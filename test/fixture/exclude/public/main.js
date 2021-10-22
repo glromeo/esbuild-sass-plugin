@@ -578,7 +578,7 @@ n4.finalized = true, n4._$litElement$ = true, (l2 = globalThis.litElementHydrate
 // ../node_modules/lit-element/index.js
 console.warn("The main 'lit-element' module entrypoint is deprecated. Please update your imports to use the 'lit' package: 'lit' and 'lit/decorators.ts' or import from 'lit-element/lit-element.ts'. See https://lit.dev/msg/deprecated-import-path for more information.");
 
-// sass-plugin-17:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/lit/styles.scss
+// sass-plugin-18:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/lit/styles.scss
 var styles_default = r`
 .message {
   font-family: sans-serif;
@@ -596,7 +596,7 @@ customElements.define("hello-world", (_a = class extends n4 {
   }
 }, __publicField(_a, "styles", [styles_default]), _a));
 
-// sass-plugin-18:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/modules/example.module.scss
+// sass-plugin-19:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/modules/example.module.scss
 var css = `._message_kto8s_1 {
   color: yellow;
   background-color: blue;
@@ -608,7 +608,7 @@ var example_module_default = {
   "message": "_message_kto8s_1"
 };
 
-// sass-plugin-18:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/modules/common.module.scss
+// sass-plugin-19:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/modules/common.module.scss
 var css2 = `._message_bxgcs_1 {
   font-family: Roboto, sans-serif;
 }`;

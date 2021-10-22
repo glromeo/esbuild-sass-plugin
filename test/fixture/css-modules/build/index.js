@@ -1,4 +1,4 @@
-// sass-plugin-16:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/css-modules/src/example.module.scss
+// sass-plugin-17:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/css-modules/src/example.module.scss
 var css = `._message_1vmzm_1 {
   color: white;
   background-color: red;
@@ -9,7 +9,7 @@ var example_module_default = {
   "message": "_message_1vmzm_1"
 };
 
-// sass-plugin-16:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/css-modules/src/common.module.scss
+// sass-plugin-17:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/css-modules/src/common.module.scss
 var css2 = `._message_bxgcs_1 {
   font-family: Roboto, sans-serif;
 }`;

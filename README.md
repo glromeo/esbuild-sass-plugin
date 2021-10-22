@@ -204,7 +204,9 @@ esbuild.build({
     })]
 });
 ```
-> `postcss` and `postcss-modules` have to be added to your `package.json`.
+> **NOTE:** `postcss` and `postcss-modules` have to be added to your `package.json`.
+
+`postcssModules` also accepts an optional array of plugins for PostCSS as second parameter.
 
 Look into [fixture/css-modules](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/css-modules) for the complete example.
 
