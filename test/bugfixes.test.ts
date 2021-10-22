@@ -1,12 +1,10 @@
 import * as chai from "chai";
 import {expect} from "chai";
-// @ts-ignore
 import chaiString from "chai-string";
 import * as esbuild from "esbuild";
 import * as fs from "fs";
 import * as path from "path";
-import {sassPlugin} from "../src";
-import {exec} from "child_process";
+import {sassPlugin, postcssModules} from "../src";
 
 chai.use(chaiString);
 
@@ -189,5 +187,43 @@ describe("tests covering github issues", function () {
 
         expect(fs.readFileSync("./builtin.css", "utf-8").substring(102))
             .eq(fs.readFileSync("./magic.css", "utf-8").substring(102));
+    });
+
+
+    it("issue #35", async function () {
+
+        const absWorkingDir = path.resolve(__dirname, "issues/35/packages/fonta");
+        process.chdir(absWorkingDir);
+
+        const postcssUrl = require("postcss-url");
+
+        await esbuild.build({
+            absWorkingDir,
+            bundle: true,
+            sourcemap: true,
+            minify: true,
+            splitting: true,
+            format: 'esm',
+            target: ['esnext'],
+            entryPoints: ['./src/FontA.tsx'],
+            outdir: './dist/',
+            loader: {
+                '.woff': 'dataurl',
+                '.woff2': 'dataurl',
+            },
+            plugins: [
+                sassPlugin({
+                    type: 'css-text',
+                    transform: postcssModules({}, [
+                        postcssUrl({
+                            basePath: "../../",
+                            url: 'inline'
+                        })
+                    ]),
+                })
+            ],
+        });
+
+        expect(fs.readFileSync("./dist/FontA.js", "utf-8")).match(/data:font\/woff2;base64/);
     });
 });
