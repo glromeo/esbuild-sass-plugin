@@ -1,5 +1,5 @@
 const { build } = require('esbuild');
-const { sassPlugin, postcssModules } = require('esbuild-sass-plugin');
+const { sassPlugin, postcssModules } = require('../../../../../lib');
 const { dtsPlugin } = require('esbuild-plugin-d.ts');
 
 build({

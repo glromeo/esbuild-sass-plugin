@@ -4,6 +4,8 @@ import commonjs from '@rollup/plugin-commonjs';
 import postcss from 'rollup-plugin-postcss';
 import url from 'postcss-url';
 
+console.log("rollup cwd:", process.cwd());
+
 export default {
   input: 'src/FontB.tsx',
   output: {
