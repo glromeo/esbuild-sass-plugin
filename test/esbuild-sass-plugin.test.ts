@@ -121,7 +121,7 @@ describe("esbuild sass plugin tests", function () {
         expect(cssBundle).to.have.string("// test/fixture/bootstrap/index.js\n" +
             "document.body.innerHTML =");
         expect(cssBundle).to.have.string("document.head.appendChild(document.createElement(\"style\")).appendChild(document.createTextNode(css));\n");
-        expect(cssBundle).to.have.string("var css = `@charset \"UTF-8\";\n/*!\n * Bootstrap v5.1.1");
+        expect(cssBundle).to.have.string("var css = `@charset \"UTF-8\";\n/*!\n * Bootstrap v5.1.3");
     });
 
     it("open-iconic (dealing with relative paths & data urls)", async function () {

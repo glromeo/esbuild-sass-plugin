@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@aotearoan/sass-farbig@^4.0.4":
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/@aotearoan/sass-farbig/-/sass-farbig-4.0.4.tgz#67f36f4ce9bbe753845912d91d8525a87ffacb48"
-  integrity sha512-GrFhKp/N24ILW45/b31oNzRMssbRcgIcOwZwrI832akDnUsGVP7Y8M3J/b/wlAGJmbsokjgF/vcwrGqG3SCPow==
+"@aotearoan/sass-farbig@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@aotearoan/sass-farbig/-/sass-farbig-5.0.0.tgz#04b1b3436690f879c103c119a521e1eb7671648a"
+  integrity sha512-0tArtfKQc2nGX19L7bY9RWVLjpQ19dZj3ruikSQCAspwAMXfId52vdhZsk40kbTQ8xKKUXp3vqMhGC/6xmZWsw==
   dependencies:
     core-js "^3.6.4"
     mathsass "^0.11.0"

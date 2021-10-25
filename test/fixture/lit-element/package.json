@@ -4,8 +4,8 @@
   "main": "src/index.ts",
   "license": "MIT",
   "dependencies": {
-    "lit-element": "^3.0.0",
-    "postcss": "^8.3.9"
+    "lit-element": "^3.0.1",
+    "postcss": "^8.3.11"
   },
   "scripts": {
     "serve": "node ../serve lit-element"

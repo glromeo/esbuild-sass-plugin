@@ -5,7 +5,7 @@
   "license": "MIT",
   "dependencies": {
     "autoprefixer": "^10.3.7",
-    "postcss": "^8.3.9",
+    "postcss": "^8.3.11",
     "postcss-preset-env": "^6.7.0",
     "precss": "^4.0.0"
   }

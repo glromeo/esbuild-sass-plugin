@@ -546,8 +546,7 @@ var L = class {
 // ../node_modules/lit-element/lit-element.js
 var l2;
 var o4;
-var r4;
-var n4 = class extends n2 {
+var s4 = class extends n2 {
   constructor() {
     super(...arguments), this.renderOptions = { host: this }, this._$Dt = void 0;
   }
@@ -572,13 +571,15 @@ var n4 = class extends n2 {
     return T;
   }
 };
-n4.finalized = true, n4._$litElement$ = true, (l2 = globalThis.litElementHydrateSupport) === null || l2 === void 0 || l2.call(globalThis, { LitElement: n4 }), (o4 = globalThis.litElementPolyfillSupport) === null || o4 === void 0 || o4.call(globalThis, { LitElement: n4 });
-((r4 = globalThis.litElementVersions) !== null && r4 !== void 0 ? r4 : globalThis.litElementVersions = []).push("3.0.0");
+s4.finalized = true, s4._$litElement$ = true, (l2 = globalThis.litElementHydrateSupport) === null || l2 === void 0 || l2.call(globalThis, { LitElement: s4 });
+var n4 = globalThis.litElementPolyfillSupport;
+n4 == null || n4({ LitElement: s4 });
+((o4 = globalThis.litElementVersions) !== null && o4 !== void 0 ? o4 : globalThis.litElementVersions = []).push("3.0.1");
 
 // ../node_modules/lit-element/index.js
 console.warn("The main 'lit-element' module entrypoint is deprecated. Please update your imports to use the 'lit' package: 'lit' and 'lit/decorators.ts' or import from 'lit-element/lit-element.ts'. See https://lit.dev/msg/deprecated-import-path for more information.");
 
-// sass-plugin-18:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/lit/styles.scss
+// sass-plugin-18:D:\Workspace\esbuild-sass-plugin\test\fixture\exclude\src\lit\styles.scss
 var styles_default = r`
 .message {
   font-family: sans-serif;
@@ -590,13 +591,13 @@ var styles_default = r`
 
 // src/lit/index.js
 var _a;
-customElements.define("hello-world", (_a = class extends n4 {
+customElements.define("hello-world", (_a = class extends s4 {
   render() {
     return y`<div class="message">Hello World, I have been rendered with Lit!!!</div>`;
   }
 }, __publicField(_a, "styles", [styles_default]), _a));
 
-// sass-plugin-19:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/modules/example.module.scss
+// sass-plugin-19:D:\Workspace\esbuild-sass-plugin\test\fixture\exclude\src\modules\example.module.scss
 var css = `._message_kto8s_1 {
   color: yellow;
   background-color: blue;
@@ -608,7 +609,7 @@ var example_module_default = {
   "message": "_message_kto8s_1"
 };
 
-// sass-plugin-19:/Users/Gianluca/Workbench/Workspace/esbuild-sass-plugin/test/fixture/exclude/src/modules/common.module.scss
+// sass-plugin-19:D:\Workspace\esbuild-sass-plugin\test\fixture\exclude\src\modules\common.module.scss
 var css2 = `._message_bxgcs_1 {
   font-family: Roboto, sans-serif;
 }`;
