@@ -85,6 +85,7 @@ The **options** passed to the plugin are a superset of the Sass [Options](https:
 |implementation|string|`"sass"`|
 |transform|function|undefined|
 |exclude|regex or function|undefined|
+|importer|function|undefined|
 |importMapper|function|undefined|
 
 
@@ -138,6 +139,21 @@ await esbuild.build({
 })
 ```
 
+### Importer Option
+The default importer built in the plugin has been developed to be fast but its scope is limited. For complex import scenarios (e.g pnpm) 
+this can be replaced by a custom implementation like the very solid [`sass-extended-importer`](https://github.com/wessberg/sass-extended-importer)
+```javascript
+const {createImporter} = require("sass-extended-importer");
+
+await esbuild.build({
+    ...
+    plugins: [sassPlugin({
+        importer: createImporter()
+    })]
+})
+```
+There's a working example of using `pnpm` with `@material` design in [issue/38](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/issues/38)
+
 ### ImportMapper Option
 A function to customize/re-map the import path, both `import` statements in JavaScript/TypeScript code and `@import` 
 in Sass/SCSS are covered.   
@@ -159,8 +175,7 @@ now you can resolve these paths with `importMapper`
 await esbuild.build({
     ...
     plugins: [sassPlugin({
-        importMapper: (path)=>
-          path.replace(/^@img\//,"./assets/images/")
+        importMapper: (path) => path.replace(/^@img\//,"./assets/images/")
     })]
 })
 ```
@@ -245,7 +260,6 @@ await esbuild.build({
 });
 ```
 
-
 ### Caching
 
 Chaching greatly improves the performance in incremental builds or watch mode.
@@ -262,7 +276,6 @@ await esbuild.build({
     ...
 })
 ```
-
 
 ### Benchmarks
 Given 24 × 24 = 576 lit-element files & 576 imported CSS styles
