@@ -10,7 +10,10 @@ esbuild.build({
     bundle: true,
     plugins: [
         sassPlugin({
-            includePaths: [path.resolve(__dirname, "./node_modules")],
+            includePaths: [
+                path.resolve(__dirname, "./node_modules"),
+                path.resolve(__dirname, "./node_modules/.pnpm/node_modules"),
+            ],
             importer: createImporter()
         })
     ]

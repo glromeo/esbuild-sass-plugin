@@ -3,27 +3,9 @@ lockfileVersion: 5.3
 specifiers:
   '@emotion/react': ^11.5.0
   '@emotion/styled': ^11.3.0
-  '@material/animation': ^13.0.0
-  '@material/base': ^13.0.0
   '@material/checkbox': ^13.0.0
   '@material/data-table': ^13.0.0
-  '@material/density': ^13.0.0
-  '@material/dom': ^13.0.0
-  '@material/elevation': ^13.0.0
-  '@material/feature-targeting': ^13.0.0
-  '@material/floating-label': ^13.0.0
   '@material/icon-button': ^13.0.0
-  '@material/line-ripple': ^13.0.0
-  '@material/list': ^13.0.0
-  '@material/menu': ^13.0.0
-  '@material/notched-outline': ^13.0.0
-  '@material/ripple': ^13.0.0
-  '@material/rtl': ^13.0.0
-  '@material/select': ^13.0.0
-  '@material/shape': ^13.0.0
-  '@material/theme': ^13.0.0
-  '@material/touch-target': ^13.0.0
-  '@material/typography': ^13.0.0
   '@mui/material': ^5.0.4
   esbuild: ^0.13.9
   esbuild-sass-plugin: ^1.7.0
@@ -34,27 +16,9 @@ specifiers:
 dependencies:
   '@emotion/react': 11.5.0_react@17.0.2
   '@emotion/styled': 11.3.0_f400783037ccf00f9cadfddbfc36c9d5
-  '@material/animation': 13.0.0
-  '@material/base': 13.0.0
   '@material/checkbox': 13.0.0
   '@material/data-table': 13.0.0
-  '@material/density': 13.0.0
-  '@material/dom': 13.0.0
-  '@material/elevation': 13.0.0
-  '@material/feature-targeting': 13.0.0
-  '@material/floating-label': 13.0.0
   '@material/icon-button': 13.0.0
-  '@material/line-ripple': 13.0.0
-  '@material/list': 13.0.0
-  '@material/menu': 13.0.0
-  '@material/notched-outline': 13.0.0
-  '@material/ripple': 13.0.0
-  '@material/rtl': 13.0.0
-  '@material/select': 13.0.0
-  '@material/shape': 13.0.0
-  '@material/theme': 13.0.0
-  '@material/touch-target': 13.0.0
-  '@material/typography': 13.0.0
   '@mui/material': 5.0.4_a0e5aa09008c2d42a228aa7968c12559
   react: 17.0.2
   react-dom: 17.0.2_react@17.0.2
