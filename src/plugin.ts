@@ -200,7 +200,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                                 contents: out.contents,
                                 loader: out.loader,
                                 resolveDir: dirname(path),
-                                watchFiles
+                                watchFiles: [...watchFiles, ...(out.watchFiles || [])],
+                                watchDirs: out.watchDirs || []
                             };
                         } else {
                             css = out;
