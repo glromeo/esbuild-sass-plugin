@@ -1,7 +1,7 @@
 import {SassPluginOptions} from "./index";
 import resolve from "resolve";
 
-export function createSassImporter({basedir = process.cwd(), importMapper, implementation }: SassPluginOptions) {
+export function createSassImporter({basedir = process.cwd(), importMapper }: SassPluginOptions) {
 
     const opts = {basedir, extensions: [".scss", ".sass", ".css"]};
 
@@ -20,11 +20,7 @@ export function createSassImporter({basedir = process.cwd(), importMapper, imple
                 const fragment = url.slice(0, index)+"/_"+url.slice(index+1)
                 return {file: resolve.sync(fragment, opts)};
             } catch (e:any) {
-                if (implementation === "node-sass") {
-                    return null;
-                } else {
-                    throw e;
-                }
+                return null;
             }
         }
     }
