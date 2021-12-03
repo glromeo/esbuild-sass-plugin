@@ -161,5 +161,9 @@ export type CachedResult = {
 };
 
 
-export {sassPlugin} from "./plugin";
+import {sassPlugin} from "./plugin";
+
+export default sassPlugin;
+export {sassPlugin};
 export {makeModule, postcssModules} from "./utils";
+

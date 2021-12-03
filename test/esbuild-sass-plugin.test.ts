@@ -239,6 +239,8 @@ describe("esbuild sass plugin tests", function () {
             })]
         });
 
+        // NOTE: You might want to update these snapshots when you upgrade postcss!
+
         let expected = fs.readFileSync("./dest/app.css", "utf-8");
         expected = expected.replace(/url\("img\/background(-2x)?.jpg"\)/g, "url()");
         let actual = fs.readFileSync("./out/app.css", "utf-8");

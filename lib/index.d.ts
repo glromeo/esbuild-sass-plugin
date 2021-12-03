@@ -34,5 +34,7 @@ export declare type CachedResult = {
     mtimeMs: number;
     result: OnLoadResult;
 };
-export { sassPlugin } from "./plugin";
+import { sassPlugin } from "./plugin";
+export default sassPlugin;
+export { sassPlugin };
 export { makeModule, postcssModules } from "./utils";
