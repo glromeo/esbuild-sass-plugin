@@ -2,7 +2,7 @@ git:
   depth: 1
 language: node_js
 node_js:
-  - '15'
+  - '16'
 cache: yarn
 install:
   - yarn install
