@@ -1,5 +1,5 @@
 import { OnLoadResult, OnResolveArgs } from "esbuild";
-import { Importer, types } from "sass";
+import { Importer, Value } from "sass";
 export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
     importMapper?: (url: string) => string;
@@ -14,7 +14,7 @@ export declare type SassPluginOptions = {
     picomatch?: any;
     importer?: Importer | Importer[];
     functions?: {
-        [key: string]: (...args: types.SassType[]) => types.SassType | void;
+        [key: string]: (...args: Value[]) => Value | void;
     };
     includePaths?: string[];
     indentedSyntax?: boolean;

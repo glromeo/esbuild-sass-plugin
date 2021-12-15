@@ -1,5 +1,5 @@
 import {OnLoadResult, OnResolveArgs} from "esbuild";
-import {Importer, types} from "sass";
+import {Importer, Value} from "sass";
 
 export type Type = "css" | "style" | "css-text" | "lit-css"
 
@@ -64,7 +64,7 @@ export type SassPluginOptions = {
      *
      * @default undefined
      */
-    functions?: { [key: string]: (...args: types.SassType[]) => types.SassType | void };
+    functions?: { [key: string]: (...args: Value[]) => Value | void };
 
     /**
      * An array of paths that should be looked in to attempt to resolve your @import declarations.

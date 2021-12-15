@@ -11,7 +11,7 @@
     "34"
   ],
   "devDependencies": {
-    "esbuild": "^0.13.8",
+    "esbuild": "^0.14.5",
     "esbuild-sass-plugin": "^1.6.3"
   },
   "dependencies": {

@@ -281,27 +281,27 @@ await esbuild.build({
 Given 24 × 24 = 576 lit-element files & 576 imported CSS styles
 #### cache: true
 ```
-initial build: 2.033s
-incremental build: 1.199s     (one ts modified)
-incremental build: 512.429ms  (same ts modified again)
-incremental build: 448.871ms  (one scss modified)
-incremental build: 448.92ms   (same scss modified)
+initial build: 3.266s
+incremental build: 890.663ms  (one ts modified)
+incremental build: 932.9ms    (same ts modified again)
+incremental build: 873.24ms   (one scss modified)
+incremental build: 837.774ms  (same scss modified)
 ```
 #### cache: false
 ```
-initial build: 1.961s
-incremental build: 1.986s     (touch 1 ts)
-incremental build: 1.336s     (touch 1 ts)
-incremental build: 1.069s     (touch 1 scss)
-incremental build: 1.061s     (touch 1 scss)
+initial build: 3.237s
+incremental build: 1.904s
+incremental build: 1.863s
+incremental build: 1.959s
+incremental build: 1.885s
 ```
-#### node-sass
+#### node-sass & cache: true
 ```
-initial build: 1.030s
-incremental build: 468.677ms  (one ts modified) 
-incremental build: 347.55ms   (same ts modified again)
-incremental build: 401.264ms  (one scss modified)
-incremental build: 364.649ms  (same scss modified)
+initial build: 1.893s
+incremental build: 789.792ms 
+incremental build: 765.563ms
+incremental build: 813.937ms
+incremental build: 762.243ms
 ```
 
 [travis-url]: https://travis-ci.com/glromeo/esbuild-sass-plugin

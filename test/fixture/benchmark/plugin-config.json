@@ -1,5 +1,5 @@
 {
-  "implementation": "node-sass",
+  "implementation": "sass",
   "type": [
     ["style", "src/index.scss"],
     ["lit-css"]
