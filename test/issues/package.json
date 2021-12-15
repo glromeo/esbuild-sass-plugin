@@ -8,10 +8,12 @@
     "21",
     "23",
     "25",
-    "34"
+    "34",
+    "48"
   ],
   "devDependencies": {
-    "esbuild": "^0.13.8",
+    "esbuild": "^0.14.3",
+    "sass": "^1.45.0",
     "esbuild-sass-plugin": "^1.6.3"
   },
   "dependencies": {

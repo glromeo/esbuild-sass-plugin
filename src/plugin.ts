@@ -5,6 +5,9 @@ import picomatch from "picomatch";
 import {CachedResult, SassPluginOptions, Type} from "./index";
 import {loadSass, makeModule} from "./utils";
 import {createSassImporter} from "./importer";
+import * as sass from "sass";
+import * as fs from "fs";
+import {pathToFileURL} from "url";
 
 let pluginIndex: number = 0;
 
@@ -20,8 +23,6 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     if (!options.picomatch) {
         options.picomatch = {unixify: true};
     }
-
-    const sass = loadSass(options);
 
     const type: Type = typeof options.type === "string" ? options.type : "css";
 
@@ -80,18 +81,29 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         return {css: readFileSync(path, "utf-8"), watchFiles: [path]};
     }
 
-    const importer = createSassImporter(options);
+    const sourceMaps = {};
 
-    function renderSync(file) {
+    function renderSync(path) {
         const {
             css,
-            stats: {
-                includedFiles
+            loadedUrls,
+            sourceMap
+        } = sass.compileString(fs.readFileSync(path, "utf8"), {
+            importer: createSassImporter(options, path),
+            sourceMap: true,
+            logger: {
+                warn(message, options) {
+                    console.log(message, options)
+                },
+                debug(message, options) {
+                    console.log(message, options)
+                }
             }
-        } = sass.renderSync({importer, ...options, file});
+        });
+        sourceMaps[path] = sourceMap;
         return {
-            css: css.toString("utf-8"),
-            watchFiles: includedFiles
+            css: css.toString(),
+            watchFiles: loadedUrls.map(url => url.pathname.slice(1))
         };
     }
 

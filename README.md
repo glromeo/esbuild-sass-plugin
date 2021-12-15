@@ -278,30 +278,43 @@ await esbuild.build({
 ```
 
 ### Benchmarks
-Given 24 × 24 = 576 lit-element files & 576 imported CSS styles
+Given 24 × 24 = 576 lit-element files & 576 imported CSS styles plus the import of the full bootstrap 5.1
+
+### sass (default implementation)
+
 #### cache: true
 ```
-initial build: 2.033s
-incremental build: 1.199s     (one ts modified)
-incremental build: 512.429ms  (same ts modified again)
-incremental build: 448.871ms  (one scss modified)
-incremental build: 448.92ms   (same scss modified)
+initial build: 3.051s
+incremental build: 793.142ms
+incremental build: 772.664ms
+incremental build: 755.093ms
+incremental build: 721.7ms
 ```
 #### cache: false
 ```
-initial build: 1.961s
-incremental build: 1.986s     (touch 1 ts)
-incremental build: 1.336s     (touch 1 ts)
-incremental build: 1.069s     (touch 1 scss)
-incremental build: 1.061s     (touch 1 scss)
+initial build: 3.026s
+incremental build: 1.849s
+incremental build: 1.715s
+incremental build: 1.665s
+incremental build: 1.640s
 ```
-#### node-sass
+### node-sass
+
+#### cache: true
 ```
-initial build: 1.030s
-incremental build: 468.677ms  (one ts modified) 
-incremental build: 347.55ms   (same ts modified again)
-incremental build: 401.264ms  (one scss modified)
-incremental build: 364.649ms  (same scss modified)
+initial build: 1.903s
+incremental build: 797.098ms
+incremental build: 768.213ms
+incremental build: 770.619ms
+incremental build: 750.743ms
+```
+#### cache: false
+```
+initial build: 1.858s
+incremental build: 1.689s
+incremental build: 1.790s
+incremental build: 1.652s
+incremental build: 1.682s
 ```
 
 [travis-url]: https://travis-ci.com/glromeo/esbuild-sass-plugin
