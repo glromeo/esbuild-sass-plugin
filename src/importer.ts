@@ -1,7 +1,10 @@
 import {SassPluginOptions} from "./index";
 import resolve from "resolve";
+import type { LegacyImporter } from "sass";
 
-export function createSassImporter({basedir = process.cwd(), importMapper }: SassPluginOptions) {
+export function createSassImporter(
+    {basedir = process.cwd(), importMapper }: SassPluginOptions
+): LegacyImporter<'sync'|'async'> {
 
     const opts = {basedir, extensions: [".scss", ".sass", ".css"]};
 

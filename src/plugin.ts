@@ -83,16 +83,16 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     const importer = createSassImporter(options);
 
     function renderSync(file) {
-        const {
-            css,
-            stats: {
-                includedFiles
-            }
-        } = sass.renderSync({importer, ...options, file});
-        return {
-            css: css.toString("utf-8"),
-            watchFiles: includedFiles
-        };
+      const {
+          css,
+          stats: { includedFiles },
+          map,
+      } = sass.renderSync({ importer, ...options, file });
+      return {
+          css: css.toString('utf-8'),
+          watchFiles: includedFiles,
+          map,
+      };
     }
 
     const cache = !options.cache
@@ -186,7 +186,13 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
             async function transform(path: string, type: Type): Promise<OnLoadResult> {
                 try {
-                    let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
+                  let css: string, watchFiles: string[], map: Buffer | undefined;
+                  if (path.endsWith('.css')) {
+                      ({ css, watchFiles } = readCssFileSync(path));
+                  } else {
+                      ({ css, watchFiles, map } = renderSync(path));
+                  }
+        
 
                     watchFiles = [...watchFiles];
                     if (lastWatchFiles) {
@@ -194,7 +200,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                     }
 
                     if (options.transform) {
-                        const out: string | OnLoadResult = await options.transform(css, dirname(path), path);
+                        const out: string | OnLoadResult = await options.transform(
+                            css,
+                            dirname(path),
+                            path, 
+                            map
+                        );
                         if (typeof out !== "string") {
                             return {
                                 contents: out.contents,

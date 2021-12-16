@@ -142,7 +142,12 @@ export type SassPluginOptions = {
      *
      * @default undefined
      */
-    transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>;
+    transform?: (
+        css: string, 
+        resolveDir: string, 
+        filePath: string,
+        map?: Buffer
+    ) => string | OnLoadResult | Promise<string | OnLoadResult>;
 
     /**
      *
