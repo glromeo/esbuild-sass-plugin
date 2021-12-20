@@ -1,4 +1,4 @@
-import {SassPluginOptions, Type} from "./index"
+import {Type} from "./index"
 import {AcceptedPlugin, Postcss} from "postcss"
 import PostcssModulesPlugin from "postcss-modules"
 import {OnLoadResult} from "esbuild"
@@ -14,10 +14,6 @@ function requireModule(module: string, includePaths: string[] | undefined) {
       process.exit(1)
     }
   }
-}
-
-export function loadSass({implementation: module = "sass", includePaths}: SassPluginOptions) {
-  return requireModule(module, includePaths)
 }
 
 const cssTextModule = cssText => `\

@@ -2,7 +2,6 @@ import {OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild"
 import * as fs from "fs"
 import {promises as fsp, readFileSync, Stats} from "fs"
 import {dirname, extname, resolve, sep} from "path"
-import picomatch from "picomatch"
 import {CachedResult, SassPluginOptions, Type} from "./index"
 import {makeModule} from "./utils"
 import * as sass from "sass"
@@ -20,44 +19,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
   if (!options.basedir) {
     options.basedir = process.cwd()
   }
-  if (!options.picomatch) {
-    options.picomatch = {unixify: true}
+
+  const type = options.type ?? "css"
+
+  if (options["picomatch"] || options["exclude"] || typeof type !== "string") {
+    console.log("The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.")
   }
-
-  const type: Type = typeof options.type === "string" ? options.type : "css"
-
-  const matchers: [string, (args: OnResolveArgs) => boolean][] | false = Array.isArray(options.type)
-    && options.type.map(function ([type, pattern]) {
-      if (Array.isArray(pattern)) {
-        const importerMatcher = picomatch("**/" + pattern[0], options.picomatch)
-        const pathMatcher = pattern[1] ? picomatch("**/" + pattern[1], options.picomatch) : null
-        if (pathMatcher) {
-          return [
-            type, (args: OnResolveArgs) => importerMatcher(args.importer) && pathMatcher(resolve(args.resolveDir, args.path))
-          ]
-        } else {
-          return [
-            type, (args: OnResolveArgs) => importerMatcher(args.importer)
-          ]
-        }
-      } else {
-        if (pattern) {
-          const pathMatcher = picomatch("**/" + pattern, options.picomatch)
-          return [type, (args: OnResolveArgs) => pathMatcher(resolve(args.resolveDir, args.path))]
-        } else {
-          return [type, () => true]
-        }
-      }
-    })
-
-  const typeOf = matchers
-    ? (args: OnResolveArgs): Type => {
-      for (const [type, isMatch] of matchers) if (isMatch(args)) {
-        return type as Type
-      }
-      return type
-    }
-    : (): Type => type
 
   function pathResolve({resolveDir, path, importer}: OnResolveArgs) {
     return resolve(resolveDir || dirname(importer), path)
@@ -110,7 +77,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     const basedir = dirname(path)
     let source = fs.readFileSync(path, "utf8")
     if (options.precompile) {
-      source = options.precompile(source)
+      source = options.precompile(source, path)
     }
     const {
       css,
@@ -119,7 +86,10 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
       importer: {
         load(canonicalUrl: URL): ImporterResult | null {
           const filename = canonicalUrl.pathname.slice(1)
-          const contents = fs.readFileSync(filename, "utf8")
+          let contents = fs.readFileSync(filename, "utf8")
+          if (options.precompile) {
+            contents = options.precompile(contents, filename)
+          }
           switch (extname(filename)) {
             case ".scss":
               return {contents, syntax: "scss"}
@@ -184,19 +154,6 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     return stats.reduce((max, {mtimeMs}) => Math.max(max, mtimeMs), 0)
   }
 
-  function useExclude(callback) {
-    const exclude = options.exclude
-    if (exclude instanceof RegExp) {
-      return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args)
-    } else if (typeof exclude === "function") {
-      return (args: OnResolveArgs) => exclude(args) ? null : callback(args)
-    } else if (typeof exclude === "object") {
-      throw new Error("invalid exclude option")
-    } else {
-      return callback
-    }
-  }
-
   const RELATIVE_PATH = /^\.\.?\//
 
   const namespace = `sass-plugin-${pluginIndex++}`
@@ -205,17 +162,15 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     name: "sass-plugin",
     setup: function (build) {
 
-      build.onResolve({filter: /\.(s[ac]ss|css)$/}, useExclude((args) => {
+      build.onResolve({filter: options.filter ?? /\.(s[ac]ss|css)$/}, (args) => {
         if (RELATIVE_PATH.test(args.path)) {
           return {path: pathResolve(args), namespace, pluginData: args}
         } else {
           return {path: requireResolve(args), namespace, pluginData: args}
         }
-      }))
+      })
 
-      let cached: (
-        transform: (filename: string, type: Type) => Promise<OnLoadResult>
-      ) => (args) => Promise<OnLoadResult>
+      let cached: (transform: (filename: string) => Promise<OnLoadResult>) => (args) => Promise<OnLoadResult>
 
       if (cache) {
         cached = (transform) => async ({path, pluginData: args}: OnLoadArgs) => {
@@ -231,17 +186,15 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
               let stats = await collectStats(watchFiles)
               for (const {mtimeMs} of stats) {
                 if (mtimeMs > cached.mtimeMs) {
-                  cached.result = await transform(watchFiles[0], cached.type)
+                  cached.result = await transform(watchFiles[0])
                   cached.mtimeMs = maxMtimeMs(stats)
                   break
                 }
               }
               return cached.result
             }
-            let type = typeOf(args)
-            let result = await transform(path, type)
+            let result = await transform(path)
             group.set(args.path, {
-              type,
               mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
               result
             })
@@ -253,13 +206,13 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         }
       } else {
         cached = (transform) => ({path, pluginData: args}: OnLoadArgs) => {
-          return transform(path, typeOf(args))
+          return transform(path)
         }
       }
 
       const lastWatchFiles = build.initialOptions.watch ? {} : null
 
-      async function transform(path: string, type: Type): Promise<OnLoadResult> {
+      async function transform(path: string): Promise<OnLoadResult> {
         try {
           let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path)
 

@@ -1,7 +1,7 @@
-const {posix, join, sep} = require("path");
+const {join, sep} = require("path");
 const esbuild = require("esbuild");
 const chokidar = require("chokidar");
-const {existsSync, rmdirSync, mkdirSync, readFileSync} = require("fs");
+const {existsSync, rmdirSync, mkdirSync} = require("fs");
 const {sassPlugin} = require("../../lib");
 
 const fixture = process.argv[2];
@@ -23,9 +23,11 @@ let result;
 
 const watcher = chokidar.watch(src, {ignoreInitial: true});
 
+const configure = require(join(__dirname, fixture, "esbuild.config.js"))
+
 watcher.on("ready", async function () {
     console.time("initial build");
-    result = await esbuild.build({
+    result = await esbuild.build(configure({
         entryPoints: [require.resolve(`./${fixture}`)],
         bundle: true,
         format: "esm",
@@ -34,9 +36,10 @@ watcher.on("ready", async function () {
         define: {"process.env.NODE_ENV": "\"development\""},
         incremental: true,
         plugins: [
-            sassPlugin(JSON.parse(readFileSync(join(__dirname, fixture, "plugin-config.json"), "utf-8")))
-        ]
-    });
+            sassPlugin()
+        ],
+        logLevel: "debug"
+    }));
     console.timeEnd("initial build");
 });
 

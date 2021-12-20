@@ -3,12 +3,23 @@
 [![Build Status][travis-image]][travis-url]
 
 A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
+                                                                                                     
+**NOTE:** This is the 2.x branch of the plugin, if you want to use node-sass or an old feature please stick to the 1.x branch
 
 ### Features
-* support for `constructable stylesheet` to be used in custom elements or `dynamic style` to be added to the html page
-* comes with [Dart Sass](https://www.npmjs.com/package/sass) but can be easily switched to [node-sass](https://github.com/sass/node-sass)
-* caching
 * **PostCSS** & **CSS modules**
+* support for **constructable stylesheet** to be used in custom elements or `dynamic style` to be added to the html page
+* uses the **new [Dart Sass](https://www.npmjs.com/package/sass) Js API**.
+* caching
+* **url rewriting**
+* pre-compiling (to add **global resources** to the sass files)
+
+### Breaking Changes
+* `type` has been simplified and now accepts only a string. 
+If you need different types in a project you can use more than one instance of the plugin. 
+You can have a look at the **exclude** fixture for an example_ where **lit CSS** and **CSS modules** are both used in the same app
+* The support for [node-sass](https://github.com/sass/node-sass) has been removed from the 2.x branch and for good. 
+Sadly, node-sass is at a dead end and so it's 1.x. I don't exclude updates or fixes on it but it's down in the list of my priorities.
 
 ### Install
 ```console
@@ -78,45 +89,14 @@ Look in the `test` folder for more usage examples.
 
 The **options** passed to the plugin are a superset of the Sass [Options](https://sass-lang.com/documentation/js-api#options).
 
-|Option|Type|Default|
-|---|---|---|
-|cache|boolean or Map|true|
-|type|string or ~~array~~*|`"css"`|
-|implementation|string|`"sass"`|
-|transform|function|undefined|
-|exclude|regex or function|undefined|
-|importer|function|undefined|
-|importMapper|function|undefined|
-
-
-> **WARNING**: _The **array** version of **type** is **deprecated**_
-> 
-> It was meant to have different loaders for different parts of the code passing an array to `type` where each item 
-> was:
-> * the type (one of: `css`, `css-text`, `lit-css` or `style`)
-> * a valid [picomatch](https://github.com/micromatch/picomatch) glob, an array of one such glob or an array of two.
-> 
-> e.g. You can still do:
->
-> ```javascript
-> await esbuild.build({
->     ...
->     plugins: [sassPlugin({
->         type: [                                     // this is somehow like a case 'switch'...
->             ["css", "bootstrap/**"],                // ...all bootstrap SCSS files (args.path) 
->             ["style", ["src/nomod/**"]],            // ...all files imported from files in 'src/nomod' (args.importer) 
->             ["style", ["**/index.ts","**/*.scss"]], // all scss files imported from files name index.ts (both params)
->             ["lit-css"]                             // this matches all, similar to a case 'default'
->         ],
->     })]
-> })
-> ```
-> 
-> ...but **I am planning to remove this complicated way of defining different behaviours in v2.0** \
-> I haven't decided the new option format yet but, please, try and use the single string version of type \
-> and rely on exclude to switch behaviour if possible!
-> 
-> _have a look at the **exclude** fixture for an example_ where **lit CSS** and **CSS modules** are both used in the same app
+|Option| Type                          |Default|
+|---|-------------------------------|---|
+|cache| boolean or Map                |true|
+|type| `"css"`<br/>`"style"`<br/>`"lit-css"` |`"css"`|
+|transform| function                      |undefined|
+|exclude| regex or function             |undefined|
+|importer| function                      |undefined|
+|importMapper| function                      |undefined|
 
 
 ### Exclude Option
@@ -298,7 +278,8 @@ incremental build: 1.715s
 incremental build: 1.665s
 incremental build: 1.640s
 ```
-### node-sass
+
+### node-sass (just as a reference ...samples taken from 1.8.x)
 
 #### cache: true
 ```

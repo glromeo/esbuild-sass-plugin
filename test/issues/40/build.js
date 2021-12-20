@@ -1,6 +1,8 @@
 const esbuild = require("esbuild");
 const {sassPlugin} = require("../../../lib");
 
+const blue = "blue";
+
 esbuild
     .build({
         entryPoints: ["index.js"],
@@ -10,7 +12,9 @@ esbuild
             sassPlugin({
                 importer(url) {
                     if (url === "..") {
-                        return {contents: `/* $env!!! */\n$color: ${"blue"};\n`}
+                        return {contents: `
+                            $color: ${blue};
+                        `}
                     }
                     return null;
                 }

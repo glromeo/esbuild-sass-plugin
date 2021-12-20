@@ -1,4 +1,4 @@
-import {OnLoadResult, OnResolveArgs} from "esbuild"
+import {OnLoadResult} from "esbuild"
 import {Importer, Value} from "sass"
 import {sassPlugin} from "./plugin"
 
@@ -7,15 +7,15 @@ export type Type = "css" | "style" | "css-text" | "lit-css"
 export type SassPluginOptions = {
 
   /**
+   *
+   */
+  filter?: RegExp
+
+  /**
    * Function to transform import path. Not just paths by @import
    * directive, but also paths imported by ts code.
    */
   importMapper?: (url: string) => string
-
-  /**
-   *
-   */
-  exclude?: RegExp | ((args: OnResolveArgs) => boolean) | { path?: RegExp, resolveDir?: RegExp }
 
   /**
    * "sass" for dart-sass (compiled to javascript, slow) or "node-sass" (libsass, fast yet deprecated)
@@ -37,7 +37,7 @@ export type SassPluginOptions = {
    *
    * @default css files will be passed to css loader
    */
-  type?: Type | ([Type] | [Type, string | [string] | [string, string]])[]
+  type?: Type
 
   /**
    * Enable the cache or pass your own Map to recycle its contents although
@@ -46,11 +46,6 @@ export type SassPluginOptions = {
    * @default true
    */
   cache?: Map<string, Map<string, CachedResult>> | boolean
-
-  /**
-   *
-   */
-  picomatch?: any
 
   /**
    * Handles when the @import directive is encountered.
@@ -152,23 +147,16 @@ export type SassPluginOptions = {
   quietDeps?: boolean
 
   /**
-   * 
+   *
    */
-  precompile?: (source: string) => string
+  precompile?: (source: string, path: string) => string
 }
-
-
-export type CachedResult = {
-
-  type: Type
-
-  mtimeMs: number
-
-  result: OnLoadResult
-};
-
 
 export default sassPlugin
 export {sassPlugin}
-export {makeModule, postcssModules} from "./utils"
+export {makeModule, postcssModules} from "./utils";
 
+export type CachedResult = {
+  mtimeMs: number
+  result: OnLoadResult
+}
