@@ -1,6 +1,6 @@
 {
   "name": "esbuild-sass-plugin",
-  "version": "1.8.1",
+  "version": "2.0.0-alpha.0",
   "description": "esbuild plugin for sass/scss files supporting both css loader and css result import (lit-element)",
   "main": "lib/index.js",
   "keywords": [
