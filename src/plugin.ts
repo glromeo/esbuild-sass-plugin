@@ -85,7 +85,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     } = sass.compileString(source, {
       importer: {
         load(canonicalUrl: URL): ImporterResult | null {
-          const filename = canonicalUrl.pathname.slice(1)
+          const filename = sep === "/" ? canonicalUrl.pathname : canonicalUrl.pathname.slice(1)
           let contents = fs.readFileSync(filename, "utf8")
           if (options.precompile) {
             contents = options.precompile(contents, filename)
@@ -104,7 +104,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
           if (url.startsWith("~")) {
             filename = require.resolve(url.slice(1), {paths: [basedir]})
           } else if (url.startsWith("file://")) {
-            filename = url.slice(8)
+            filename = sep === "/" ?  url.slice(7) : url.slice(8)
           } else {
             filename = url
           }
