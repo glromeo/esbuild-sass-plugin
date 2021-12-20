@@ -1,5 +1,6 @@
 import { OnLoadResult, OnResolveArgs } from "esbuild";
 import { Importer, Value } from "sass";
+import { sassPlugin } from "./plugin";
 export declare type Type = "css" | "style" | "css-text" | "lit-css";
 export declare type SassPluginOptions = {
     importMapper?: (url: string) => string;
@@ -28,13 +29,13 @@ export declare type SassPluginOptions = {
     sourceMapRoot?: string;
     transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>;
     quietDeps?: boolean;
+    precompile?: (source: string) => string;
 };
 export declare type CachedResult = {
     type: Type;
     mtimeMs: number;
     result: OnLoadResult;
 };
-import { sassPlugin } from "./plugin";
 export default sassPlugin;
 export { sassPlugin };
 export { makeModule, postcssModules } from "./utils";

@@ -284,7 +284,7 @@ Given 24 × 24 = 576 lit-element files & 576 imported CSS styles plus the import
 
 #### cache: true
 ```
-initial build: 3.051s
+initial build: 3.064s
 incremental build: 793.142ms
 incremental build: 772.664ms
 incremental build: 755.093ms
