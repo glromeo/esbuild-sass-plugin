@@ -15,7 +15,7 @@
     "README.MD"
   ],
   "author": "Gianluca Romeo <glromeo@gmail.com> (https://github.com/glromeo/esbuild-sass-plugin)",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/glromeo/esbuild-sass-plugin/issues"
   },
