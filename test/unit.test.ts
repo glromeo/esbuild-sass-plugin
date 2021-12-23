@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild'
 import {sassPlugin} from '../src'
 import {getContext} from '../src/utils'
-import {deleteFixture, readTextFile, useFixture, writeTextFile} from './test-toolkit'
+import {deleteFixture, readCssFile, readTextFile, useFixture, writeTextFile} from './test-toolkit'
 import fs from 'fs'
 import {expect} from 'chai'
 
@@ -31,7 +31,7 @@ describe('unit tests', function () {
     })
 
     expect(readTextFile('out/index-css.js')).to.equalIgnoreSpaces(readTextFile('snapshot/index-css.js'))
-    expect(readTextFile('out/index-css.css')).to.equalIgnoreSpaces(readTextFile('snapshot/index-css.css'))
+    expect(readCssFile('out/index-css.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-css.css'))
   })
 
   it('can handle a scss import', async function () {
@@ -48,7 +48,7 @@ describe('unit tests', function () {
     })
 
     expect(readTextFile('out/index-scss.js')).to.equalIgnoreSpaces(readTextFile('snapshot/index-scss.js'))
-    expect(readTextFile('out/index-scss.css')).to.equalIgnoreSpaces(readTextFile('snapshot/index-scss.css'))
+    expect(readCssFile('out/index-scss.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-scss.css'))
   })
 
   it('can handle a sass import', async function () {
@@ -65,7 +65,7 @@ describe('unit tests', function () {
     })
 
     expect(readTextFile('out/index-sass.js')).to.equalIgnoreSpaces(readTextFile('snapshot/index-sass.js'))
-    expect(readTextFile('out/index-sass.css')).to.equalIgnoreSpaces(readTextFile('snapshot/index-sass.css'))
+    expect(readCssFile('out/index-sass.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-sass.css'))
   })
 
   it('can use context bound to build options', async function () {

@@ -2,6 +2,7 @@ import {BuildOptions} from 'esbuild'
 import path from 'path'
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from 'fs'
 import {sassPlugin, SassPluginOptions} from '../src'
+import {fake} from 'mocha-toolkit'
 
 export * from 'mocha-toolkit'
 
@@ -38,6 +39,10 @@ export function readJsonFile(pathname: string) {
   return JSON.parse(readTextFile(pathname))
 }
 
+export function readCssFile(pathname: string) {
+  return readTextFile(pathname).replace(/\/\* sass-plugin.+\*\//g, "/* no comment */")
+}
+
 export function writeTextFile(pathname: string, content: string) {
   writeFileSync(pathname, content)
 }
@@ -59,7 +64,8 @@ export function pluginInternals(options: SassPluginOptions = {}) {
     },
     onEnd(callback) {
       endCallback = callback
-    }
+    },
+    resolve: fake()
   })
   return {
     resolveCallback, loadCallback, startCallback, endCallback
