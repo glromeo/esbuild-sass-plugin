@@ -10,10 +10,6 @@
     "25",
     "48"
   ],
-  "devDependencies": {
-    "esbuild": "^0.14.5",
-    "sass": "^1.45.1",
-  },
   "dependencies": {
     "postcss": "^8.3.11",
     "postcss-modules": "^4.2.2",
