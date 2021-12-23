@@ -1,12 +1,16 @@
 {
-  "name": "fixture-post-css",
+  "name": "post-css-fixture",
   "version": "1.0.0",
-  "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.4",
+    "postcss-modules": "^4.2.2",
     "postcss-preset-env": "^7.0.1",
     "precss": "^4.0.0"
+  },
+  "scripts": {
+    "build": "node ./build",
+    "serve": "node ../serve post-css"
   }
 }

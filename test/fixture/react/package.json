@@ -1,11 +1,18 @@
 {
   "name": "react-fixture",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "antd": "^4.17.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
+  },
+  "scripts": {
+    "build": "node ./build",
+    "serve": "node ../serve react"
+  },
+  "devDependencies": {
+    "@types/react": "^17.0.37",
+    "@types/react-dom": "^17.0.11"
   }
 }

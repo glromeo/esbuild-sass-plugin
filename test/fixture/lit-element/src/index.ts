@@ -1,3 +1,3 @@
-import "./hello-world";
+import './hello-world'
 
-import "./index.scss";
+import './index.scss'

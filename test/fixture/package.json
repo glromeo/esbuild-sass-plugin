@@ -1,28 +1,17 @@
 {
   "name": "fixtures",
   "version": "1.0.0",
-  "main": "serve.js",
   "license": "MIT",
   "private": true,
   "workspaces": [
     "benchmark",
     "bootstrap",
-    "data-urls",
+    "caching",
+    "css-modules",
     "lit-element",
+    "multiple",
     "open-iconic",
     "post-css",
-    "react",
-    "css-modules",
-    "exclude"
-  ],
-  "scripts": {
-    "serve-benchmark": "node serve benchmark",
-    "serve-bootstrap": "node serve bootstrap",
-    "serve-lit-element": "node serve lit-element",
-    "serve-react": "node serve react"
-  },
-  "dependencies": {
-    "postcss": "^8.4.4",
-    "postcss-modules": "^4.2.2"
-  }
+    "react"
+  ]
 }

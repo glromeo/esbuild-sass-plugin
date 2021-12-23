@@ -33,4 +33,4 @@ esbuild.build({
 
 **Note**:
 
-This project is slightly different from the example because it's meant to be run as part of the tests
+This project is slightly different from the example because it's part of the fixtures

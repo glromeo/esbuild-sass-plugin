@@ -1,7 +1,68 @@
-import {Type} from "./index"
-import {AcceptedPlugin, Postcss} from "postcss"
-import PostcssModulesPlugin from "postcss-modules"
-import {OnLoadResult} from "esbuild"
+import {Type} from './index'
+import {AcceptedPlugin, Postcss} from 'postcss'
+import PostcssModulesPlugin from 'postcss-modules'
+import {BuildOptions, OnLoadResult, WatchMode} from 'esbuild'
+import {Syntax} from 'sass'
+import {resolve, parse} from 'path'
+import {existsSync} from 'fs'
+
+export const RELATIVE_PATH = /^\.\.?\//
+
+export function modulesPaths(): string[] {
+  let path = process.cwd()
+  let {root} = parse(path)
+  let found: string[] = []
+  while (path !== root) {
+    const filename = resolve(path, 'node_modules')
+    if (existsSync(filename)) {
+      found.push(filename)
+    }
+    path = resolve(path, '..')
+  }
+  return [...found]
+}
+
+export function fileSyntax(filename: string): Syntax {
+  if (filename.endsWith('.scss')) {
+    return 'scss'
+  } else if (filename.endsWith('.css')) {
+    return 'css'
+  } else {
+    return 'indented'
+  }
+}
+
+export type PluginContext = {
+  instance: number
+  namespace: string
+  sourcemap: boolean
+  watched: { [path: string]: string[] } | null
+}
+
+const SASS_PLUGIN_CONTEXT = Symbol()
+
+export function getContext(buildOptions: BuildOptions): PluginContext {
+  let descriptor = Object.getOwnPropertyDescriptor(buildOptions, SASS_PLUGIN_CONTEXT)
+  if (descriptor === undefined) {
+    Object.defineProperty(buildOptions, SASS_PLUGIN_CONTEXT, descriptor = {
+      value: {
+        instances: 0
+      }
+    })
+  }
+  const instance = descriptor.value.instances++
+  return {
+    instance,
+    namespace: `sass-plugin-${instance}`,
+    sourcemap: !!buildOptions.sourcemap,
+    watched: buildOptions.watch ? {} : null
+  }
+}
+
+export function sourceMappingURL(sourceMap: any): string {
+  const data = Buffer.from(JSON.stringify(sourceMap), 'utf8').toString('base64')
+  return `/*# sourceMappingURL=data:application/json;charset=utf-8;base64,${data} */`
+}
 
 function requireModule(module: string, includePaths: string[] | undefined) {
   try {
@@ -18,17 +79,17 @@ function requireModule(module: string, includePaths: string[] | undefined) {
 
 const cssTextModule = cssText => `\
 export default \`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`;
+${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
 const cssResultModule = cssText => `\
 import {css} from "lit-element/lit-element.js";
 export default css\`
-${cssText.replace(/([$`\\])/g, "\\$1")}\`;
+${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
 const styleModule = cssText => `\
-const css = \`${cssText.replace(/([$`\\])/g, "\\$1")}\`;
+const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 document.head
     .appendChild(document.createElement("style"))
     .appendChild(document.createTextNode(css));
@@ -36,10 +97,10 @@ export {css};
 `
 
 export function makeModule(contents: string, type: Type) {
-  if (type === "style") {
+  if (type === 'style') {
     return styleModule(contents)
   } else {
-    return type === "lit-css" ? cssResultModule(contents) : cssTextModule(contents)
+    return type === 'lit-css' ? cssResultModule(contents) : cssTextModule(contents)
   }
 }
 
@@ -51,8 +112,8 @@ export type PostcssModulesParams = Parameters<PostcssModulesPlugin>[0] & {
 export function postcssModules(options: PostcssModulesParams, plugins: AcceptedPlugin[] = []) {
 
   const includePaths = options.includePaths ?? [options.basedir ?? process.cwd()]
-  const postcss: Postcss = requireModule("postcss", includePaths)
-  const postcssModulesPlugin: PostcssModulesPlugin = requireModule("postcss-modules", includePaths)
+  const postcss: Postcss = requireModule('postcss', includePaths)
+  const postcssModulesPlugin: PostcssModulesPlugin = requireModule('postcss-modules', includePaths)
 
   return async (source: string, dirname: string, path: string): Promise<OnLoadResult> => {
 
@@ -69,8 +130,8 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
     ]).process(source, {from: path, map: false})
 
     return {
-      contents: `${makeModule(css, "style")}export default ${cssModule};`,
-      loader: "js"
+      contents: `${makeModule(css, 'style')}export default ${cssModule};`,
+      loader: 'js'
     }
   }
 }
