@@ -1,8 +1,9 @@
 import {BuildOptions} from 'esbuild'
 import path from 'path'
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from 'fs'
+import {sassPlugin, SassPluginOptions} from '../src'
 
-export * from "mocha-toolkit";
+export * from 'mocha-toolkit'
 
 export function useFixture(name: string): BuildOptions {
   const absWorkingDir = path.resolve(__dirname, `fixture/${name}`)
@@ -39,4 +40,43 @@ export function readJsonFile(pathname: string) {
 
 export function writeTextFile(pathname: string, content: string) {
   writeFileSync(pathname, content)
+}
+
+export function pluginInternals(options: SassPluginOptions = {}) {
+  const {setup} = sassPlugin(options)
+  let resolveCallback, loadCallback, startCallback, endCallback
+  setup({
+    esbuild: {} as any,
+    initialOptions: {},
+    onResolve(options, callback) {
+      resolveCallback = callback
+    },
+    onLoad(options, callback) {
+      loadCallback = callback
+    },
+    onStart(callback) {
+      startCallback = callback
+    },
+    onEnd(callback) {
+      endCallback = callback
+    }
+  })
+  return {
+    resolveCallback, loadCallback, startCallback, endCallback
+  }
+}
+
+// https://github.com/mozilla/source-map/issues/349
+
+const nodeFetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch')
+Object.defineProperty(globalThis, 'fetch', {configurable: true, enumerable: true, value: undefined})
+
+const {SourceMapConsumer} = require('source-map')
+
+if (nodeFetchDescriptor) {
+  Object.defineProperty(globalThis, 'fetch', nodeFetchDescriptor)
+}
+
+export function consumeSourceMap(sourceMap: any, callback) {
+  return SourceMapConsumer.with(sourceMap, null, callback)
 }

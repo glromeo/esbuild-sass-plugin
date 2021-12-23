@@ -1,16 +1,11 @@
 import * as esbuild from 'esbuild'
 import {postcssModules, sassPlugin} from '../src'
-import {SourceMapConsumer} from 'source-map'
-
-/**
- * NOTE: due to source-map checking the existence of fetch to determine whether it runs in a browser
- *       we have to make sure that mocha-toolkit is imported after source-map
- */
-import {readJsonFile, readTextFile, useFixture} from './test-toolkit'
-import {expect} from 'chai'
-import fs from 'fs'
+import {statSync} from 'fs'
+import {consumeSourceMap, readJsonFile, readTextFile, useFixture} from './test-toolkit'
 
 describe('unit tests', function () {
+
+  this.timeout(5000)
 
   let cwd
   beforeEach(function () {
@@ -51,7 +46,9 @@ describe('unit tests', function () {
       bundle: true,
       sourcemap: 'both',
       plugins: [
-        sassPlugin()
+        sassPlugin({
+          quietDeps: true
+        })
       ]
     })
 
@@ -71,7 +68,7 @@ describe('unit tests', function () {
       '../../node_modules/bootstrap/scss/_functions.scss'
     ])
 
-    await SourceMapConsumer.with(sourceMap, null, consumer => {
+    await consumeSourceMap(sourceMap, consumer => {
       expect(
         consumer.generatedPositionFor({
           source: '../../node_modules/bootstrap/scss/bootstrap.scss',
@@ -438,11 +435,11 @@ describe('unit tests', function () {
 
     expect(readTextFile('./out/index.js')).to.match(/crimson/)
 
-    let {mtimeMs} = fs.statSync('./out/index.js')
+    let {mtimeMs} = statSync('./out/index.js')
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(reject, 10000)
       setTimeout(function tryAgain() {
-        if (mtimeMs < fs.statSync('./out/index.js').mtimeMs) {
+        if (mtimeMs < statSync('./out/index.js').mtimeMs) {
           clearTimeout(timeout)
           resolve()
         } else {
@@ -459,4 +456,43 @@ describe('unit tests', function () {
     result.stop!()
   })
 
+  it('precompile allows to add additional data', async function () {
+    const options = useFixture('precompile')
+
+    const env = readTextFile('./env.scss')
+
+    const context = {blue: 'blue'}
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.js'],
+      outdir: './out',
+      bundle: true,
+      plugins: [sassPlugin({
+        precompile(source, pathname) {
+          const prefix = /\/included\.scss$/.test(pathname) ? `
+            $color: ${context.blue};
+          ` : env
+          return prefix + source
+        }
+      })]
+    })
+
+    const bundle = readTextFile('./out/index.css')
+
+    expect(bundle).to.containIgnoreSpaces(`
+      .included {
+        color: blue;
+      }
+    `)
+    expect(bundle).to.containIgnoreSpaces(`
+      .excluded {
+        color: red;
+      }
+    `)
+  })
+
+  it('precompile respects sourcemaps', async function () {
+    console.warn('NOT IMPLEMENTED YET')
+  })
 })

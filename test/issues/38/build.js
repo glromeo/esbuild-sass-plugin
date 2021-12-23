@@ -1,8 +1,9 @@
 const esbuild = require("esbuild");
 const {sassPlugin} = require("../../../lib");
 const path = require("path");
+const {cleanFixture, logSuccess, logFailure} = require('../../fixture/utils')
 
-const {createImporter} = require("sass-extended-importer");
+cleanFixture(__dirname)
 
 esbuild.build({
     entryPoints: ["src/index.jsx"],
@@ -13,8 +14,7 @@ esbuild.build({
             includePaths: [
                 path.resolve(__dirname, "./node_modules"),
                 path.resolve(__dirname, "./node_modules/.pnpm/node_modules"),
-            ],
-            importer: createImporter()
+            ]
         })
     ]
-}).then(console.log).catch(console.error);
+}).then(logSuccess, logFailure)

@@ -45,23 +45,24 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
   return {
     name: 'sass-plugin',
-    setup: function (build) {
+    setup({initialOptions, onLoad, onResolve}) {
 
       const {
         namespace,
         sourcemap,
         watched
-      } = getContext(build.initialOptions)
+      } = getContext(initialOptions)
 
-      build.onResolve({filter: options.filter ?? /\.(s[ac]ss|css)$/}, (args) => {
+      onResolve({filter: options.filter ?? /\.(s[ac]ss|css)$/}, (args) => {
         const {resolveDir, path, importer}: OnResolveArgs = args
         const basedir = resolveDir || dirname(importer)
         return {path: resolvePath(basedir, path), namespace, pluginData: args}
       })
 
       const renderSync = createRenderer(options, sourcemap)
+      const transform = options.transform
 
-      build.onLoad({filter: /./, namespace}, useCache(options, async path => {
+      onLoad({filter: /./, namespace}, useCache(options, async path => {
         try {
           let {css, watchFiles} = renderSync(path)
 
@@ -69,13 +70,15 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             watched[path] = watchFiles
           }
 
-          if (options.transform) {
-            const out: string | OnLoadResult = await options.transform(css, dirname(path), path)
+          const resolveDir = dirname(path)
+
+          if (transform) {
+            const out: string | OnLoadResult = await transform(css, resolveDir, path)
             if (typeof out !== 'string') {
               return {
                 contents: out.contents,
                 loader: out.loader,
-                resolveDir: dirname(path),
+                resolveDir,
                 watchFiles: [...watchFiles, ...(out.watchFiles || [])],
                 watchDirs: out.watchDirs || []
               }
@@ -87,12 +90,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
           return type === 'css' ? {
             contents: css,
             loader: 'css',
-            resolveDir: dirname(path),
+            resolveDir,
             watchFiles
           } : {
             contents: makeModule(css, type),
             loader: 'js',
-            resolveDir: dirname(path),
+            resolveDir,
             watchFiles
           }
 

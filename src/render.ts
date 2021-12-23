@@ -106,6 +106,18 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
             }
           } else if (url.startsWith('file://')) {
             filename = sep === '/' ? url.slice(7) : url.slice(8)
+            // ================================================ patch for: https://github.com/sass/dart-sass/issues/1581
+            let joint = filename.lastIndexOf("/~")
+            if (joint >= 0) {
+              const basedir = filename.slice(0, joint)
+              filename = filename.slice(joint + 2)
+              try {
+                requireOptions.paths[0] = basedir
+                filename = require.resolve(filename, requireOptions)
+              } catch (ignored) {
+              }
+            }
+            // =========================================================================================================
           } else {
             filename = url
           }
