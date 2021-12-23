@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild'
 import {postcssModules, sassPlugin} from '../src'
 import {statSync} from 'fs'
-import {consumeSourceMap, readJsonFile, readTextFile, useFixture} from './test-toolkit'
+import {consumeSourceMap, readCssFile, readJsonFile, readTextFile, useFixture} from './test-toolkit'
 import {sep} from 'path'
 
 describe('unit tests', function () {
@@ -238,10 +238,10 @@ describe('unit tests', function () {
 
     // NOTE: You might want to update these snapshots when you upgrade postcss!
 
-    let expected = readTextFile('./snapshot/app.css')
+    let expected = readCssFile('./snapshot/app.css')
     expected = expected.replace(/url\("img\/background(-2x)?.jpg"\)/g, 'url()')
 
-    let actual = readTextFile('./out/app.css')
+    let actual = readCssFile('./out/app.css')
     actual = actual.slice(actual.indexOf('\n') + 1).replace(/url\(data:image\/jpeg;base64,\)/g, 'url()')
 
     expect(actual.replace(/;/g, '')).to.equalIgnoreSpaces(expected.replace(/;/g, ''))
