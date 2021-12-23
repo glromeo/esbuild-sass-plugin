@@ -2,6 +2,7 @@ import * as esbuild from 'esbuild'
 import {postcssModules, sassPlugin} from '../src'
 import {statSync} from 'fs'
 import {consumeSourceMap, readJsonFile, readTextFile, useFixture} from './test-toolkit'
+import {sep} from 'path'
 
 describe('unit tests', function () {
 
@@ -88,10 +89,16 @@ describe('unit tests', function () {
       ).to.eql({
         line: 4, column: 0, lastColumn: null
       })
+
+      let  expected = 'data:;charset=utf-8,@import%20%22~bootstrap/scss/bootstrap.scss%22;%0D%0A%0D%0Abody%20%7B%0D%0A%20%20padding:%201em;%0D%0A%7D'
+      if (sep === "/") {
+        expected = expected.replace(/%0D%0A/g, "%0A")
+      }
+
       expect(
         consumer.originalPositionFor({line: 9749, column: 0})
       ).to.eql({
-        source: 'data:;charset=utf-8,@import%20%22~bootstrap/scss/bootstrap.scss%22;%0D%0A%0D%0Abody%20%7B%0D%0A%20%20padding:%201em;%0D%0A%7D',
+        source: expected,
         line: 3,
         column: 0,
         name: null
