@@ -4,7 +4,7 @@ const {readFileSync} = require('fs')
 
 const env = readFileSync('./env.scss', 'utf-8')
 
-const context = {blue: 'blue'}
+const context = {color: 'blue'}
 
 esbuild.build({
   entryPoints: ['index.js'],
@@ -14,7 +14,7 @@ esbuild.build({
     sassPlugin({
       precompile(source, pathname) {
         const prefix = /\/included\.scss$/.test(pathname) ? `
-            $color: ${context.blue};
+            $color: ${context.color};
           ` : env
         return prefix + source
       }

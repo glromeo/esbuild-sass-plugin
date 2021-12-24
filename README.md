@@ -1,14 +1,11 @@
 ![cooltext394785080075403](https://user-images.githubusercontent.com/160981/136289874-26ce7269-ea08-47dd-be31-9bf0ef7a0b8d.png)
+![image](https://user-images.githubusercontent.com/160981/147304513-386dac37-7098-43d9-a17a-d10cc719d8ba.png)
 
 [![Build Status][travis-image]][travis-url]
 
 A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
 
-**NOTE:** This is the 2.x branch of the plugin, if you want to use node-sass or an old feature please stick to the 1.x
-branch
-
 ### Features
-
 * **PostCSS** & **CSS modules**
 * support for **constructable stylesheet** to be used in custom elements or `dynamic style` to be added to the html page
 * uses the **new [Dart Sass](https://www.npmjs.com/package/sass) Js API**.
@@ -17,11 +14,10 @@ branch
 * pre-compiling (to add **global resources** to the sass files)
 
 ### Breaking Changes
-
 * `type` has been simplified and now accepts only a string. If you need different types in a project you can use more
   than one instance of the plugin. You can have a look at the **exclude** fixture for an example_ where **lit CSS**
   and **CSS modules** are both used in the same app
-* The support for [node-sass](https://github.com/sass/node-sass) has been removed from the 2.x branch and for good.
+* The support for [node-sass](https://github.com/sass/node-sass) has been removed and for good.
   Sadly, node-sass is at a dead end and so it's 1.x. I don't exclude updates or fixes on it but it's down in the list of
   my priorities.
 
@@ -44,9 +40,10 @@ await esbuild.build({
 })
 ```
 
-this will use `loader: "css"` and your transpiled Sass will be included in index.css.
+this will use esbuild `loader: "css"` and your transpiled Sass will be in `index.css` alongside your bundle.
 
-If you specify `type: "style"` then the stylesheet will be dynamically added to the page.
+If you specify `type: "style"` then the stylesheet will be in the bundle 
+and will be dynamically added to the page when the bundle is loaded.
 
 If you want to use the resulting css text as a string import you can use `type: "css-text"`
 
@@ -65,9 +62,7 @@ await esbuild.build({
 ```javascript
 import cssText from './styles.scss'
 
-
 customElements.define('hello-world', class HelloWorld extends HTMLElement {
-
   constructor() {
     super();
     this.attachShadow({mode: 'open'});
@@ -89,7 +84,7 @@ export default class HelloWorld extends LitElement {
   static styles = styles
 
   render() {
-  ...
+    ...
   }
 }
 ```
@@ -98,63 +93,21 @@ Look in `test/fixtures` folder for more usage examples.
 
 ### Options
 
-The **options** passed to the plugin are a superset of the
-Sass [Options](https://sass-lang.com/documentation/js-api#options).
+The **options** passed to the plugin are a superset of Sass
+[compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter).
 
-| Option       | Type                                  | Default                                |
-|--------------|---------------------------------------|----------------------------------------|
-| cache        | boolean or Map                        | true (one Map per namespace)           |
-| type         | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                |
-| transform    | function                              | undefined                              |
-| loadPaths    | [string[]]()                          | collection of node_modules from cwd up |
-| importer     | function                              | undefined                              |
-| importMapper | function                              | undefined                              |
+| Option                                     | Type                                  | Default                                 |
+|--------------------------------------------|---------------------------------------|-----------------------------------------|
+| filter                                     | regular expression                    | <code>/\.(s[ac]ss&vert;css)$/</code>    |
+| cache                                      | boolean or Map                        | `true` (there is one Map per namespace) |
+| type                                       | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                 |
+| transform                                  | function                              | undefined                               |
+| [loadPaths](https://www.shorturl.at/bdpBS) | string[]                              | []                                      |
+| importer                                   | function                              | built in importer                       |
+| precompile                                 | function                              | undefined                               |
+| importMapper                               | function                              | undefined                               |
 
-### Exclude Option
-
-Used to exclude paths from the plugin. It can either be **a simple regex** which applies to the path
-
-```javascript
-await esbuild.build({
-  ...
-    plugins
-:
-[sassPlugin({
-  exclude: /^http:\/\//,  // ignores urls
-})]
-})
-```
-
-**or a function** which receives the whole set of args that esbuild passes on resolve.
-
-```javascript
-await esbuild.build({
-  ...
-    plugins
-:
-[sassPlugin({
-  exclude: ({resolveDir}) => !/\\lit$/.test(resolveDir),  // ignores files outside lit directory
-})]
-})
-```
-
-### Importer Option
-
-The default importer built in the plugin has been developed to be fast but its scope is limited. For complex import
-scenarios (e.g pnpm)
-this can be replaced by a custom implementation like the very
-solid [`sass-extended-importer`](https://github.com/wessberg/sass-extended-importer)
-
-```javascript
-const {createImporter} = require("sass-extended-importer");
-
-await esbuild.build({
-  ...,
-  plugins:[sassPlugin({
-    importer: createImporter()
-  })]
-})
-```
+### pnpm
 
 There's a working example of using `pnpm` with `@material` design
 in [issue/38](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/issues/38)
@@ -191,10 +144,48 @@ await esbuild.build({
 })
 ```
 
-### Transform Option
+### Precompile
+#### `url(...)` rewrite
+If your sass reference resources with relative urls (see [#48](https://github.com/glromeo/esbuild-sass-plugin/issues/48))
+esbuild will struggle to rewrite those urls because it doesn't have idea of the imports that the Sass compiler 
+has gone through. Fortunately the new importer API allows to rewrite those relative URLs in absolute ones which 
+then esbuild will be able to handle.
+
+Here is an example of how to do the `url(...)` rewrite
+```javascript
+await esbuild.build({
+  ...,
+  plugins: [sassPlugin({
+    precompile(source, pathname) {
+      const basedir = path.dirname(pathname)
+      return source.replace(/(url\(['"]?)(\.\.?\/)([^'")]+['"]?\))/g, `$1${basedir}/$2$3`)
+    }
+  })]
+})
+```
+#### Globals and other Shims (like sass-loader's additionalData)
+Look for a complete example in the [precompile](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/precompile) fixture
+
+```javascript
+const context = { color: "blue" }
+
+await esbuild.build({
+  ...,
+  plugins: [sassPlugin({
+    precompile(source, pathname) {
+      const prefix = /\/included\.scss$/.test(pathname) ? `
+            $color: ${context.color};
+          ` : env
+      return prefix + source
+    }
+  })]
+})
+```
+
+### Transform
 
 ```typescript
-async (css: string, resolveDir: string?) => string
+async (css: string, resolveDir?: string) => string
 ``` 
 
 It's a function which will be invoked before passing the css to esbuild or wrapping it in a module.\
