@@ -1,9 +1,9 @@
 import {Type} from './index'
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
-import {BuildOptions, OnLoadResult, WatchMode} from 'esbuild'
+import {BuildOptions, OnLoadResult} from 'esbuild'
 import {Syntax} from 'sass'
-import {resolve, parse} from 'path'
+import {parse, resolve} from 'path'
 import {existsSync} from 'fs'
 
 export const RELATIVE_PATH = /^\.\.?\//
@@ -64,9 +64,17 @@ export function sourceMappingURL(sourceMap: any): string {
   return `/*# sourceMappingURL=data:application/json;charset=utf-8;base64,${data} */`
 }
 
-function requireModule(module: string, includePaths: string[] | undefined) {
+function requireTool(module: string, basedir?: string) {
   try {
-    return require(require.resolve(module, includePaths ? {paths: includePaths} : {paths: [process.cwd()]}))
+    return require(module)
+  } catch (ignored) {
+  }
+  if (basedir) try {
+    return require(require.resolve(module, {paths: [basedir]}))
+  } catch (ignored) {
+  }
+  try {
+    return require(require.resolve(module, {paths: [process.cwd()]}))
   } catch (e) {
     try {
       return require(module) // extra attempt at finding a co-located tool
@@ -105,15 +113,13 @@ export function makeModule(contents: string, type: Type) {
 }
 
 export type PostcssModulesParams = Parameters<PostcssModulesPlugin>[0] & {
-  basedir?: string,
-  includePaths?: string[] | undefined
+  basedir?: string
 };
 
 export function postcssModules(options: PostcssModulesParams, plugins: AcceptedPlugin[] = []) {
 
-  const includePaths = options.includePaths ?? [options.basedir ?? process.cwd()]
-  const postcss: Postcss = requireModule('postcss', includePaths)
-  const postcssModulesPlugin: PostcssModulesPlugin = requireModule('postcss-modules', includePaths)
+  const postcss: Postcss = requireTool('postcss', options.basedir)
+  const postcssModulesPlugin: PostcssModulesPlugin = requireTool('postcss-modules', options.basedir)
 
   return async (source: string, dirname: string, path: string): Promise<OnLoadResult> => {
 

@@ -2,7 +2,6 @@ import * as esbuild from 'esbuild'
 import {postcssModules, sassPlugin} from '../src'
 import {statSync} from 'fs'
 import {consumeSourceMap, readCssFile, readJsonFile, readTextFile, useFixture} from './test-toolkit'
-import {sep} from 'path'
 
 describe('unit tests', function () {
 
@@ -90,10 +89,11 @@ describe('unit tests', function () {
         line: 4, column: 0, lastColumn: null
       })
 
-      let  expected = 'data:;charset=utf-8,@import%20%22~bootstrap/scss/bootstrap.scss%22;%0D%0A%0D%0Abody%20%7B%0D%0A%20%20padding:%201em;%0D%0A%7D'
-      if (sep === "/") {
-        expected = expected.replace(/%0D%0A/g, "%0A")
-      }
+      let expected = `data:;charset=utf-8,@import%20%22~bootstrap/scss/bootstrap.scss%22;${
+        process.platform === 'win32'
+          ? '%0D%0A%0D%0Abody%20%7B%0D%0A%20%20padding:%201em;%0D%0A%7D'
+          : '%0A%0Abody%20%7B%0A%20%20padding:%201em;%0A%7D'
+      }`
 
       expect(
         consumer.originalPositionFor({line: 9749, column: 0})
