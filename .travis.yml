@@ -10,4 +10,5 @@ script:
   - yarn setup
   - yarn build
   - yarn test
-
+after_success:
+  - yarn coverage

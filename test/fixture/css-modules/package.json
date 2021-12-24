@@ -1,5 +1,14 @@
 {
-  "name": "fixture-css-modules",
+  "name": "css-modules-fixture",
   "version": "1.0.0",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.4",
+    "postcss-modules": "^4.2.2"
+  },
+  "scripts": {
+    "build": "node ./build",
+    "serve": "node ../serve css-modules"
+  }
 }

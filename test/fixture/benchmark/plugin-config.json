@@ -1,8 +1,0 @@
-{
-  "implementation": "sass",
-  "type": [
-    ["style", "src/index.scss"],
-    ["lit-css"]
-  ],
-  "cache": true
-}

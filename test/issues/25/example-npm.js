@@ -1,7 +1,7 @@
 const esbuild = require("esbuild");
 const {sassPlugin} = require("esbuild-sass-plugin");
 
-// given node-sass has been installed with `npm i -g node-sass`;
+// given sass has been installed with `npm i -g sass`;
 
 const {execSync} = require('child_process');
 
@@ -12,7 +12,6 @@ esbuild.build({
     bundle: true,
     outdir: "./out",
     plugins: [sassPlugin({
-        implementation: "node-sass",
         includePaths: [includePath]
     })]
 });

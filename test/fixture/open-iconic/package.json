@@ -1,7 +1,6 @@
 {
-  "name": "fixture-data-urls",
+  "name": "open-iconic-fixture",
   "version": "1.0.0",
-  "main": "index.js",
   "license": "MIT",
   "dependencies": {
     "open-iconic": "^1.1.1"

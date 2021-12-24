@@ -1,3 +1,5 @@
-// Why not just import directly in index.js? Because otherwise dart-sass will treat it as an entrypoint and won't apply quietDeps
-
 @import "~bootstrap/scss/bootstrap.scss";
+
+body {
+  padding: 1em;
+}

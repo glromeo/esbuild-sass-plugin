@@ -1,0 +1,14 @@
+{
+  "name": "multiple-fixture",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "lit-element": "^3.0.2",
+    "postcss": "^8.4.4",
+    "postcss-modules": "^4.2.2"
+  },
+  "scripts": {
+    "build": "node ./build",
+    "serve": "node ../serve multiple"
+  }
+}

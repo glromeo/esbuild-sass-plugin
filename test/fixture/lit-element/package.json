@@ -1,13 +1,13 @@
 {
   "name": "lit-element-fixture",
   "version": "1.0.0",
-  "main": "src/index.ts",
   "license": "MIT",
   "dependencies": {
     "lit-element": "^3.0.2",
     "postcss": "^8.4.4"
   },
   "scripts": {
+    "build": "node ./build",
     "serve": "node ../serve lit-element"
   }
 }

@@ -11,11 +11,6 @@
     "@material/icon-button": "^13.0.0",
     "@mui/material": "^5.0.4",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "sass-extended-importer": "^0.4.2"
-  },
-  "devDependencies": {
-    "esbuild": "^0.13.9",
-    "esbuild-sass-plugin": "^1.7.0"
+    "react-dom": "^17.0.2"
   }
 }

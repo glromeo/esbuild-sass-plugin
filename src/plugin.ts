@@ -1,12 +1,9 @@
-import {OnLoadArgs, OnLoadResult, OnResolveArgs, Plugin} from "esbuild";
-import {promises as fsp, readFileSync, Stats} from "fs";
-import {dirname, resolve} from "path";
-import picomatch from "picomatch";
-import {CachedResult, SassPluginOptions, Type} from "./index";
-import {loadSass, makeModule} from "./utils";
-import {createSassImporter} from "./importer";
-
-let pluginIndex: number = 0;
+import {OnLoadResult, OnResolveArgs, Plugin} from 'esbuild'
+import {dirname, resolve} from 'path'
+import {SassPluginOptions} from './index'
+import {getContext, makeModule, modulesPaths, RELATIVE_PATH} from './utils'
+import {useCache} from './cache'
+import {createRenderer} from './render'
 
 /**
  *
@@ -14,220 +11,101 @@ let pluginIndex: number = 0;
  */
 export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
-    if (!options.basedir) {
-        options.basedir = process.cwd();
+  if (!options.basedir) {
+    options.basedir = process.cwd()
+  }
+
+  if (options.includePaths) {
+    console.log(`'includePaths' option is deprecated, please use 'loadPaths' instead`)
+  }
+  options.loadPaths = Array.from(new Set([
+    ...options.loadPaths || modulesPaths(),
+    ...options.includePaths || []
+  ]))
+
+  const type = options.type ?? 'css'
+
+  if (options['picomatch'] || options['exclude'] || typeof type !== 'string') {
+    console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
+  }
+
+  const requireOptions = {paths: ['.', ...options.loadPaths]}
+
+  function resolvePath(basedir: string, path: string) {
+    if (options.importMapper) {
+      path = options.importMapper(path)
     }
-    if (!options.picomatch) {
-        options.picomatch = {unixify: true};
+    if (RELATIVE_PATH.test(path)) {
+      return resolve(basedir, path)
+    } else {
+      requireOptions.paths[0] = basedir
+      return require.resolve(path, requireOptions)
     }
+  }
 
-    const sass = loadSass(options);
+  return {
+    name: 'sass-plugin',
+    setup({initialOptions, onLoad, onResolve}) {
 
-    const type: Type = typeof options.type === "string" ? options.type : "css";
+      const {
+        namespace,
+        sourcemap,
+        watched
+      } = getContext(initialOptions)
 
-    const matchers: [string, (args: OnResolveArgs) => boolean][] | false = Array.isArray(options.type)
-        && options.type.map(function ([type, pattern]) {
-            if (Array.isArray(pattern)) {
-                const importerMatcher = picomatch("**/" + pattern[0], options.picomatch);
-                const pathMatcher = pattern[1] ? picomatch("**/" + pattern[1], options.picomatch) : null;
-                if (pathMatcher) {
-                    return [
-                        type, (args: OnResolveArgs) => importerMatcher(args.importer) && pathMatcher(resolve(args.resolveDir, args.path))
-                    ];
-                } else {
-                    return [
-                        type, (args: OnResolveArgs) => importerMatcher(args.importer)
-                    ];
-                }
+      onResolve({filter: options.filter ?? /\.(s[ac]ss|css)$/}, (args) => {
+        const {resolveDir, path, importer}: OnResolveArgs = args
+        const basedir = resolveDir || dirname(importer)
+        return {path: resolvePath(basedir, path), namespace, pluginData: args}
+      })
+
+      const renderSync = createRenderer(options, sourcemap)
+      const transform = options.transform
+
+      onLoad({filter: /./, namespace}, useCache(options, async path => {
+        try {
+          let {css, watchFiles} = renderSync(path)
+
+          if (watched) {
+            watched[path] = watchFiles
+          }
+
+          const resolveDir = dirname(path)
+
+          if (transform) {
+            const out: string | OnLoadResult = await transform(css, resolveDir, path)
+            if (typeof out !== 'string') {
+              return {
+                contents: out.contents,
+                loader: out.loader,
+                resolveDir,
+                watchFiles: [...watchFiles, ...(out.watchFiles || [])],
+                watchDirs: out.watchDirs || []
+              }
             } else {
-                if (pattern) {
-                    const pathMatcher = picomatch("**/" + pattern, options.picomatch);
-                    return [type, (args: OnResolveArgs) => pathMatcher(resolve(args.resolveDir, args.path))];
-                } else {
-                    return [type, () => true];
-                }
+              css = out
             }
-        });
+          }
 
-    const typeOf = matchers
-        ? (args: OnResolveArgs): Type => {
-            for (const [type, isMatch] of matchers) if (isMatch(args)) {
-                return type as Type;
-            }
-            return type;
+          return type === 'css' ? {
+            contents: css,
+            loader: 'css',
+            resolveDir,
+            watchFiles
+          } : {
+            contents: makeModule(css, type),
+            loader: 'js',
+            resolveDir,
+            watchFiles
+          }
+
+        } catch (err: any) {
+          return {
+            errors: [{text: err.message}],
+            watchFiles: watched?.[path] ?? [path]
+          }
         }
-        : (): Type => type;
-
-    function pathResolve({resolveDir, path, importer}: OnResolveArgs) {
-        return resolve(resolveDir || dirname(importer), path);
+      }))
     }
-
-    function requireResolve({resolveDir, path, importer}: OnResolveArgs) {
-        if (!resolveDir) {
-            resolveDir = dirname(importer);
-        }
-
-        const mapper = options.importMapper
-        if(mapper) {
-            path = mapper(path)
-        }
-
-        const paths = options.includePaths ? [resolveDir, ...options.includePaths] : [resolveDir];
-        return require.resolve(path, {paths});
-    }
-
-    function readCssFileSync(path: string) {
-        return {css: readFileSync(path, "utf-8"), watchFiles: [path]};
-    }
-
-    const importer = createSassImporter(options);
-
-    function renderSync(file) {
-        const {
-            css,
-            stats: {
-                includedFiles
-            }
-        } = sass.renderSync({importer, ...options, file});
-        return {
-            css: css.toString("utf-8"),
-            watchFiles: includedFiles
-        };
-    }
-
-    const cache = !options.cache
-        ? null
-        : options.cache instanceof Map
-            ? options.cache
-            : new Map<string, Map<string, CachedResult>>();
-
-    function collectStats(watchFiles): Promise<Stats[]> {
-        return Promise.all(watchFiles.map(filename => fsp.stat(filename)));
-    }
-
-    function maxMtimeMs(stats: Stats[]) {
-        return stats.reduce((max, {mtimeMs}) => Math.max(max, mtimeMs), 0);
-    }
-
-    function useExclude(callback) {
-        const exclude = options.exclude;
-        if (exclude instanceof RegExp) {
-            return (args: OnResolveArgs) => exclude.test(args.path) ? null : callback(args);
-        } else if (typeof exclude === "function") {
-            return (args: OnResolveArgs) => exclude(args) ? null : callback(args);
-        } else if (typeof exclude === "object") {
-            throw new Error("invalid exclude option");
-        } else {
-            return callback;
-        }
-    }
-
-    const RELATIVE_PATH = /^\.\.?\//;
-
-    const namespace = `sass-plugin-${pluginIndex++}`;
-
-    return {
-        name: "sass-plugin",
-        setup: function (build) {
-
-            build.onResolve({filter: /\.(s[ac]ss|css)$/}, useExclude((args) => {
-                if (RELATIVE_PATH.test(args.path)) {
-                    return {path: pathResolve(args), namespace, pluginData: args};
-                } else {
-                    return {path: requireResolve(args), namespace, pluginData: args};
-                }
-            }));
-
-            let cached: (
-                transform: (filename: string, type: Type) => Promise<OnLoadResult>
-            ) => (args) => Promise<OnLoadResult>;
-
-            if (cache) {
-                cached = (transform) => async ({path, pluginData: args}: OnLoadArgs) => {
-                    let group = cache.get(args.resolveDir);
-                    if (!group) {
-                        group = new Map();
-                        cache.set(args.resolveDir, group);
-                    }
-                    try {
-                        let cached = group.get(args.path);
-                        if (cached) {
-                            let watchFiles = cached.result.watchFiles!;
-                            let stats = await collectStats(watchFiles);
-                            for (const {mtimeMs} of stats) {
-                                if (mtimeMs > cached.mtimeMs) {
-                                    cached.result = await transform(watchFiles[0], cached.type);
-                                    cached.mtimeMs = maxMtimeMs(stats);
-                                    break;
-                                }
-                            }
-                            return cached.result;
-                        }
-                        let type = typeOf(args);
-                        let result = await transform(path, type);
-                        group.set(args.path, {
-                            type,
-                            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
-                            result
-                        });
-                        return result;
-                    } catch (error) {
-                        group.delete(args.path);
-                        throw error;
-                    }
-                };
-            } else {
-                cached = (transform) => ({path, pluginData: args}: OnLoadArgs) => {
-                    return transform(path, typeOf(args));
-                };
-            }
-
-            const lastWatchFiles = build.initialOptions.watch ? {} : null;
-
-            async function transform(path: string, type: Type): Promise<OnLoadResult> {
-                try {
-                    let {css, watchFiles} = path.endsWith(".css") ? readCssFileSync(path) : renderSync(path);
-
-                    watchFiles = [...watchFiles];
-                    if (lastWatchFiles) {
-                        lastWatchFiles[path] = watchFiles;
-                    }
-
-                    if (options.transform) {
-                        const out: string | OnLoadResult = await options.transform(css, dirname(path), path);
-                        if (typeof out !== "string") {
-                            return {
-                                contents: out.contents,
-                                loader: out.loader,
-                                resolveDir: dirname(path),
-                                watchFiles: [...watchFiles, ...(out.watchFiles || [])],
-                                watchDirs: out.watchDirs || []
-                            };
-                        } else {
-                            css = out;
-                        }
-                    }
-
-                    return type === "css" ? {
-                        contents: css,
-                        loader: "css",
-                        resolveDir: dirname(path),
-                        watchFiles
-                    } : {
-                        contents: makeModule(css, type),
-                        loader: "js",
-                        resolveDir: dirname(path),
-                        watchFiles
-                    };
-                } catch (err:any) {
-                    return {
-                        errors: [{text: err.message}],
-                        watchFiles: lastWatchFiles?.[path] ?? [path]
-                    };
-                }
-            }
-
-            build.onLoad({filter: /./, namespace}, cached(transform));
-        }
-    };
+  }
 }

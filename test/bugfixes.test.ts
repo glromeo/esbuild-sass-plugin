@@ -1,229 +1,196 @@
-import * as chai from "chai";
-import {expect} from "chai";
-import chaiString from "chai-string";
-import * as esbuild from "esbuild";
-import * as fs from "fs";
-import * as path from "path";
-import {sassPlugin, postcssModules} from "../src";
+import {expect} from 'chai'
+import * as esbuild from 'esbuild'
+import * as path from 'path'
+import {postcssModules, sassPlugin} from '../src'
 
-chai.use(chaiString);
+import {readTextFile, sinon, useFixture, writeTextFile} from './test-toolkit'
 
-describe("tests covering github issues", function () {
+describe('tests covering github issues', function () {
 
-    this.timeout(5000);
+  let cwd
+  beforeEach(function () {
+    cwd = process.cwd()
+  })
+  afterEach(function () {
+    process.chdir(cwd)
+  })
 
-    let cwd;
-    beforeEach(function () {
-        cwd = process.cwd();
-    });
-    afterEach(function () {
-        process.chdir(cwd);
-    });
+  it('#18 Multiple files with the same name results in only one file being imported', async function () {
 
-    it("#18", async function () {
+    await esbuild.build({
+      entryPoints: ['./test/issues/18/entrypoint.js'],
+      bundle: true,
+      outdir: './test/issues/18/out',
+      plugins: [sassPlugin({})]
+    })
 
-        await esbuild.build({
-            entryPoints: ["./test/issues/18/entrypoint.js"],
-            bundle: true,
-            outdir: "./test/issues/18/out",
-            plugins: [sassPlugin({})]
-        });
+    let cssBundle = readTextFile('./test/issues/18/out/entrypoint.css')
+    expect(cssBundle).to.containIgnoreSpaces('.component_a { background: blue; }')
+    expect(cssBundle).to.containIgnoreSpaces('.component_b { background: yellow; }')
+  })
 
-        let cssBundle = fs.readFileSync("./test/issues/18/out/entrypoint.css", "utf-8");
-        expect(cssBundle).to.containIgnoreSpaces(".component_a { background: blue; }");
-        expect(cssBundle).to.containIgnoreSpaces(".component_b { background: yellow; }");
-    });
+  it('#20 Plugin stops working after a SASS failure', async function () {
+    const options = useFixture('../issues/20')
 
-    it("issue #20", async function () {
+    writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
+    writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color }`)
 
-        const absWorkingDir = path.resolve(__dirname, "issues/20");
-        process.chdir(absWorkingDir);
+    let step = 0
 
-        fs.writeFileSync("dep.scss", `$primary-color: #333; body { padding: 0; color: $primary-color; }`);
-        fs.writeFileSync("tmp.scss", `@use 'dep'; body {background-color: dep.$primary-color }`);
+    const result = await esbuild.build({
+      ...options,
+      entryPoints: ['./tmp.scss'],
+      outfile: './tmp.css',
+      plugins: [sassPlugin()],
+      logLevel: 'silent',
+      watch: {
+        onRebuild(failure, result) {
+          switch (step) {
+            case 0:
+              expect(failure).to.be.null
+              writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0 color: $primary-color; }`)
+              return step++
+            case 1:
+              expect(failure).to.be.not.null
+              writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
+              return step++
+            case 2:
+              expect(failure).to.be.null
+              writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color color: red }`)
+              return step++
+            case 3:
+              expect(failure).to.be.not.null
+              writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
+              return step++
+            case 4:
+              expect(failure).to.be.null
+              expect(result).to.be.not.null
+              result!.stop!()
+              return step++
+          }
+        }
+      }
+    })
 
-        let step = 0;
+    await new Promise((resolve, reject) => {
+      writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
+      const interval = setInterval(() => {
+        if (step === 5) {
+          clearInterval(interval)
+          try {
+            expect(readTextFile('./tmp.css')).to.match(/background-color: #333;/)
+            result.stop!()
+            resolve(null)
+          } catch (e) {
+            reject(e)
+          }
+        }
+      }, 250)
+    })
+  })
 
-        const result = await esbuild.build({
-            entryPoints: ["./tmp.scss"],
-            absWorkingDir,
-            outfile: "./tmp.css",
-            plugins: [sassPlugin()],
-            logLevel: "silent",
-            watch: {
-                onRebuild(failure, result) {
-                    switch (step) {
-                        case 0:
-                            expect(failure).to.be.null;
-                            fs.writeFileSync("dep.scss", `$primary-color: #333; body { padding: 0 color: $primary-color; }`);
-                            return step++;
-                        case 1:
-                            expect(failure).to.be.not.null;
-                            fs.writeFileSync("dep.scss", `$primary-color: #333; body { padding: 0; color: $primary-color; }`);
-                            return step++;
-                        case 2:
-                            expect(failure).to.be.null;
-                            fs.writeFileSync("tmp.scss", `@use 'dep'; body {background-color: dep.$primary-color color: red }`);
-                            return step++;
-                        case 3:
-                            expect(failure).to.be.not.null;
-                            fs.writeFileSync("tmp.scss", `@use 'dep'; body {background-color: dep.$primary-color; color: red }`);
-                            return step++;
-                        case 4:
-                            expect(failure).to.be.null;
-                            expect(result).to.be.not.null;
-                            result!.stop!();
-                            return step++;
-                    }
-                }
-            }
-        });
+  it('#21 Support for new math.div', async function () {
+    const options = useFixture('../issues/21')
 
-        await new Promise((resolve, reject) => {
-            fs.writeFileSync("tmp.scss", `@use 'dep'; body {background-color: dep.$primary-color; color: red }`);
-            const interval = setInterval(() => {
-                if (step === 5) {
-                    clearInterval(interval);
-                    try {
-                        expect(fs.readFileSync("./tmp.css", "utf-8")).to.match(/background-color: #333;/);
-                        result.stop!();
-                        resolve(null);
-                    } catch (e) {
-                        reject(e);
-                    }
-                }
-            }, 250);
-        });
-    });
+    let debug = sinon.fake()
+    let warn = sinon.fake()
 
-    it("issue #21", async function () {
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.scss'],
+      outfile: './out/sample.css',
+      plugins: [sassPlugin({
+        logger: {
+          debug,
+          warn
+        }
+      })]
+    })
 
-        const absWorkingDir = path.resolve(__dirname, "issues/21");
-        process.chdir(absWorkingDir);
+    expect(readTextFile('./out/sample.css')).to.match(/z-index: 5;/)
+    expect(debug).to.be.callCount(0)
+    expect(warn).to.be.callCount(0)
+  })
 
-        await esbuild.build({
-            entryPoints: ["./index.scss"],
-            absWorkingDir,
-            outfile: "./sample.css",
-            plugins: [sassPlugin()]
-        });
+  it('#23 Support for previous methods of import in SASS', async function () {
+    const options = useFixture('../issues/23')
 
-        expect(fs.readFileSync("./sample.css", "utf-8")).to.match(/z-index: 5;/);
-    });
+    let debug = sinon.fake()
+    let warn = sinon.fake()
 
-    it("issue #23", async function () {
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.js'],
+      bundle: true,
+      outdir: './out',
+      plugins: [sassPlugin({
+        type: 'style',
+        quietDeps: true,
+        logger: {
+          debug,
+          warn
+        }
+      })]
+    })
 
-        const absWorkingDir = path.resolve(__dirname, "issues/23");
-        process.chdir(absWorkingDir);
+    expect(readTextFile('./out/index.js')).to.match(/background-color: #ae65ff;/)
 
-        await esbuild.build({
-            entryPoints: ["./index.js"],
-            absWorkingDir,
-            bundle: true,
-            outdir: "./out",
-            plugins: [sassPlugin({
-                type: "style",
-                quietDeps: true
-            })]
-        });
+    // NOTE: even with quietDeps: true we get 7 warnings!
 
-        expect(fs.readFileSync("./out/index.js", "utf-8")).to.match(/background-color: #ae65ff;/);
-    });
+    expect(debug).to.be.callCount(0)
+    expect(warn).to.be.callCount(7)
+  })
 
-    it("issue #25", async function () {
+  it('#25 why require.resolve is set to cwd ?', async function () {
+    const options = useFixture('../issues/25')
 
-        const absWorkingDir = path.resolve(__dirname, "issues/25");
-        process.chdir(absWorkingDir);
+    const includePath = path.resolve(__dirname, 'fixture/node_modules')
 
-        const includePath = path.resolve(__dirname, "fixture/node_modules");
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.js'],
+      bundle: true,
+      outdir: './out',
+      plugins: [sassPlugin({
+        includePaths: [includePath]
+      })]
+    })
 
-        await esbuild.build({
-            entryPoints: ["./index.js"],
-            absWorkingDir,
-            bundle: true,
-            outdir: "./out",
-            plugins: [sassPlugin({
-                implementation: "node-sass",
-                includePaths: [includePath]
-            })]
-        });
+    expect(readTextFile('./out/index.css')).to.match(/background-color: red;/)
+  })
 
-        expect(fs.readFileSync("./out/index.css", "utf-8")).to.match(/background-color: red;/);
-    });
+  it('#35 esbuild loader for woff2 being ignored', async function () {
+    const options = useFixture('../issues/35/packages/fonta')
 
-    it("issue #34", async function () {
+    const postcssUrl = require('postcss-url')
 
-        const absWorkingDir = path.resolve(__dirname, "issues/34");
-        process.chdir(absWorkingDir);
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./src/FontA.tsx'],
+      bundle: true,
+      sourcemap: true,
+      minify: true,
+      splitting: true,
+      format: 'esm',
+      target: ['esnext'],
+      outdir: './dist/',
+      loader: {
+        '.woff': 'dataurl',
+        '.woff2': 'dataurl'
+      },
+      plugins: [
+        sassPlugin({
+          type: 'css-text',
+          transform: postcssModules({}, [
+            postcssUrl({
+              basePath: '../../',
+              url: 'inline'
+            })
+          ])
+        })
+      ]
+    })
 
-        const magicImporter = require(require.resolve("node-sass-magic-importer", {paths:[process.cwd()]}));
-
-        let importer = magicImporter();
-
-        await esbuild.build({
-            entryPoints: ["main.scss"],
-            absWorkingDir,
-            bundle: true,
-            plugins: [
-                sassPlugin({
-                    implementation: "node-sass"
-                })
-            ],
-            outfile: "builtin.css",
-        });
-
-        await esbuild.build({
-            entryPoints: ["main.scss"],
-            absWorkingDir,
-            bundle: true,
-            plugins: [
-                sassPlugin({
-                    implementation: "node-sass",
-                    importer: importer
-                })
-            ],
-            outfile: "magic.css",
-        });
-
-        expect(fs.readFileSync("./builtin.css", "utf-8").substring(102))
-            .eq(fs.readFileSync("./magic.css", "utf-8").substring(102));
-    });
-
-
-    it("issue #35", async function () {
-
-        const absWorkingDir = path.resolve(__dirname, "issues/35/packages/fonta");
-        process.chdir(absWorkingDir);
-
-        const postcssUrl = require("postcss-url");
-
-        await esbuild.build({
-            absWorkingDir,
-            bundle: true,
-            sourcemap: true,
-            minify: true,
-            splitting: true,
-            format: 'esm',
-            target: ['esnext'],
-            entryPoints: ['./src/FontA.tsx'],
-            outdir: './dist/',
-            loader: {
-                '.woff': 'dataurl',
-                '.woff2': 'dataurl',
-            },
-            plugins: [
-                sassPlugin({
-                    type: 'css-text',
-                    transform: postcssModules({}, [
-                        postcssUrl({
-                            basePath: "../../",
-                            url: 'inline'
-                        })
-                    ]),
-                })
-            ],
-        });
-
-        expect(fs.readFileSync("./dist/FontA.js", "utf-8")).match(/data:font\/woff2;base64/);
-    });
-});
+    expect(readTextFile('./dist/FontA.js')).match(/data:font\/woff2;base64/)
+  })
+})
