@@ -41,6 +41,9 @@ await esbuild.build({
 ```
 
 this will use esbuild `loader: "css"` and your transpiled Sass will be in `index.css` alongside your bundle.
+There are two main options that control the plugin: `filter` which has the same meaning of filter in esbuild 
+[onLoad](https://esbuild.github.io/plugins/#on-load) and `type` that's what specifies how the css should be
+rendered and imported. 
 
 If you specify `type: "style"` then the stylesheet will be in the bundle 
 and will be dynamically added to the page when the bundle is loaded.
@@ -96,16 +99,16 @@ Look in `test/fixtures` folder for more usage examples.
 The **options** passed to the plugin are a superset of Sass
 [compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter).
 
-| Option                                     | Type                                  | Default                                 |
-|--------------------------------------------|---------------------------------------|-----------------------------------------|
-| filter                                     | regular expression                    | <code>/\.(s[ac]ss&vert;css)$/</code>    |
-| cache                                      | boolean or Map                        | `true` (there is one Map per namespace) |
-| type                                       | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                 |
-| transform                                  | function                              | undefined                               |
-| [loadPaths](https://www.shorturl.at/bdpBS) | string[]                              | []                                      |
-| importer                                   | function                              | built in importer                       |
-| precompile                                 | function                              | undefined                               |
-| importMapper                               | function                              | undefined                               |
+| Option                                               | Type                                  | Default                                 |
+|------------------------------------------------------|---------------------------------------|-----------------------------------------|
+| [filter](https://esbuild.github.io/plugins/#on-load) | regular expression                    | <code>/\.(s[ac]ss&vert;css)$/</code>    |
+| cache                                                | boolean or Map                        | `true` (there is one Map per namespace) |
+| type                                                 | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                 |
+| transform                                            | function                              | undefined                               |
+| [loadPaths](https://www.shorturl.at/bdpBS)           | string[]                              | []                                      |
+| importer                                             | function                              | built in importer                       |
+| precompile                                           | function                              | undefined                               |
+| importMapper                                         | function                              | undefined                               |
 
 ### pnpm
 
