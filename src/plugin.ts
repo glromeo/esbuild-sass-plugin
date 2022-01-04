@@ -59,7 +59,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         return {path: resolvePath(basedir, path), namespace, pluginData: args}
       })
 
-      const renderSync = createRenderer(options, sourcemap)
+      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
       const transform = options.transform
 
       onLoad({filter: /./, namespace}, useCache(options, async path => {
