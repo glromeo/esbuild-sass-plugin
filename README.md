@@ -110,23 +110,17 @@ The **options** passed to the plugin are a superset of Sass
 | precompile                                           | function                              | undefined                               |
 | importMapper                                         | function                              | undefined                               |
 
-> **What happened to `exclude` ?**
-> the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
-> If you have URLs in your imports and you want the plugin to ignore them you can just change the filter to something like:
-> ```javascript
-> sassPlugin({
->   filter: /^(?!https?:).*\.(s[ac]ss|css)$/
->   ...
-> })
-> ```
+### What happened to `exclude` ?
+the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
+If you have URLs in your imports and you want the plugin to ignore them you can just change the filter to something like:
+```javascript
+sassPlugin({
+  filter: /^(?!https?:).*\.(s[ac]ss|css)$/
+  ...
+})
+```
 
-
-### pnpm
-
-There's a working example of using `pnpm` with `@material` design
-in [issue/38](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/issues/38)
-
-### ImportMapper Option
+### `importMapper`
 
 A function to customize/re-map the import path, both `import` statements in JavaScript/TypeScript code and `@import`
 in Sass/SCSS are covered.   
@@ -158,8 +152,9 @@ await esbuild.build({
 })
 ```
 
-### Precompile
-#### `url(...)` rewrite
+### `precompile`
+
+#### - Rewriting relative `url(...)`s
 If your sass reference resources with relative urls (see [#48](https://github.com/glromeo/esbuild-sass-plugin/issues/48))
 esbuild will struggle to rewrite those urls because it doesn't have idea of the imports that the Sass compiler 
 has gone through. Fortunately the new importer API allows to rewrite those relative URLs in absolute ones which 
@@ -177,7 +172,7 @@ await esbuild.build({
   })]
 })
 ```
-#### Globals and other Shims (like sass-loader's additionalData)
+#### - Globals and other Shims (like sass-loader's additionalData)
 Look for a complete example in the [precompile](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/precompile) fixture
 
 ```javascript
@@ -196,7 +191,7 @@ await esbuild.build({
 })
 ```
 
-### Transform
+### `transform`
 
 ```typescript
 async (css: string, resolveDir?: string) => string
@@ -205,7 +200,7 @@ async (css: string, resolveDir?: string) => string
 It's a function which will be invoked before passing the css to esbuild or wrapping it in a module.\
 It can be used to do **PostCSS** processing and/or to create **modules** like in the following examples.
 
-#### PostCSS
+#### - PostCSS
 
 The simplest use case is to invoke PostCSS like this:
 
@@ -226,7 +221,7 @@ esbuild.build({
 
 ```
 
-#### CSS Modules
+#### - CSS Modules
 
 A helper function is available to do all the work of calling PostCSS to create a CSS module. The usage is something
 like:
@@ -255,6 +250,10 @@ the complete example.
 > **NOTE:** Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. \
 > This gives the flexibility to implement that helper function.
 
+### pnpm
+
+There's a working example of using `pnpm` with `@material` design
+in [issue/38](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/issues/38)
 
 ### Benchmarks
 
