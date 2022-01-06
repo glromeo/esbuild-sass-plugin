@@ -110,6 +110,17 @@ The **options** passed to the plugin are a superset of Sass
 | precompile                                           | function                              | undefined                               |
 | importMapper                                         | function                              | undefined                               |
 
+> **What happened to `exclude` ?**
+> the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
+> If you have URLs in your imports and you want the plugin to ignore them you can just change the filter to something like:
+> ```javascript
+> sassPlugin({
+>   filter: /^(?!https?:).*\.(s[ac]ss|css)$/
+>   ...
+> })
+> ```
+
+
 ### pnpm
 
 There's a working example of using `pnpm` with `@material` design
