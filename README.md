@@ -269,5 +269,5 @@ Given 24 × 24 = 576 lit-element files & 576 imported CSS styles plus the import
 
 (*) node-sass is here just to give a term of comparison ...those samples were taken from 1.8.x
 
-[travis-url]: https://travis-ci.com/glromeo/esbuild-sass-plugin
-[travis-image]: https://travis-ci.com/glromeo/esbuild-sass-plugin.svg?branch=main
+[travis-url]: https://app.travis-ci.com/glromeo/esbuild-sass-plugin
+[travis-image]: https://app.travis-ci.com/glromeo/esbuild-sass-plugin.svg?branch=main
