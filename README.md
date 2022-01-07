@@ -162,6 +162,8 @@ then esbuild will be able to handle.
 
 Here is an example of how to do the `url(...)` rewrite
 ```javascript
+const path = require('path')
+
 await esbuild.build({
   ...,
   plugins: [sassPlugin({
