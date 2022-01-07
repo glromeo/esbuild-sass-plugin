@@ -1,4 +1,4 @@
-import {dirname, resolve, sep} from 'path'
+import {dirname, resolve, sep, parse} from 'path'
 import fs, {readFileSync} from 'fs'
 import {fileSyntax, sourceMappingURL} from './utils'
 import * as sass from 'sass'
@@ -48,9 +48,9 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
   function resolveRelativeImport(loadPath: string, filename: string): string | null {
     const absolute = resolve(loadPath, filename)
-    let ext = absolute.lastIndexOf('.')
-    if (ext >= 0) {
-      return resolveImport(absolute.slice(0, ext), absolute.slice(ext))
+    const pathParts = parse(absolute)
+    if (pathParts.ext) {
+      return resolveImport(pathParts.dir + sep + pathParts.name, pathParts.ext)
     } else {
       return resolveImport(absolute)
     }
