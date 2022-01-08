@@ -160,7 +160,7 @@ esbuild will struggle to rewrite those urls because it doesn't have idea of the 
 has gone through. Fortunately the new importer API allows to rewrite those relative URLs in absolute ones which 
 then esbuild will be able to handle.
 
-Here is an example of how to do the `url(...)` rewrite
+Here is an example of how to do the `url(...)` rewrite ([make sure to handle `\` in *Windows*](https://github.com/glromeo/esbuild-sass-plugin/issues/58))
 ```javascript
 const path = require('path')
 
@@ -174,6 +174,7 @@ await esbuild.build({
   })]
 })
 ```
+
 #### - Globals and other Shims (like sass-loader's additionalData)
 Look for a complete example in the [precompile](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/precompile) fixture
 
