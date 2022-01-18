@@ -14,9 +14,10 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
 * pre-compiling (to add **global resources** to the sass files)
 
 ### Breaking Changes
-* `type` has been simplified and now accepts only a string. If you need different types in a project you can use more
-  than one instance of the plugin. You can have a look at the **exclude** fixture for an example_ where **lit CSS**
-  and **CSS modules** are both used in the same app
+* `type` has been simplified and now accepts only a string. If you need different types in a project [you can use more
+  than one instance](https://github.com/glromeo/esbuild-sass-plugin/issues/60) of the plugin. 
+  You can have a look at the [**multiple** fixture](https://github.com/glromeo/esbuild-sass-plugin/blob/main/test/fixture/multiple) 
+  for an example where **lit CSS** and **CSS modules** are both used in the same app
 * The support for [node-sass](https://github.com/sass/node-sass) has been removed and for good.
   Sadly, node-sass is at a dead end and so it's 1.x. I don't exclude updates or fixes on it but it's down in the list of
   my priorities.
