@@ -1,0 +1,6 @@
+@import '../fonts/fonts.scss';
+
+html.darkMode {
+  @import '../lib/SomeLib/builtIn'; // Note the extension should not be added, this is intended to use namespace feature
+}
+

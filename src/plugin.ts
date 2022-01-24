@@ -1,9 +1,11 @@
-import {OnLoadResult, OnResolveArgs, Plugin} from 'esbuild'
+import {OnLoadResult, Plugin} from 'esbuild'
 import {dirname, resolve} from 'path'
 import {SassPluginOptions} from './index'
 import {getContext, makeModule, modulesPaths, RELATIVE_PATH} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
+
+const DEFAULT_FILTER = /\.(s[ac]ss|css)$/
 
 /**
  *
@@ -43,26 +45,21 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     }
   }
 
+  const pluginName = 'sass-plugin'
+
   return {
-    name: 'sass-plugin',
-    setup({initialOptions, onLoad, onResolve}) {
+    name: pluginName,
+    setup({initialOptions, onLoad}) {
 
       const {
-        namespace,
         sourcemap,
         watched
       } = getContext(initialOptions)
 
-      onResolve({filter: options.filter ?? /\.(s[ac]ss|css)$/}, (args) => {
-        const {resolveDir, path, importer}: OnResolveArgs = args
-        const basedir = resolveDir || dirname(importer)
-        return {path: resolvePath(basedir, path), namespace, pluginData: args}
-      })
-
-      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
+      const renderSync = createRenderer(options, sourcemap)
       const transform = options.transform
 
-      onLoad({filter: /./, namespace}, useCache(options, async path => {
+      onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
         try {
           let {css, watchFiles} = renderSync(path)
 
