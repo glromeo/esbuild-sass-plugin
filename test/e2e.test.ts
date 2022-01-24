@@ -3,7 +3,7 @@ import {postcssModules, sassPlugin} from '../src'
 import {statSync} from 'fs'
 import {consumeSourceMap, readCssFile, readJsonFile, readTextFile, useFixture} from './test-toolkit'
 
-describe('unit tests', function () {
+describe('e2e tests', function () {
 
   this.timeout(5000)
 
@@ -41,7 +41,7 @@ describe('unit tests', function () {
 
     await esbuild.build({
       ...options,
-      entryPoints: ['./index.js'],
+      entryPoints: ['./src/index.js'],
       outdir: './out',
       bundle: true,
       sourcemap: 'both',
@@ -89,16 +89,10 @@ describe('unit tests', function () {
         line: 4, column: 0, lastColumn: null
       })
 
-      let expected = `data:;charset=utf-8,@import%20%22~bootstrap/scss/bootstrap.scss%22;${
-        process.platform === 'win32'
-          ? '%0D%0A%0D%0Abody%20%7B%0D%0A%20%20padding:%201em;%0D%0A%7D'
-          : '%0A%0Abody%20%7B%0A%20%20padding:%201em;%0A%7D'
-      }`
-
       expect(
         consumer.originalPositionFor({line: 9749, column: 0})
       ).to.eql({
-        source: expected,
+        source: `../src/entrypoint.scss`,
         line: 3,
         column: 0,
         name: null

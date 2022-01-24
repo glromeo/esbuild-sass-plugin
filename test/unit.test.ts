@@ -68,36 +68,6 @@ describe('unit tests', function () {
     expect(readCssFile('out/index-sass.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-sass.css'))
   })
 
-  it('can use context bound to build options', async function () {
-    const options = useFixture('tmp')
-    writeTextFile('./index.js', `// no comment`)
-    await esbuild.build({
-      ...options,
-      entryPoints: ['./index.js'],
-      outdir: './out',
-      bundle: true,
-      plugins: [
-        {
-          name: 'test-plugin',
-          setup(build) {
-            expect(getContext(build.initialOptions).instance).eq(0)
-          }
-        }, {
-          name: 'test-plugin',
-          setup(build) {
-            expect(getContext(build.initialOptions).instance).eq(1)
-          }
-        }, {
-          name: 'test-plugin',
-          setup(build) {
-            expect(getContext(build.initialOptions).instance).eq(2)
-          }
-        }
-      ]
-    })
-    deleteFixture('tmp')
-  })
-
   it('caching test', async function () {
     const options = useFixture('caching')
 

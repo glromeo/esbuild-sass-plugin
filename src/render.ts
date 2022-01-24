@@ -1,4 +1,4 @@
-import {dirname, resolve, sep, parse} from 'path'
+import {dirname, resolve, sep, parse, relative} from 'path'
 import fs, {readFileSync} from 'fs'
 import {fileSyntax, sourceMappingURL} from './utils'
 import * as sass from 'sass'
@@ -141,6 +141,14 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
     })
 
     const cssText = css.toString()
+
+    if (sourceMap) {
+      sourceMap.sourceRoot = basedir
+      sourceMap.sources[sourceMap.sources.length-1] = pathToFileURL(path).href
+      sourceMap.sources = sourceMap.sources.map(source => {
+        return source.startsWith('file://') ? relative(basedir, source.slice(7)) : source
+      })
+    }
 
     return {
       css: sourcemap ? `${cssText}\n${sourceMappingURL(sourceMap)}` : cssText,

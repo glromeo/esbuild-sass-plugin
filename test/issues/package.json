@@ -11,6 +11,7 @@
     "48"
   ],
   "dependencies": {
+    "esbuild": "^0.14.13",
     "postcss": "^8.3.11",
     "postcss-modules": "^4.2.2",
     "postcss-url": "^10.1.3",

@@ -5,7 +5,7 @@ const {cleanFixture, logSuccess, logFailure} = require('../utils')
 cleanFixture(__dirname)
 
 esbuild.build({
-  entryPoints: ['index.js'],
+  entryPoints: ['src/index.js'],
   outdir: 'out',
   bundle: true,
   format: 'esm',

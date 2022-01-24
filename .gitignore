@@ -47,3 +47,4 @@ lib/
 *.iml
 
 .idea/
+/.nyc_output/

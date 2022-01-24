@@ -10,7 +10,7 @@
 :root {
   --fontSize: 1rem;
   --mainColor: rgba(18,52,86,0.47059);
-  --secondaryColor: lab(32.5 38.5 -47.6 / 90%);
+  --secondaryColor: rgba(102, 51, 153, 0.9);
 }
 
 html {
@@ -31,9 +31,7 @@ html {
     word-wrap: break-word;
     padding-left: calc(1rem / 2 + 1px);
     padding-right: calc(1rem / 2 + 1px);
-    padding-left: calc(1rem / 2 + 1px);
     padding-left: calc(var(--fontSize) / 2 + 1px);
-    padding-right: calc(1rem / 2 + 1px);
     padding-right: calc(var(--fontSize) / 2 + 1px);
   }
 }
@@ -43,7 +41,18 @@ h1,h2,h3,h4,h5,h6 {
   margin-bottom: 0;
 }
 
-.hero:matches(main, .main) {
+main.hero, .hero.main {
+  background-image: img/background.jpg;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+
+main.hero, .hero.main {
+  background-image: img/background-2x.jpg;
+}
+}
+
+main.hero, .hero.main {
   background-image: -webkit-image-set(url("img/background.jpg") 1x, url("img/background-2x.jpg") 2x);
   background-image: image-set("img/background.jpg" 1x, "img/background-2x.jpg" 2x);
 }
