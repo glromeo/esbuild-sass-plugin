@@ -3,7 +3,7 @@ import fs, {readFileSync} from 'fs'
 import {fileSyntax, sourceMappingURL} from './utils'
 import * as sass from 'sass'
 import {ImporterResult} from 'sass'
-import {pathToFileURL} from 'url'
+import {fileURLToPath, pathToFileURL} from 'url'
 import {SassPluginOptions} from './index'
 
 export type RenderSync = (path: string) => RenderResult
@@ -146,7 +146,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       sourceMap.sourceRoot = basedir
       sourceMap.sources[sourceMap.sources.length-1] = pathToFileURL(path).href
       sourceMap.sources = sourceMap.sources.map(source => {
-        return source.startsWith('file://') ? relative(basedir, source.slice(7)) : source
+        return source.startsWith('file://') ? relative(basedir, fileURLToPath(source)) : source
       })
     }
 
