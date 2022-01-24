@@ -1,5 +1,5 @@
 ![cooltext394785080075403](https://user-images.githubusercontent.com/160981/136289874-26ce7269-ea08-47dd-be31-9bf0ef7a0b8d.png)
-![image](https://user-images.githubusercontent.com/160981/147304513-386dac37-7098-43d9-a17a-d10cc719d8ba.png)
+![image](https://user-images.githubusercontent.com/160981/150880682-4915c4dd-726b-4fea-8f3b-597d191f05bc.png)
 
 [![Build Status][travis-image]][travis-url]
 
