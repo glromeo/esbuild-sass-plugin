@@ -40,7 +40,7 @@ export function readJsonFile(pathname: string) {
 }
 
 export function readCssFile(pathname: string) {
-  return readTextFile(pathname).replace(/\/\* sass-plugin.+\*\//g, "/* no comment */")
+  return readTextFile(pathname).replace(/\/\* sass-plugin.+\*\//g, '/* no comment */')
 }
 
 export function writeTextFile(pathname: string, content: string) {

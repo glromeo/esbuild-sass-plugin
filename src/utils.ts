@@ -60,7 +60,7 @@ export function getContext(buildOptions: BuildOptions): PluginContext {
 }
 
 export function sourceMappingURL(sourceMap: any): string {
-  const data = Buffer.from(JSON.stringify(sourceMap), 'utf8').toString('base64')
+  const data = Buffer.from(JSON.stringify(sourceMap), 'utf-8').toString('base64')
   return `/*# sourceMappingURL=data:application/json;charset=utf-8;base64,${data} */`
 }
 

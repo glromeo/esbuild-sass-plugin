@@ -4,6 +4,7 @@ import * as path from 'path'
 import {postcssModules, sassPlugin} from '../src'
 
 import {readTextFile, sinon, useFixture, writeTextFile} from './test-toolkit'
+import {existsSync} from 'fs'
 
 describe('tests covering github issues', function () {
 
@@ -24,9 +25,9 @@ describe('tests covering github issues', function () {
       plugins: [sassPlugin({})]
     })
 
-    let cssBundle = readTextFile('./test/issues/18/out/entrypoint.css')
-    expect(cssBundle).to.containIgnoreSpaces('.component_a { background: blue; }')
-    expect(cssBundle).to.containIgnoreSpaces('.component_b { background: yellow; }')
+    expect(readTextFile('./test/issues/18/out/entrypoint.css'))
+      .to.containIgnoreSpaces('.component_a { background: blue; }')
+      .and.containIgnoreSpaces('.component_b { background: yellow; }')
   })
 
   it('#20 Plugin stops working after a SASS failure', async function () {
@@ -192,5 +193,36 @@ describe('tests covering github issues', function () {
     })
 
     expect(readTextFile('./dist/FontA.js')).match(/data:font\/woff2;base64/)
+  })
+
+  it('#61 npm exports and url encode/decode', async function () {
+    const options = useFixture('../issues/61')
+
+    let debug = sinon.fake()
+    let warn = sinon.fake()
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./src/index.jsx'],
+      outdir: './out',
+      bundle: true,
+      plugins: [sassPlugin({
+        logger: {
+          debug,
+          warn
+        }
+      })]
+    })
+
+    expect(existsSync('./out/index.js')).to.be.true
+
+    expect(readTextFile('./out/index.css'))
+      .to.include('@charset "UTF-8"', 'has the correct encoding')
+      .and.include('/* src/快樂的.scss */', 'sass has imported a file with chinese in the name')
+      .and.include('.\\5feb\\6a02\\7684', 'chinese css classes are unicode escaped (tested in Chrome)')
+      .and.include('/* node_modules/swiper/swiper.scss */', 'has imported swiper/scss')
+
+    expect(debug).to.be.callCount(0)
+    expect(warn).to.be.callCount(0)
   })
 })

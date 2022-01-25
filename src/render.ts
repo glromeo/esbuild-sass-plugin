@@ -1,4 +1,4 @@
-import {dirname, resolve, sep, parse, relative} from 'path'
+import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
 import {fileSyntax, sourceMappingURL} from './utils'
 import * as sass from 'sass'
@@ -58,6 +58,8 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
   const requireOptions = {paths: ['.', ...loadPaths]}
 
+  const sepTilde = `${sep}~`
+
   /**
    * renderSync
    */
@@ -65,7 +67,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     const basedir = dirname(path)
 
-    let source = fs.readFileSync(path, 'utf8')
+    let source = fs.readFileSync(path, 'utf-8')
     if (options.precompile) {
       source = options.precompile(source, path)
     }
@@ -84,30 +86,30 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       syntax,
       importer: {
         load(canonicalUrl: URL): ImporterResult | null {
-          const filename = sep === '/' ? canonicalUrl.pathname : canonicalUrl.pathname.slice(1)
-          let contents = fs.readFileSync(filename, 'utf8')
+          const pathname = fileURLToPath(canonicalUrl)
+          let contents = fs.readFileSync(pathname, 'utf8')
           if (options.precompile) {
-            contents = options.precompile(contents, filename)
+            contents = options.precompile(contents, canonicalUrl.pathname)
           }
           return {
             contents,
-            syntax: fileSyntax(filename),
-            sourceMapUrl: sourcemap ? pathToFileURL(filename) : undefined
+            syntax: fileSyntax(pathname),
+            sourceMapUrl: sourcemap ? canonicalUrl : undefined
           }
         },
         canonicalize(url: string): URL | null {
           let filename
           if (url.startsWith('~')) {
-            filename = url.slice(1)
+            filename = decodeURI(url.slice(1))
             try {
               requireOptions.paths[0] = basedir
               filename = require.resolve(filename, requireOptions)
             } catch (ignored) {
             }
           } else if (url.startsWith('file://')) {
-            filename = sep === '/' ? url.slice(7) : url.slice(8)
+            filename = fileURLToPath(url)
             // ================================================ patch for: https://github.com/sass/dart-sass/issues/1581
-            let joint = filename.lastIndexOf('/~')
+            let joint = filename.lastIndexOf(sepTilde)
             if (joint >= 0) {
               const basedir = filename.slice(0, joint)
               filename = filename.slice(joint + 2)
@@ -119,7 +121,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
             }
             // =========================================================================================================
           } else {
-            filename = url
+            filename = decodeURI(url)
           }
           if (options.importMapper) {
             filename = options.importMapper(filename)
@@ -144,7 +146,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     if (sourceMap) {
       sourceMap.sourceRoot = basedir
-      sourceMap.sources[sourceMap.sources.length-1] = pathToFileURL(path).href
+      sourceMap.sources[sourceMap.sources.length - 1] = pathToFileURL(path).href
       sourceMap.sources = sourceMap.sources.map(source => {
         return source.startsWith('file://') ? relative(basedir, fileURLToPath(source)) : source
       })
@@ -152,7 +154,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     return {
       css: sourcemap ? `${cssText}\n${sourceMappingURL(sourceMap)}` : cssText,
-      watchFiles: [path, ...loadedUrls.map(url => sep === '/' ? url.pathname : url.pathname.slice(1))]
+      watchFiles: [path, ...loadedUrls.map(fileURLToPath)]
     }
   }
 }

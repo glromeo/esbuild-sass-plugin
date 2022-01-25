@@ -29,11 +29,11 @@ watcher.on('ready', async function () {
       sassPlugin({
         'filter': /^\.\.\/index.scss$/,
         'type': 'style',
-        'cache': false
+        'cache': true
       }),
       sassPlugin({
         'type': 'lit-css',
-        'cache': false
+        'cache': true
       })
     ],
     logLevel: 'debug'
