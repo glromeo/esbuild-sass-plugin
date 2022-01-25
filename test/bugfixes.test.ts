@@ -220,7 +220,7 @@ describe('tests covering github issues', function () {
       .to.include('@charset "UTF-8"', 'has the correct encoding')
       .and.include('/* src/快樂的.scss */', 'sass has imported a file with chinese in the name')
       .and.include('.\\5feb\\6a02\\7684', 'chinese css classes are unicode escaped (tested in Chrome)')
-      .and.include('/* node_modules/swiper/swiper.scss */', 'has imported swiper/scss')
+      .and.include('/* ../node_modules/swiper/swiper.scss */', 'has imported swiper/scss')
 
     expect(debug).to.be.callCount(0)
     expect(warn).to.be.callCount(0)
