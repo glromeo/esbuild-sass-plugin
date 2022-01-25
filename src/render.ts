@@ -9,7 +9,7 @@ import {SassPluginOptions} from './index'
 export type RenderSync = (path: string) => RenderResult
 
 export type RenderResult = {
-  css: string
+  cssText: string
   watchFiles: string[]
 }
 
@@ -74,7 +74,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     const syntax = fileSyntax(path)
     if (syntax === 'css') {
-      return {css: readFileSync(path, 'utf-8'), watchFiles: [path]}
+      return {cssText: readFileSync(path, 'utf-8'), watchFiles: [path]}
     }
 
     const {
@@ -142,7 +142,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       sourceMap: sourcemap
     })
 
-    const cssText = css.toString()
+    let cssText = css.toString()
 
     if (sourceMap) {
       sourceMap.sourceRoot = basedir
@@ -150,10 +150,11 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       sourceMap.sources = sourceMap.sources.map(source => {
         return source.startsWith('file://') ? relative(basedir, fileURLToPath(source)) : source
       })
+      cssText += '\n' + sourceMappingURL(sourceMap)
     }
 
     return {
-      css: sourcemap ? `${cssText}\n${sourceMappingURL(sourceMap)}` : cssText,
+      cssText,
       watchFiles: [path, ...loadedUrls.map(fileURLToPath)]
     }
   }

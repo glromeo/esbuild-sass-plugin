@@ -45,10 +45,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     }
   }
 
-  const pluginName = 'sass-plugin'
-
   return {
-    name: pluginName,
+    name: 'sass-plugin',
     setup({initialOptions, onLoad}) {
 
       const {
@@ -56,12 +54,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         watched
       } = getContext(initialOptions)
 
-      const renderSync = createRenderer(options, sourcemap)
+      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
       const transform = options.transform
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
         try {
-          let {css, watchFiles} = renderSync(path)
+          let {cssText, watchFiles} = renderSync(path)
 
           if (watched) {
             watched[path] = watchFiles
@@ -70,7 +68,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
           const resolveDir = dirname(path)
 
           if (transform) {
-            const out: string | OnLoadResult = await transform(css, resolveDir, path)
+            const out: string | OnLoadResult = await transform(cssText, resolveDir, path)
             if (typeof out !== 'string') {
               return {
                 contents: out.contents,
@@ -80,17 +78,17 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 watchDirs: out.watchDirs || []
               }
             } else {
-              css = out
+              cssText = out
             }
           }
 
           return type === 'css' ? {
-            contents: css,
+            contents: cssText,
             loader: 'css',
             resolveDir,
             watchFiles
           } : {
-            contents: makeModule(css, type),
+            contents: makeModule(cssText, type),
             loader: 'js',
             resolveDir,
             watchFiles
