@@ -260,16 +260,17 @@ There's a working example of using `pnpm` with `@material` design
 in [issue/38](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/issues/38)
 
 ### Benchmarks
+**Windows 10** Pro - **i7-4770K** CPU @ **3.50**GHz - RAM **24**GB - SSD **500**GB
 
 Given 24 × 24 = 576 lit-element files & 576 imported CSS styles plus the import of the full bootstrap 5.1
 
-|                        | dart sass  | dart sass (no cache)  | node-sass*  | node-sass (no cache) |
-|------------------------|------------|-----------------------|-------------|----------------------|
-| **initial build**      | 2.946s     | 2.945s                | 1.903s      | 1.858s               |
-| rebuild (.ts change)   | 285.959ms  | 1.950s                | 797.098ms   | 1.689s               |
-| rebuild (.ts change)   | 260.791ms  | 1.799s                | 768.213ms   | 1.790s               |
-| rebuild (.scss change) | 234.152ms  | 1.801s                | 770.619ms   | 1.652s               |
-| rebuild (.scss change) | 267.857ms  | 1.738s                | 750.743ms   | 1.682s               |
+|                        | dart sass | dart sass (no cache)  | node-sass*  | node-sass (no cache) |
+|------------------------|-----------|-----------------------|-------------|----------------------|
+| **initial build**      | 2.750s    | 2.750s                | 1.903s      | 1.858s               |
+| rebuild (.ts change)   | 285.959ms | 1.950s                | 797.098ms   | 1.689s               |
+| rebuild (.ts change)   | 260.791ms | 1.799s                | 768.213ms   | 1.790s               |
+| rebuild (.scss change) | 234.152ms | 1.801s                | 770.619ms   | 1.652s               |
+| rebuild (.scss change) | 267.857ms | 1.738s                | 750.743ms   | 1.682s               |
 
 (*) node-sass is here just to give a term of comparison ...those samples were taken from 1.8.x
 
