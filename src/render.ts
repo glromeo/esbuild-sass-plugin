@@ -146,9 +146,8 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     if (sourceMap) {
       sourceMap.sourceRoot = basedir
-      sourceMap.sources[sourceMap.sources.length - 1] = pathToFileURL(path).href
       sourceMap.sources = sourceMap.sources.map(source => {
-        return source.startsWith('file://') ? relative(basedir, fileURLToPath(source)) : source
+        return relative(basedir, source.startsWith("data:") ? path : fileURLToPath(source))
       })
       cssText += '\n' + sourceMappingURL(sourceMap)
     }

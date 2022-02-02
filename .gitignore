@@ -41,10 +41,11 @@ node_modules/
 .env.test
 
 lib/
-
+**/dist
 **/out
 **/tmp
 *.iml
 
 .idea/
 /.nyc_output/
+
