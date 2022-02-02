@@ -41,11 +41,10 @@
   },
   "dependencies": {
     "esbuild": "^0.14.13",
-    "sass": "^1.49.0"
+    "sass-embedded": "^1.49.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.10",
-    "@types/sass": "^1.43.1",
     "mocha-toolkit": "^1.0.7",
     "postcss": "^8.4.5",
     "postcss-modules": "^4.3.0",

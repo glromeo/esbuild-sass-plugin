@@ -2,7 +2,7 @@ import {Type} from './index'
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
 import {BuildOptions, OnLoadResult} from 'esbuild'
-import {Syntax} from 'sass'
+import {Syntax} from 'sass-embedded'
 import {parse, resolve} from 'path'
 import {existsSync} from 'fs'
 

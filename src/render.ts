@@ -1,19 +1,20 @@
 import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
+import {readFile} from 'fs/promises';
 import {fileSyntax, sourceMappingURL} from './utils'
-import * as sass from 'sass'
-import {ImporterResult} from 'sass'
+import * as sass from 'sass-embedded'
+import {ImporterResult} from 'sass-embedded'
 import {fileURLToPath, pathToFileURL} from 'url'
 import {SassPluginOptions} from './index'
 
-export type RenderSync = (path: string) => RenderResult
+export type RenderAsync = (path: string) => Promise<RenderResult>
 
 export type RenderResult = {
   cssText: string
   watchFiles: string[]
 }
 
-export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderSync {
+export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderAsync {
 
   const loadPaths = options.loadPaths!
 
@@ -61,33 +62,33 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
   const sepTilde = `${sep}~`
 
   /**
-   * renderSync
+   * renderAsync
    */
-  return function (path: string): RenderResult {
+  return async function (path: string): Promise<RenderResult> {
 
     const basedir = dirname(path)
 
-    let source = fs.readFileSync(path, 'utf-8')
+    let source = await readFile(path, {encoding: 'utf-8'})
     if (options.precompile) {
       source = options.precompile(source, path)
     }
 
     const syntax = fileSyntax(path)
     if (syntax === 'css') {
-      return {cssText: readFileSync(path, 'utf-8'), watchFiles: [path]}
+      return {cssText: await readFile(path, {encoding: 'utf-8'}), watchFiles: [path]}
     }
 
     const {
       css,
       loadedUrls,
       sourceMap
-    } = sass.compileString(source, {
+    } = await sass.compileStringAsync(source, {
       ...options,
       syntax,
       importer: {
-        load(canonicalUrl: URL): ImporterResult | null {
+        async load(canonicalUrl: URL): Promise<ImporterResult | null> {
           const pathname = fileURLToPath(canonicalUrl)
-          let contents = fs.readFileSync(pathname, 'utf8')
+          let contents = await readFile(pathname, {encoding: 'utf8'})
           if (options.precompile) {
             contents = options.precompile(contents, canonicalUrl.pathname)
           }
