@@ -3,7 +3,7 @@ import * as esbuild from 'esbuild'
 import * as path from 'path'
 import {postcssModules, sassPlugin} from '../src'
 
-import {readTextFile, sinon, useFixture, writeTextFile} from './test-toolkit'
+import {readJsonFile, readTextFile, sinon, useFixture, writeTextFile} from "./test-toolkit";
 import {existsSync} from 'fs'
 
 describe('tests covering github issues', function () {
@@ -224,5 +224,33 @@ describe('tests covering github issues', function () {
 
     expect(debug).to.be.callCount(0)
     expect(warn).to.be.callCount(0)
+  })
+
+  it('#69 when building scss files main scss file source is first in sourcemap not last', async function () {
+    const options = useFixture('../issues/69')
+
+    await esbuild.build({
+      ...options,
+      plugins: [
+        sassPlugin({
+          loadPaths: [ 'scss_utils', ],
+        }),
+      ],
+      outdir: 'dist',
+      entryPoints: [
+        'src/with_use.scss',
+        'src/without_use.scss',
+      ],
+      sourcemap: true,
+      metafile: true,
+    })
+
+    expect(readJsonFile('./dist/with_use.css.map')).to.eql({
+      "version": 3,
+      "sources": ["../src/with_use.scss", "../scss_utils/_colors.scss"],
+      "sourcesContent": [null, null],
+      "mappings": "AAEA;AACE;;",
+      "names": []
+    })
   })
 })
