@@ -6,14 +6,18 @@ import {ImporterResult} from 'sass'
 import {fileURLToPath, pathToFileURL} from 'url'
 import {SassPluginOptions} from './index'
 
-export type RenderSync = (path: string) => RenderResult
+const {readFile} = fs.promises;
+
+const isAsync = false;
+
+export type RenderSass = (path: string) => Promise<RenderResult>
 
 export type RenderResult = {
   cssText: string
   watchFiles: string[]
 }
 
-export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderSync {
+export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderSass {
 
   const loadPaths = options.loadPaths!
 
@@ -60,84 +64,109 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
   const sepTilde = `${sep}~`
 
+  async function loadAsync(canonicalUrl: URL): Promise<ImporterResult | null> {
+    const pathname = fileURLToPath(canonicalUrl);
+    let contents = await readFile(pathname, "utf8");
+    if (options.precompile) {
+      contents = options.precompile(contents, canonicalUrl.pathname);
+    }
+    return {
+      contents,
+      syntax: fileSyntax(pathname),
+      sourceMapUrl: sourcemap ? canonicalUrl : undefined
+    };
+  }
+
+  function loadSync(canonicalUrl: URL): ImporterResult | null {
+    const pathname = fileURLToPath(canonicalUrl);
+    let contents = fs.readFileSync(pathname, "utf8");
+    if (options.precompile) {
+      contents = options.precompile(contents, canonicalUrl.pathname);
+    }
+    return {
+      contents,
+      syntax: fileSyntax(pathname),
+      sourceMapUrl: sourcemap ? canonicalUrl : undefined
+    };
+  }
+
   /**
-   * renderSync
+   * renderSass
    */
-  return function (path: string): RenderResult {
+  return async function (path: string): Promise<RenderResult> {
 
     const basedir = dirname(path)
 
-    let source = fs.readFileSync(path, 'utf-8')
+    let source = isAsync ? await readFile(path, 'utf-8') : readFileSync(path, 'utf-8')
     if (options.precompile) {
       source = options.precompile(source, path)
     }
 
     const syntax = fileSyntax(path)
     if (syntax === 'css') {
-      return {cssText: readFileSync(path, 'utf-8'), watchFiles: [path]}
+      return {cssText: isAsync ? await readFile(path, 'utf-8') : readFileSync(path, 'utf-8'), watchFiles: [path]}
+    }
+
+    function canonicalize(url: string): URL | null {
+      let filename;
+      if (url.startsWith("~")) {
+        filename = decodeURI(url.slice(1));
+        try {
+          requireOptions.paths[0] = basedir;
+          filename = require.resolve(filename, requireOptions);
+        } catch (ignored) {
+        }
+      } else if (url.startsWith("file://")) {
+        filename = fileURLToPath(url);
+        // ================================================ patch for: https://github.com/sass/dart-sass/issues/1581
+        let joint = filename.lastIndexOf(sepTilde);
+        if (joint >= 0) {
+          const basedir = filename.slice(0, joint);
+          filename = filename.slice(joint + 2);
+          try {
+            requireOptions.paths[0] = basedir;
+            filename = require.resolve(filename, requireOptions);
+          } catch (ignored) {
+          }
+        }
+        // =========================================================================================================
+      } else {
+        filename = decodeURI(url);
+      }
+      if (options.importMapper) {
+        filename = options.importMapper(filename);
+      }
+      let resolved = resolveRelativeImport(basedir, filename);
+      if (resolved) {
+        return pathToFileURL(resolved);
+      }
+      for (const loadPath of loadPaths) {
+        resolved = resolveRelativeImport(loadPath, filename);
+        if (resolved) {
+          return pathToFileURL(resolved);
+        }
+      }
+      return null;
     }
 
     const {
       css,
       loadedUrls,
       sourceMap
-    } = sass.compileString(source, {
+    } = isAsync ? await sass.compileStringAsync(source, {
+      ...options as any,
+      syntax,
+      importer: {
+        load: loadAsync,
+        canonicalize
+      },
+      sourceMap: sourcemap
+    }) : sass.compileString(source, {
       ...options,
       syntax,
       importer: {
-        load(canonicalUrl: URL): ImporterResult | null {
-          const pathname = fileURLToPath(canonicalUrl)
-          let contents = fs.readFileSync(pathname, 'utf8')
-          if (options.precompile) {
-            contents = options.precompile(contents, canonicalUrl.pathname)
-          }
-          return {
-            contents,
-            syntax: fileSyntax(pathname),
-            sourceMapUrl: sourcemap ? canonicalUrl : undefined
-          }
-        },
-        canonicalize(url: string): URL | null {
-          let filename
-          if (url.startsWith('~')) {
-            filename = decodeURI(url.slice(1))
-            try {
-              requireOptions.paths[0] = basedir
-              filename = require.resolve(filename, requireOptions)
-            } catch (ignored) {
-            }
-          } else if (url.startsWith('file://')) {
-            filename = fileURLToPath(url)
-            // ================================================ patch for: https://github.com/sass/dart-sass/issues/1581
-            let joint = filename.lastIndexOf(sepTilde)
-            if (joint >= 0) {
-              const basedir = filename.slice(0, joint)
-              filename = filename.slice(joint + 2)
-              try {
-                requireOptions.paths[0] = basedir
-                filename = require.resolve(filename, requireOptions)
-              } catch (ignored) {
-              }
-            }
-            // =========================================================================================================
-          } else {
-            filename = decodeURI(url)
-          }
-          if (options.importMapper) {
-            filename = options.importMapper(filename)
-          }
-          let resolved = resolveRelativeImport(basedir, filename)
-          if (resolved) {
-            return pathToFileURL(resolved)
-          }
-          for (const loadPath of loadPaths) {
-            resolved = resolveRelativeImport(loadPath, filename)
-            if (resolved) {
-              return pathToFileURL(resolved)
-            }
-          }
-          return null
-        }
+        load: loadSync,
+        canonicalize
       },
       sourceMap: sourcemap
     })

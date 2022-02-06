@@ -54,12 +54,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         watched
       } = getContext(initialOptions)
 
-      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
+      const renderSass = createRenderer(options, options.sourceMap ?? sourcemap)
       const transform = options.transform
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
         try {
-          let {cssText, watchFiles} = renderSync(path)
+          let {cssText, watchFiles} = await renderSass(path)
 
           if (watched) {
             watched[path] = watchFiles
