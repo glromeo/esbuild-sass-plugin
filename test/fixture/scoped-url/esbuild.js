@@ -1,4 +1,5 @@
 const {sassPlugin} = require("../../../lib/index.js");
+const path = require("path");
 
 require("esbuild").build({
   entryPoints: ["./src/index.js"],
@@ -9,6 +10,11 @@ require("esbuild").build({
     ".png": "file"
   },
   plugins: [
-    sassPlugin()
+    sassPlugin({
+      precompile(source, pathname) {
+        const basedir = path.dirname(pathname).replace(/\\/g, "/")
+        return source.replace(/(url\(['"]?)(\.\.?\/)?([^'")]+['"]?\))/g, `$1${basedir}/$2$3`)
+      }
+    })
   ]
 }).catch(() => process.exit(1));
