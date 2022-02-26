@@ -471,7 +471,7 @@ describe('e2e tests', function () {
       bundle: true,
       plugins: [sassPlugin({
         precompile(source, pathname) {
-          const prefix = /\/included\.scss$/.test(pathname) ? `
+          const prefix = /included\.scss$/.test(pathname) ? `
             $color: ${context.blue};
           ` : env
           return prefix + source

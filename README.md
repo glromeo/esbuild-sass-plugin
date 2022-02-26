@@ -110,6 +110,7 @@ The **options** passed to the plugin are a superset of Sass
 | importer                                             | function                              | built in importer                       |
 | precompile                                           | function                              | undefined                               |
 | importMapper                                         | function                              | undefined                               |
+| cssImports                                           | boolean                               | false                                   |
 
 ### What happened to `exclude` ?
 the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
@@ -120,6 +121,15 @@ sassPlugin({
   ...
 })
 ```
+
+### `cssImports`
+when this is set to `true` the plugin rewrites the node-modules relative URLs startig with the `~` prefix so that
+esbuild can resolve them similarly to what `css-loader` does. 
+> Although this practice is [kind of deprecated nowadays](https://webpack.js.org/loaders/sass-loader/#resolving-import-at-rules) 
+> some packages out there still use this notation (e.g. `formio`)
+> \
+> so I added this feature to help in cases [like this one](https://github.com/glromeo/esbuild-sass-plugin/issues/74).
+
 
 ### `importMapper`
 

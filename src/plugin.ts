@@ -47,7 +47,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
   return {
     name: 'sass-plugin',
-    setup({initialOptions, onLoad}) {
+    setup({initialOptions, onResolve, onLoad, resolve}) {
 
       const {
         sourcemap,
@@ -56,6 +56,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
       const transform = options.transform
+
+      if (options.cssImports) {
+        onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
+          return resolve(path.slice(1), {importer, resolveDir});
+        });
+      }
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
         try {

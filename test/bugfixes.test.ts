@@ -253,4 +253,19 @@ describe('tests covering github issues', function () {
       "names": []
     })
   })
+
+  it('#74 Support for deprecated css imports (leftover css urls starting with ~)', async function () {
+    const options = useFixture('../issues/74')
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ["./src/formio.scss"],
+      bundle: true,
+      outdir: "./out",
+      plugins: [sassPlugin({cssImports: true})]
+    })
+
+    expect(readTextFile('./out/formio.css'))
+        .to.match(/\/\* \.\.\/node_modules\/dialog-polyfill\/dist\/dialog-polyfill\.css \*\//)
+  })
 })

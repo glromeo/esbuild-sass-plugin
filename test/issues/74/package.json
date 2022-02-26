@@ -1,0 +1,12 @@
+{
+  "name": "isse-74",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node scss.config.js"
+  },
+  "homepage": "https://github.com/glromeo/esbuild-sass-plugin/issues/74",
+  "dependencies": {
+    "dialog-polyfill": "^0.5.6"
+  }
+}
