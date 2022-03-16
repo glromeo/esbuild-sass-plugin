@@ -103,7 +103,7 @@ style.setAttribute("nonce", "${nonce}");
 style.appendChild(document.createTextNode(css));
 document.head.appendChild(style);
 export {css};
-` : cssText => `\
+` : `\
 const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 document.head
     .appendChild(document.createElement("style"))
