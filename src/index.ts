@@ -26,7 +26,7 @@ export type SassPluginOptions = StringOptions<'sync'> & {
    *
    * @default []
    */
-  includePaths?: string[];
+  includePaths?: string[]
 
   /**
    * Directory that paths will be relative to.
@@ -55,7 +55,7 @@ export type SassPluginOptions = StringOptions<'sync'> & {
    *
    * @default undefined
    */
-  transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>;
+  transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>
 
   /**
    *
@@ -66,6 +66,11 @@ export type SassPluginOptions = StringOptions<'sync'> & {
    * Should rewrite leftover css imports starting with ~ so that esbuild can resolve them?
    */
   cssImports?: boolean
+
+  /**
+   *
+   */
+  nonce?: string
 }
 
 export default sassPlugin

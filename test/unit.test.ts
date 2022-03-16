@@ -109,8 +109,23 @@ describe('unit tests', function () {
     result.rebuild.dispose()
   })
 
-  it('follows esbuild absWorkingDir and accepts loadPaths (was includePaths)', function () {
+  it('allows to specify a nonce for the <style> tag', async function () {
+    const options = useFixture('nonce')
 
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.js'],
+      outdir: './out',
+      bundle: true,
+      plugins: [
+        sassPlugin({
+          type: 'style',
+          nonce: '12345'
+        })
+      ]
+    })
+
+    expect(readTextFile('out/index.js')).to.equalIgnoreSpaces(readTextFile('snapshot.js'))
   })
 
 })

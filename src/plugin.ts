@@ -31,19 +31,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
   }
 
-  const requireOptions = {paths: ['.', ...options.loadPaths]}
-
-  function resolvePath(basedir: string, path: string) {
-    if (options.importMapper) {
-      path = options.importMapper(path)
-    }
-    if (RELATIVE_PATH.test(path)) {
-      return resolve(basedir, path)
-    } else {
-      requireOptions.paths[0] = basedir
-      return require.resolve(path, requireOptions)
-    }
-  }
+  const nonce = options.nonce
 
   return {
     name: 'sass-plugin',
@@ -59,8 +47,8 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       if (options.cssImports) {
         onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
-          return resolve(path.slice(1), {importer, resolveDir});
-        });
+          return resolve(path.slice(1), {importer, resolveDir})
+        })
       }
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
@@ -94,7 +82,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             resolveDir,
             watchFiles
           } : {
-            contents: makeModule(cssText, type),
+            contents: makeModule(cssText, type, nonce),
             loader: 'js',
             resolveDir,
             watchFiles

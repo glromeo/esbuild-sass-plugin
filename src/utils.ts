@@ -1,4 +1,4 @@
-import {Type} from './index'
+import {SassPluginOptions, Type} from "./index";
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
 import {BuildOptions, OnLoadResult} from 'esbuild'
@@ -96,17 +96,18 @@ export default css\`
 ${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
-const styleModule = cssText => `\
+const styleModule = (cssText:string, nonce?:string) => `\
 const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
-document.head
-    .appendChild(document.createElement("style"))
-    .appendChild(document.createTextNode(css));
+const style = document.createElement("style");
+${nonce ? `style.setAttribute("nonce", "${nonce}");` : ""}\
+style.appendChild(document.createTextNode(css));
+document.head.appendChild(style);
 export {css};
-`
+`;
 
-export function makeModule(contents: string, type: Type) {
+export function makeModule(contents: string, type: Type, nonce?: string) {
   if (type === 'style') {
-    return styleModule(contents)
+    return styleModule(contents, nonce)
   } else {
     return type === 'lit-css' ? cssResultModule(contents) : cssTextModule(contents)
   }
@@ -121,7 +122,7 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
   const postcss: Postcss = requireTool('postcss', options.basedir)
   const postcssModulesPlugin: PostcssModulesPlugin = requireTool('postcss-modules', options.basedir)
 
-  return async (source: string, dirname: string, path: string): Promise<OnLoadResult> => {
+  return async function (this: SassPluginOptions, source: string, dirname: string, path: string): Promise<OnLoadResult> {
 
     let cssModule
 
@@ -136,7 +137,7 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
     ]).process(source, {from: path, map: false})
 
     return {
-      contents: `${makeModule(css, 'style')}export default ${cssModule};`,
+      contents: `${makeModule(css, 'style', this.nonce)}export default ${cssModule};`,
       loader: 'js'
     }
   }
