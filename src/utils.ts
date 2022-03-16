@@ -96,14 +96,20 @@ export default css\`
 ${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
-const styleModule = (cssText:string, nonce?:string) => `\
+const styleModule = (cssText:string, nonce?:string) => nonce ? `\
 const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 const style = document.createElement("style");
-${nonce ? `style.setAttribute("nonce", "${nonce}");` : ""}\
+style.setAttribute("nonce", "${nonce}");
 style.appendChild(document.createTextNode(css));
 document.head.appendChild(style);
 export {css};
-`;
+` : cssText => `\
+const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
+document.head
+    .appendChild(document.createElement("style"))
+    .appendChild(document.createTextNode(css));
+export {css};
+`
 
 export function makeModule(contents: string, type: Type, nonce?: string) {
   if (type === 'style') {
