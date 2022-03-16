@@ -43,7 +43,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
       } = getContext(initialOptions)
 
       const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
-      const transform = options.transform
+      const transform = options.transform ? options.transform.bind(options) : null
 
       if (options.cssImports) {
         onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
