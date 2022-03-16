@@ -111,6 +111,7 @@ The **options** passed to the plugin are a superset of Sass
 | precompile                                           | function                              | undefined                               |
 | importMapper                                         | function                              | undefined                               |
 | cssImports                                           | boolean                               | false                                   |
+| nonce                                                | string                                | undefined                               |
 
 ### What happened to `exclude` ?
 the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
@@ -130,6 +131,10 @@ esbuild can resolve them similarly to what `css-loader` does.
 > \
 > so I added this feature to help in cases [like this one](https://github.com/glromeo/esbuild-sass-plugin/issues/74).
 
+### `nonce`
+in presence of Content-Security-Policy 
+[(CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src) 
+the `nonce` option allows to specify the nonce attribute for the dynamically generated `<style>`
 
 ### `importMapper`
 
@@ -208,7 +213,7 @@ await esbuild.build({
 ### `transform`
 
 ```typescript
-async (css: string, resolveDir?: string) => string
+async (this: SassPluginOptions, css: string, resolveDir?: string) => Promise<string>
 ``` 
 
 It's a function which will be invoked before passing the css to esbuild or wrapping it in a module.\
