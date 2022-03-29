@@ -99,7 +99,7 @@ ${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 const styleModule = (cssText:string, nonce?:string) => nonce ? `\
 const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 const style = document.createElement("style");
-style.setAttribute("nonce", "${nonce}");
+style.setAttribute("nonce", ${nonce});
 style.appendChild(document.createTextNode(css));
 document.head.appendChild(style);
 export {css};
@@ -116,6 +116,18 @@ export function makeModule(contents: string, type: Type, nonce?: string) {
     return styleModule(contents, nonce)
   } else {
     return type === 'lit-css' ? cssResultModule(contents) : cssTextModule(contents)
+  }
+}
+
+export function parseNonce(nonce: string | undefined): string | undefined {
+  if (nonce) {
+    if (nonce.startsWith("window.") || nonce.startsWith("process.") || nonce.startsWith("globalThis.")) {
+      return nonce
+    } else {
+      return JSON.stringify(nonce)
+    }
+  } else {
+    return nonce
   }
 }
 

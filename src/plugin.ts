@@ -1,7 +1,7 @@
 import {OnLoadResult, Plugin} from 'esbuild'
-import {dirname, resolve} from 'path'
+import {dirname} from 'path'
 import {SassPluginOptions} from './index'
-import {getContext, makeModule, modulesPaths, RELATIVE_PATH} from './utils'
+import {getContext, makeModule, modulesPaths, parseNonce} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
 
@@ -31,7 +31,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
     console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
   }
 
-  const nonce = options.nonce
+  const nonce = parseNonce(options.nonce)
 
   return {
     name: 'sass-plugin',

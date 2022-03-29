@@ -136,6 +136,19 @@ in presence of Content-Security-Policy
 [(CSP)](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/style-src) 
 the `nonce` option allows to specify the nonce attribute for the dynamically generated `<style>`
 
+If the `nonce` string is a field access starting with `window`, `process` or `globalThis` it is left in the code without quotes.
+```javascript
+sassPlugin({
+  type: 'style',
+  nonce: 'window.__esbuild_nonce__'
+})
+```
+This allows to define it globally or to leave it for a subsequent build to resolve it using [esbuild define](https://esbuild.github.io/api/#define).
+```javascript
+define: {'window.__esbuild_nonce__': '"12345"'}
+```
+
+
 ### `importMapper`
 
 A function to customize/re-map the import path, both `import` statements in JavaScript/TypeScript code and `@import`

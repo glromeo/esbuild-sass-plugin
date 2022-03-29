@@ -128,4 +128,24 @@ describe('unit tests', function () {
     expect(readTextFile('out/index.js')).to.equalIgnoreSpaces(readTextFile('snapshot.js'))
   })
 
+  it('if nonce starts with window, process or globalThis it is treated as a variable (ubound)', async function () {
+    const options = useFixture('nonce')
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.js'],
+      outdir: './out',
+      bundle: true,
+      plugins: [
+        sassPlugin({
+          type: 'style',
+          nonce: 'window.__esbuild_nonce__'
+        })
+      ],
+      define: {'window.__esbuild_nonce__': '"12345"'}
+    })
+
+    expect(readTextFile('out/index.js')).to.equalIgnoreSpaces(readTextFile('snapshot.js'))
+  })
+
 })
