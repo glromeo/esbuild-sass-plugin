@@ -47,7 +47,8 @@ describe('e2e tests', function () {
       sourcemap: 'both',
       plugins: [
         sassPlugin({
-          quietDeps: true
+          quietDeps: true,
+          prefer: "sass"
         })
       ]
     })

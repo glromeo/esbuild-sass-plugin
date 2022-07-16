@@ -1,6 +1,6 @@
 import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
-import {fileSyntax, sourceMappingURL} from './utils'
+import {createResolver, fileSyntax, sourceMappingURL} from './utils'
 import * as sass from 'sass'
 import {ImporterResult} from 'sass'
 import {fileURLToPath, pathToFileURL} from 'url'
@@ -16,6 +16,7 @@ export type RenderResult = {
 export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderSync {
 
   const loadPaths = options.loadPaths!
+  const resolveModule = createResolver(options, loadPaths)
 
   /**
    * NOTE: we're deliberately ignoring sass recommendation to avoid sacrificing speed here!
@@ -55,8 +56,6 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       return resolveImport(absolute)
     }
   }
-
-  const requireOptions = {paths: ['.', ...loadPaths]}
 
   const sepTilde = `${sep}~`
 
@@ -98,26 +97,15 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
           }
         },
         canonicalize(url: string): URL | null {
-          let filename
+          let filename:string
           if (url.startsWith('~')) {
-            filename = decodeURI(url.slice(1))
-            try {
-              requireOptions.paths[0] = basedir
-              filename = require.resolve(filename, requireOptions)
-            } catch (ignored) {
-            }
+            filename = resolveModule(decodeURI(url.slice(1)), basedir)
           } else if (url.startsWith('file://')) {
             filename = fileURLToPath(url)
             // ================================================ patch for: https://github.com/sass/dart-sass/issues/1581
             let joint = filename.lastIndexOf(sepTilde)
             if (joint >= 0) {
-              const basedir = filename.slice(0, joint)
-              filename = filename.slice(joint + 2)
-              try {
-                requireOptions.paths[0] = basedir
-                filename = require.resolve(filename, requireOptions)
-              } catch (ignored) {
-              }
+              filename = resolveModule(filename.slice(joint + 2), filename.slice(0, joint))
             }
             // =========================================================================================================
           } else {
@@ -147,7 +135,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
     if (sourceMap) {
       sourceMap.sourceRoot = basedir
       sourceMap.sources = sourceMap.sources.map(source => {
-        return relative(basedir, source.startsWith("data:") ? path : fileURLToPath(source))
+        return relative(basedir, source.startsWith('data:') ? path : fileURLToPath(source))
       })
       cssText += '\n' + sourceMappingURL(sourceMap)
     }

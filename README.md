@@ -107,11 +107,11 @@ The **options** passed to the plugin are a superset of Sass
 | type                                                 | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                 |
 | transform                                            | function                              | undefined                               |
 | [loadPaths](https://www.shorturl.at/bdpBS)           | string[]                              | []                                      |
-| importer                                             | function                              | built in importer                       |
 | precompile                                           | function                              | undefined                               |
 | importMapper                                         | function                              | undefined                               |
 | cssImports                                           | boolean                               | false                                   |
 | nonce                                                | string                                | undefined                               |
+| prefer                                               | string                                | preferred package.json field            |
 
 ### What happened to `exclude` ?
 the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
@@ -148,6 +148,12 @@ This allows to define it globally or to leave it for a subsequent build to resol
 define: {'window.__esbuild_nonce__': '"12345"'}
 ```
 
+### `prefer`
+when this option is specified it allows to import npm packages which have `sass` or `style` fields preferring those to `main`.
+
+> **NOTE**: This is an experimental feature
+> * it replaces the internal use of `require.resolve` with browserify `resolve.sync`
+> * it only applies to import prefixed by `~` 
 
 ### `importMapper`
 

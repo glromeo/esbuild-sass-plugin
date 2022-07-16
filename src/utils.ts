@@ -1,10 +1,11 @@
-import {SassPluginOptions, Type} from "./index";
+import {SassPluginOptions, Type} from './index'
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
 import {BuildOptions, OnLoadResult} from 'esbuild'
 import {Syntax} from 'sass'
 import {parse, resolve} from 'path'
 import {existsSync} from 'fs'
+import {SyncOpts} from 'resolve'
 
 export const RELATIVE_PATH = /^\.\.?\//
 
@@ -96,7 +97,7 @@ export default css\`
 ${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
-const styleModule = (cssText:string, nonce?:string) => nonce ? `\
+const styleModule = (cssText: string, nonce?: string) => nonce ? `\
 const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 const style = document.createElement("style");
 style.setAttribute("nonce", ${nonce});
@@ -121,7 +122,7 @@ export function makeModule(contents: string, type: Type, nonce?: string) {
 
 export function parseNonce(nonce: string | undefined): string | undefined {
   if (nonce) {
-    if (nonce.startsWith("window.") || nonce.startsWith("process.") || nonce.startsWith("globalThis.")) {
+    if (nonce.startsWith('window.') || nonce.startsWith('process.') || nonce.startsWith('globalThis.')) {
       return nonce
     } else {
       return JSON.stringify(nonce)
@@ -157,6 +158,45 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
     return {
       contents: `${makeModule(css, 'style', this.nonce)}export default ${cssModule};`,
       loader: 'js'
+    }
+  }
+}
+
+export function createResolver(options: SassPluginOptions = {}, loadPaths: string[]) {
+  if (options.prefer) {
+    const resolve = require('resolve')
+    const cache = {} as Record<string, {main:string}>
+    const prefer = options.prefer
+    const opts: SyncOpts = {
+      paths: ['.', ...loadPaths],
+      readPackageSync(readFileSync, pkgfile) {
+        let cached = cache[pkgfile]
+        if (!cached) {
+          const pkg = JSON.parse(readFileSync(pkgfile) as string)
+          cached = cache[pkgfile] = {main: pkg[prefer] || pkg.main}
+        }
+        return cached
+      }
+    }
+    return (id: string, basedir: string) => {
+      try {
+        opts.basedir = basedir
+        return resolve.sync(id, opts)
+      } catch (ignored) {
+        return id
+      }
+    }
+  } else {
+    const opts = {
+      paths: ['.', ...loadPaths]
+    }
+    return (id: string, basedir: string) => {
+      try {
+        opts.paths[0] = basedir
+        return require.resolve(id, opts)
+      } catch (ignored) {
+        return id
+      }
     }
   }
 }
