@@ -13,7 +13,8 @@ esbuild.build({
   plugins: [
     sassPlugin({
       style: 'compressed',
-      quietDeps: true
+      quietDeps: true,
+      prefer: "sass"
     })
   ]
 }).then(logSuccess, logFailure)
