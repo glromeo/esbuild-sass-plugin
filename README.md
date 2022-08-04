@@ -106,7 +106,7 @@ The **options** passed to the plugin are a superset of Sass
 | cache                                                | boolean or Map                        | `true` (there is one Map per namespace) |
 | type                                                 | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                 |
 | transform                                            | function                              | undefined                               |
-| [loadPaths](https://www.shorturl.at/bdpBS)           | string[]                              | []                                      |
+| [loadPaths](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths) | string[] | []                                   |
 | precompile                                           | function                              | undefined                               |
 | importMapper                                         | function                              | undefined                               |
 | cssImports                                           | boolean                               | false                                   |
