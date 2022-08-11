@@ -165,7 +165,7 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
 export function createResolver(options: SassPluginOptions = {}, loadPaths: string[]) {
   if (options.prefer) {
     const resolve = require('resolve')
-    const cache = {} as Record<string, {main:string}>
+    const cache = {} as Record<string, { main: string }>
     const prefer = options.prefer
     const opts: SyncOpts = {
       paths: ['.', ...loadPaths],
@@ -193,7 +193,19 @@ export function createResolver(options: SassPluginOptions = {}, loadPaths: strin
     return (id: string, basedir: string) => {
       try {
         opts.paths[0] = basedir
-        return require.resolve(id, opts)
+        let resolved = require.resolve(id, opts)
+        // pretty ugly patch to avoid resolving erroneously to .js files ///////////////////////////////////////////////
+        if (resolved.endsWith('.js')) {
+          resolved = resolved.slice(0, -3) + '.scss'
+          if (!existsSync(resolved)) {
+            resolved = resolved.slice(0, -5) + '.sass'
+            if (!existsSync(resolved)) {
+              resolved = resolved.slice(0, -5) + '.css'
+            }
+          }
+        }
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        return resolved
       } catch (ignored) {
         return id
       }
