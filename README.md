@@ -54,7 +54,7 @@ In all other cases `esbuild` won't process the CSS content and it will be handle
 In this mode the stylesheet will be in the javascript bundle 
 and will be dynamically added to the page when the bundle is loaded.
 
-#### `type "css-text"`
+#### `type: "css-text"`
 You can use this mode if you want to use the resulting css text as a string import
 
 ```javascript
