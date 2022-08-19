@@ -48,7 +48,7 @@ The example above uses the default type `css` and will use esbuild CSS loader so
 will be in `index.css` alongside your bundle.
 
 In all other cases `esbuild` won't process the CSS content and it will be handled by the plugin depending on the case
-> if you want `url()` asset resolution or other forms of processing you have to rely on `postcss` like in this [example](https://github.com/glromeo/esbuild-sass-plugin/issues/92#issuecomment-1219209442) 
+> if you want `url()` asset resolution or other forms of processing you have to use `postcss` like in [this example](https://github.com/glromeo/esbuild-sass-plugin/issues/92#issuecomment-1219209442) 
 
 #### `type: "style"`
 In this mode the stylesheet will be in the javascript bundle 
