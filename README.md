@@ -238,6 +238,9 @@ async (this: SassPluginOptions, css: string, resolveDir?: string) => Promise<str
 It's a function which will be invoked before passing the css to esbuild or wrapping it in a module.\
 It can be used to do **PostCSS** processing and/or to create **modules** like in the following examples.
 
+> **NOTE:** Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. \
+> This is what `postcssModules` uses to pass Javascript modules to esbuild bypassing the plugin output altogether.
+
 #### - PostCSS
 
 The simplest use case is to invoke PostCSS like this:
@@ -277,16 +280,14 @@ esbuild.build({
 })
 
 ```
-
-> **NOTE:** `postcss` and `postcss-modules` have to be added to your `package.json`.
+`postcssModules` produces Javascript modules which are handled by esbuild's `js` loader, so the `type` option is **ignored**
 
 `postcssModules` also accepts an optional array of plugins for PostCSS as second parameter.
 
 Look into [fixture/css-modules](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/css-modules) for
 the complete example.
 
-> **NOTE:** Since `v1.5.0` transform can return either a string or an esbuild `LoadResult` object. \
-> This gives the flexibility to implement that helper function.
+> **NOTE:** `postcss` and `postcss-modules` have to be added to your `package.json`.
 
 ### pnpm
 
