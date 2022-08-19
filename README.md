@@ -40,16 +40,22 @@ await esbuild.build({
   plugins: [sassPlugin()]
 })
 ```
-
-this will use esbuild `loader: "css"` and your transpiled Sass will be in `index.css` alongside your bundle.
 There are two main options that control the plugin: `filter` which has the same meaning of filter in esbuild 
 [onLoad](https://esbuild.github.io/plugins/#on-load) and `type` that's what specifies how the css should be
 rendered and imported. 
 
-If you specify `type: "style"` then the stylesheet will be in the bundle 
+The example above uses the default type `css` and will use esbuild CSS loader so your transpiled Sass 
+will be in `index.css` alongside your bundle.
+
+In all other cases `esbuild` won't process the CSS content and it will be handled by the plugin depending on the case
+> if you want `url()` asset resolution or other forms of processing you have to rely on `postcss` like in this [example](https://github.com/glromeo/esbuild-sass-plugin/issues/92#issuecomment-1219209442) 
+
+#### `type: "style"`
+In this mode the stylesheet will be in the javascript bundle 
 and will be dynamically added to the page when the bundle is loaded.
 
-If you want to use the resulting css text as a string import you can use `type: "css-text"`
+#### `type "css-text"`
+You can use this mode if you want to use the resulting css text as a string import
 
 ```javascript
 await esbuild.build({
@@ -77,6 +83,7 @@ customElements.define('hello-world', class HelloWorld extends HTMLElement {
 }
 ```
 
+#### `type: "lit-css"`
 Or you can import a **lit-element** css result using `type: "lit-css"`
 
 ```javascript
