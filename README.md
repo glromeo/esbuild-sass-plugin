@@ -47,7 +47,7 @@ rendered and imported.
 The example above uses the default type `css` and will use esbuild CSS loader so your transpiled Sass 
 will be in `index.css` alongside your bundle.
 
-In all other cases `esbuild` won't process the CSS content and it will be handled by the plugin depending on the case
+In all other cases `esbuild` won't process the CSS content which instead will be handled by the plugin.
 > if you want `url()` resolution or other processing you have to use `postcss` like in [this example](https://github.com/glromeo/esbuild-sass-plugin/issues/92#issuecomment-1219209442) 
 
 #### `type: "style"`
