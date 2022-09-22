@@ -218,7 +218,7 @@ await esbuild.build({
 ```
 
 #### - Globals and other Shims (like sass-loader's additionalData)
-Look for a complete example in the [precompile](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/precompile) fixture
+Look for a complete example in the [precompile](https://github.com/glromeo/esbuild-sass-plugin/tree/main/test/fixture/precompile) fixture.
 
 Prepending a variable for a specific `pathname`:
 ```javascript
@@ -237,7 +237,7 @@ await esbuild.build({
 })
 ```
 
-Prepending an `@import` of globals file only for the main file that triggered the compilation (to avoid importing it twice).
+Prepending an `@import` of globals file only for the main file that triggered the compilation (to avoid importing it twice):
 ```javascript
 const context = { color: "blue" }
 
