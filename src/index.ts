@@ -60,7 +60,7 @@ export type SassPluginOptions = StringOptions<'sync'> & {
   /**
    *
    */
-  precompile?: (source: string, path: string) => string
+  precompile?: (source: string, path: string, isRoot?: boolean) => string
 
   /**
    * Should rewrite leftover css imports starting with ~ so that esbuild can resolve them?
