@@ -209,7 +209,7 @@ const path = require('path')
 await esbuild.build({
   ...,
   plugins: [sassPlugin({
-    precompile(source, pathname, isRoot) {
+    precompile(source, pathname) {
       const basedir = path.dirname(pathname)
       return source.replace(/(url\(['"]?)(\.\.?\/)([^'")]+['"]?\))/g, `$1${basedir}/$2$3`)
     }
@@ -227,7 +227,7 @@ const context = { color: "blue" }
 await esbuild.build({
   ...,
   plugins: [sassPlugin({
-    precompile(source, pathname, isRoot) {
+    precompile(source, pathname) {
       const prefix = /\/included\.scss$/.test(pathname) ? `
             $color: ${context.color};
           ` : env
