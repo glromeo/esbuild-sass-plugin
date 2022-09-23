@@ -209,7 +209,7 @@ const path = require('path')
 await esbuild.build({
   ...,
   plugins: [sassPlugin({
-    precompile(source, pathname) {
+    precompile(source, pathname, isRoot) {
       const basedir = path.dirname(pathname)
       return source.replace(/(url\(['"]?)(\.\.?\/)([^'")]+['"]?\))/g, `$1${basedir}/$2$3`)
     }
@@ -237,7 +237,7 @@ await esbuild.build({
 })
 ```
 
-Prepending an `@import` of globals file only for the main file that triggered the compilation (to avoid importing it twice):
+Prepending an `@import` of globals file only for the root file that triggered the compilation (to avoid nested files from importing it again):
 ```javascript
 const context = { color: "blue" }
 
