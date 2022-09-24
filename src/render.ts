@@ -68,7 +68,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     let source = fs.readFileSync(path, 'utf-8')
     if (options.precompile) {
-      source = options.precompile(source, path)
+      source = options.precompile(source, path, true)
     }
 
     const syntax = fileSyntax(path)
@@ -90,7 +90,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
           const pathname = fileURLToPath(canonicalUrl)
           let contents = fs.readFileSync(pathname, 'utf8')
           if (options.precompile) {
-            contents = options.precompile(contents, pathname)
+            contents = options.precompile(contents, pathname, false)
           }
           return {
             contents,
