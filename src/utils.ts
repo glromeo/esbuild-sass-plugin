@@ -86,6 +86,12 @@ function requireTool(module: string, basedir?: string) {
   }
 }
 
+// postcssModules with inject: false
+const postcssModulesModule = (cssText: string, cssModulesClasses: string) => `\
+export const css = \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
+export const classes = ${cssModulesClasses};
+`;
+
 const cssTextModule = cssText => `\
 export default \`
 ${cssText.replace(/([$`\\])/g, '\\$1')}\`;
@@ -134,6 +140,7 @@ export function parseNonce(nonce: string | undefined): string | undefined {
 
 export type PostcssModulesParams = Parameters<PostcssModulesPlugin>[0] & {
   basedir?: string
+  inject?: boolean
 };
 
 export function postcssModules(options: PostcssModulesParams, plugins: AcceptedPlugin[] = []) {
@@ -156,7 +163,9 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
     ]).process(source, {from: path, map: false})
 
     return {
-      contents: `${makeModule(css, 'style', this.nonce)}export default ${cssModule};`,
+      contents: options.inject === false
+          ? postcssModulesModule(css, cssModule)
+          : `${makeModule(css, 'style', this.nonce)}export default ${cssModule};`,
       loader: 'js'
     }
   }

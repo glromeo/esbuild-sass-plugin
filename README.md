@@ -302,6 +302,8 @@ esbuild.build({
 })
 
 ```
+You may pass `inject: false` in `postcssModules` options to not automatically create a style element - similar to `css-text` behavior.
+
 `postcssModules` produces Javascript modules which are handled by esbuild's `js` loader, so the `type` option is **ignored**
 
 `postcssModules` also accepts an optional array of plugins for PostCSS as second parameter.
