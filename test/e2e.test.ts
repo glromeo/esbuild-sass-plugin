@@ -164,17 +164,17 @@ describe('e2e tests', function () {
     const bundle = readTextFile('./out/index.js')
 
     expect(bundle).to.containIgnoreSpaces(`
-            var r = (t3, ...n6) => {
-              const o6 = t3.length === 1 ? t3[0] : n6.reduce((e5, n7, s5) => e5 + ((t4) => {
-                if (t4._$cssResult$ === true)
-                  return t4.cssText;
-                if (typeof t4 == "number")
-                  return t4;
-                throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-              })(n7) + t3[s5 + 1], t3[0]);
-              return new s(o6, e);
-            };
-        `)
+      var r = (t3, ...n6) => {
+        const o6 = 1 === t3.length ? t3[0] : n6.reduce((e5, n7, s5) => e5 + ((t4) => {
+          if (true === t4._$cssResult$)
+            return t4.cssText;
+          if ("number" == typeof t4)
+            return t4;
+          throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+        })(n7) + t3[s5 + 1], t3[0]);
+        return new s(o6, e);
+      };
+    `)
 
     expect(bundle).to.have.string('var hello_world_default = r`\n' +
       '.banner {\n' +

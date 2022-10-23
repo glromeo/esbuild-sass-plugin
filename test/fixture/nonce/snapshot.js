@@ -1,3 +1,4 @@
+"use strict";
 (() => {
   // style.scss
   var css = `body {
