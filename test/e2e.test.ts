@@ -1,6 +1,6 @@
 import * as esbuild from 'esbuild'
 import {postcssModules, sassPlugin} from '../src'
-import {statSync} from 'fs'
+import {readFileSync, statSync} from 'fs'
 import {consumeSourceMap, readCssFile, readJsonFile, readTextFile, useFixture} from './test-toolkit'
 
 describe('e2e tests', function () {
@@ -59,11 +59,9 @@ describe('e2e tests', function () {
 
     sourceMap.sources = sourceMap.sources.map(relativeToNodeModules)
 
-    expect(sourceMap.sources).to.include.members([
-      '../../node_modules/bootstrap/scss/bootstrap.scss',
-      '../../node_modules/bootstrap/scss/_variables.scss',
-      '../../node_modules/bootstrap/scss/utilities/_api.scss'
-    ])
+    const { sources } = JSON.parse(readFileSync("../node_modules/bootstrap/dist/css/bootstrap.css.map", "utf8"))
+    expect(sourceMap.sources.slice(0, -1).map(entry => entry.replace("../../node_modules/bootstrap/", "")))
+      .to.include.members(sources.slice(1).map(entry => entry.replace("../../", "")))
 
     expect(sourceMap.sources).not.to.include.members([
       '../../node_modules/bootstrap/scss/_functions.scss'
@@ -91,7 +89,7 @@ describe('e2e tests', function () {
       })
 
       expect(
-        consumer.originalPositionFor({line: 9749, column: 0})
+        consumer.originalPositionFor({line: 10309, column: 0})
       ).to.eql({
         source: `../src/entrypoint.scss`,
         line: 3,
@@ -164,19 +162,19 @@ describe('e2e tests', function () {
     const bundle = readTextFile('./out/index.js')
 
     expect(bundle).to.containIgnoreSpaces(`
-      var r = (t3, ...n6) => {
-        const o6 = 1 === t3.length ? t3[0] : n6.reduce((e5, n7, s5) => e5 + ((t4) => {
+      var i = (t3, ...e7) => {
+        const n6 = 1 === t3.length ? t3[0] : e7.reduce((e8, s5, n7) => e8 + ((t4) => {
           if (true === t4._$cssResult$)
             return t4.cssText;
           if ("number" == typeof t4)
             return t4;
           throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-        })(n7) + t3[s5 + 1], t3[0]);
-        return new s(o6, e);
+        })(s5) + t3[n7 + 1], t3[0]);
+        return new o(n6, t3, s);
       };
     `)
 
-    expect(bundle).to.have.string('var hello_world_default = r`\n' +
+    expect(bundle).to.have.string('var hello_world_default = i`\n' +
       '.banner {\n' +
       '  font-family: sans-serif;\n' +
       '  color: blue;\n' +
@@ -318,7 +316,8 @@ describe('e2e tests', function () {
     `)
 
     expect(main).to.containIgnoreSpaces(`
-      var styles_default = r\`
+      // src/lit/styles.scss
+      var styles_default = i\`
       .message {
         font-family: sans-serif;
         color: white;

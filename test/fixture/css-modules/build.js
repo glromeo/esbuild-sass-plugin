@@ -12,6 +12,7 @@ esbuild.build({
   plugins: [
     sassPlugin({
       transform: postcssModules({
+        generateScopedName: '[hash:base64:8]--[local]',
         localsConvention: 'camelCaseOnly'
       })
     })

@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {
-    "lit-element": "^3.0.2",
-    "postcss": "^8.4.4",
-    "postcss-modules": "^4.2.2"
+    "lit-element": "^3.2.2",
+    "postcss": "^8.4.18",
+    "postcss-modules": "^5.0.0"
   },
   "scripts": {
     "build": "node ./build",
