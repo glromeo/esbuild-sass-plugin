@@ -76,7 +76,9 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       return {cssText: readFileSync(path, 'utf-8'), watchFiles: [path]}
     }
 
-    options.url = pathToFileURL(path)
+    if (options.quietDeps) {
+      options.url = pathToFileURL(path)
+    }
 
     const {
       css,
