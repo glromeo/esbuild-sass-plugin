@@ -111,7 +111,7 @@ The **options** passed to the plugin are a superset of Sass
 |------------------------------------------------------|---------------------------------------|-----------------------------------------|
 | [filter](https://esbuild.github.io/plugins/#on-load) | regular expression                    | <code>/\.(s[ac]ss&vert;css)$/</code>    |
 | cache                                                | boolean or Map                        | `true` (there is one Map per namespace) |
-| type                                                 | `"css"`<br/>`"style"`<br/>`"lit-css"` | `"css"`                                 |
+| type                                                 | `"css"`<br/>`"style"`<br/>`"lit-css"` <br/> `"css-text"` | `"css"`                                 |
 | transform                                            | function                              | undefined                               |
 | [loadPaths](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths) | string[] | []                                   |
 | precompile                                           | function                              | undefined                               |
@@ -119,6 +119,7 @@ The **options** passed to the plugin are a superset of Sass
 | cssImports                                           | boolean                               | false                                   |
 | nonce                                                | string                                | undefined                               |
 | prefer                                               | string                                | preferred package.json field            |
+| quietDeps                                            | boolean                               | false            |
 
 ### What happened to `exclude` ?
 the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
@@ -310,6 +311,12 @@ Look into [fixture/css-modules](https://github.com/glromeo/esbuild-sass-plugin/t
 the complete example.
 
 > **NOTE:** `postcss` and `postcss-modules` have to be added to your `package.json`.
+
+### quietDeps
+
+In order for `quietDeps` to correctly identify external dependencies the `url` option is defaulted to the importing file path URL.
+
+> The `url` option creates problems when importing source SASS files from 3rd party modules in which case the best workaround is to avoid `quietDeps` and [mute the logger](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter#logger) if that's a big issue.
 
 ### pnpm
 
