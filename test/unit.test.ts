@@ -100,6 +100,9 @@ describe('unit tests', function () {
     `)
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v2.sass'))
+    await result.rebuild().catch(ignored => {})
+
+    writeTextFile('./dependency.sass', readTextFile('./dependency-v3.sass'))
     await result.rebuild()
     expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { background-color: blue; } 

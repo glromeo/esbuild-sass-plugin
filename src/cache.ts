@@ -39,14 +39,18 @@ export function useCache(options: SassPluginOptions = {}, loadCallback: PluginLo
               break
             }
           }
-          return cached.result
+        } else {
+          let result = await loadCallback(path)
+          cached = {
+            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+            result
+          }
+          cache.set(path, cached)
         }
-        let result = await loadCallback(path)
-        cache.set(path, {
-          mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
-          result
-        })
-        return result
+        if (cached.result.errors) {
+          cache.delete(path)
+        }
+        return cached.result
       } catch (error) {
         cache.delete(path)
         throw error
