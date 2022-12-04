@@ -10,10 +10,12 @@
     "25",
     "48",
     "61",
-    "74"
+    "74",
+    "107"
   ],
   "dependencies": {
-    "esbuild": "^0.14.13",
+    "esbuild": "^0.15.17",
+    "sass": "^1.56.1",
     "postcss": "^8.3.11",
     "postcss-modules": "^4.2.2",
     "postcss-url": "^10.1.3",

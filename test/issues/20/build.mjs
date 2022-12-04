@@ -1,5 +1,5 @@
 import esbuild from "esbuild";
-import {sassPlugin} from "../../../lib"; // "esbuild-sass-plugin";
+import {sassPlugin} from "../../../lib/index.js"; // "esbuild-sass-plugin";
 import * as fs from "fs";
 
 let sources = [`

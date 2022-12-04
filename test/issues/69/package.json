@@ -1,0 +1,7 @@
+{
+  "name": "issue-69",
+  "version": "1.0.0",
+  "scripts": {
+    "build:esbuild": "node ./esbuild.js"
+  }
+}

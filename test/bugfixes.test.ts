@@ -3,7 +3,7 @@ import * as esbuild from 'esbuild'
 import * as path from 'path'
 import {postcssModules, sassPlugin} from '../src'
 
-import {readJsonFile, readTextFile, sinon, useFixture, writeTextFile} from "./test-toolkit";
+import {readJsonFile, readTextFile, sinon, useFixture, writeTextFile} from './test-toolkit'
 import {existsSync} from 'fs'
 
 describe('tests covering github issues', function () {
@@ -233,24 +233,24 @@ describe('tests covering github issues', function () {
       ...options,
       plugins: [
         sassPlugin({
-          loadPaths: [ 'scss_utils', ],
-        }),
+          loadPaths: ['scss_utils']
+        })
       ],
       outdir: 'dist',
       entryPoints: [
         'src/with_use.scss',
-        'src/without_use.scss',
+        'src/without_use.scss'
       ],
       sourcemap: true,
-      metafile: true,
+      metafile: true
     })
 
     expect(readJsonFile('./dist/with_use.css.map')).to.eql({
-      "version": 3,
-      "sources": ["../src/with_use.scss", "../scss_utils/_colors.scss"],
-      "sourcesContent": [null, null],
-      "mappings": "AAEA;AACE;;",
-      "names": []
+      'version': 3,
+      'sources': ['../src/with_use.scss', '../scss_utils/_colors.scss'],
+      'sourcesContent': ['@use \'colors\';\n\na {\n  color: colors.$red;\n}', '$red: red;'],
+      'mappings': 'AAEA;AACE;;',
+      'names': []
     })
   })
 
@@ -259,13 +259,37 @@ describe('tests covering github issues', function () {
 
     await esbuild.build({
       ...options,
-      entryPoints: ["./src/formio.scss"],
+      entryPoints: ['./src/formio.scss'],
       bundle: true,
-      outdir: "./out",
+      outdir: './out',
       plugins: [sassPlugin({cssImports: true})]
     })
 
     expect(readTextFile('./out/formio.css'))
-        .to.match(/\/\* \.\.\/node_modules\/dialog-polyfill\/dist\/dialog-polyfill\.css \*\//)
+      .to.match(/\/\* \.\.\/node_modules\/dialog-polyfill\/dist\/dialog-polyfill\.css \*\//)
+  })
+
+  it('#107 generate proper sourcesContent', async function () {
+    const options = useFixture('../issues/107')
+
+    await esbuild.build({
+      ...options,
+      plugins: [
+        sassPlugin()
+      ],
+      outdir: 'dist',
+      entryPoints: [
+        'src/index.scss'
+      ],
+      sourcemap: true
+    })
+
+    expect(readJsonFile('./dist/index.css.map')).to.eql({
+      'version': 3,
+      'sources': ['../src/index.scss'],
+      'sourcesContent': ['body {\n    background: black;\n}\n'],
+      'mappings': 'AAAA;AACI;;',
+      'names': []
+    })
   })
 })

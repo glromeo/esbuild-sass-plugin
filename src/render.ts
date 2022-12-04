@@ -85,6 +85,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       loadedUrls,
       sourceMap
     } = sass.compileString(source, {
+      sourceMapIncludeSources: true,
       ...options,
       syntax,
       importer: {
@@ -101,7 +102,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
           }
         },
         canonicalize(url: string): URL | null {
-          let filename:string
+          let filename: string
           if (url.startsWith('~')) {
             filename = resolveModule(decodeURI(url.slice(1)), basedir)
           } else if (url.startsWith('file://')) {

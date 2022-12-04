@@ -1,0 +1,14 @@
+{
+  "name": "test-tsup-css",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "mistic100",
+  "license": "MIT",
+  "dependencies": {
+    "tsup": "^6.5.0"
+  },
+  "scripts": {
+    "build:tsup": "yarn tsup",
+    "build:esbuild": "node ./esbuild.js"
+  }
+}
