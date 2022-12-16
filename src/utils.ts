@@ -148,8 +148,9 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
     const {css} = await postcss([
       postcssModulesPlugin({
         ...options,
-        getJSON(cssFilename: string, json: { [name: string]: string }): void {
+        getJSON(cssFilename: string, json: { [name: string]: string }, outputFileName: string): void {
           cssModule = JSON.stringify(json, null, 2)
+          options.getJSON?.(cssFilename, json, outputFileName)
         }
       }),
       ...plugins
