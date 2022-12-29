@@ -9,8 +9,8 @@ import {SyncOpts} from 'resolve'
 
 export const RELATIVE_PATH = /^\.\.?\//
 
-export function modulesPaths(): string[] {
-  let path = process.cwd()
+export function modulesPaths(absWorkingDir?: string): string[] {
+  let path = absWorkingDir || process.cwd()
   let {root} = parse(path)
   let found: string[] = []
   while (path !== root) {
