@@ -20,10 +20,6 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
   if (options.includePaths) {
     console.log(`'includePaths' option is deprecated, please use 'loadPaths' instead`)
   }
-  options.loadPaths = Array.from(new Set([
-    ...options.loadPaths || modulesPaths(),
-    ...options.includePaths || []
-  ]))
 
   const type = options.type ?? 'css'
 
@@ -36,6 +32,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
   return {
     name: 'sass-plugin',
     setup({initialOptions, onResolve, onLoad, resolve}) {
+
+      options.loadPaths = Array.from(new Set([
+        ...options.loadPaths || modulesPaths(initialOptions.absWorkingDir),
+        ...options.includePaths || []
+      ]))
 
       const {
         sourcemap,
