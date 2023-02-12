@@ -235,7 +235,7 @@ describe('e2e tests', function () {
     expected = expected.replace(/url\("img\/background(-2x)?.jpg"\)/g, 'url()')
 
     let actual = readCssFile('./out/app.css')
-    actual = actual.slice(actual.indexOf('\n') + 1).replace(/url\(data:image\/jpeg;base64,\)/g, 'url()')
+    actual = actual.slice(actual.indexOf('\n') + 1).replace(/url\(data:image\/jpeg,\)/g, 'url()')
 
     expect(actual.replace(/;/g, '')).to.equalIgnoreSpaces(expected.replace(/;/g, ''))
   })

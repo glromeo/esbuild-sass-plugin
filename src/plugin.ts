@@ -48,7 +48,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       if (options.cssImports) {
         onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
-          return resolve(path.slice(1), {importer, resolveDir})
+          return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
         })
       }
 
