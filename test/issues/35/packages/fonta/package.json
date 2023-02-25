@@ -17,9 +17,7 @@
   },
   "devDependencies": {
     "@types/react": "^17.0.4",
-    "esbuild": "^0.13.6",
     "esbuild-plugin-d.ts": "^1.0.6",
-    "esbuild-sass-plugin": "^1.6.1",
     "postcss": "^8.3.10",
     "postcss-modules": "^4.2.2",
     "postcss-url": "^10.1.3",

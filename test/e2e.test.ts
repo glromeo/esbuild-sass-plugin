@@ -48,7 +48,7 @@ describe('e2e tests', function () {
       plugins: [
         sassPlugin({
           quietDeps: true,
-          prefer: "sass"
+          prefer: 'sass'
         })
       ]
     })
@@ -59,9 +59,9 @@ describe('e2e tests', function () {
 
     sourceMap.sources = sourceMap.sources.map(relativeToNodeModules)
 
-    const { sources } = JSON.parse(readFileSync("../node_modules/bootstrap/dist/css/bootstrap.css.map", "utf8"))
-    expect(sourceMap.sources.slice(0, -1).map(entry => entry.replace("../../node_modules/bootstrap/", "")))
-      .to.include.members(sources.slice(1).map(entry => entry.replace("../../", "")))
+    const {sources} = JSON.parse(readFileSync('../node_modules/bootstrap/dist/css/bootstrap.css.map', 'utf8'))
+    expect(sourceMap.sources.slice(0, -1).map(entry => entry.replace('../../node_modules/bootstrap/', '')))
+      .to.include.members(sources.slice(1).map(entry => entry.replace('../../', '')))
 
     expect(sourceMap.sources).not.to.include.members([
       '../../node_modules/bootstrap/scss/_functions.scss'
@@ -421,18 +421,26 @@ describe('e2e tests', function () {
 
     let count = 0
 
-    const result = await esbuild.build({
+    const ctx = await esbuild.context({
       ...options,
       entryPoints: ['./src/index.js'],
       outdir: './out',
       bundle: true,
-      plugins: [sassPlugin({type: 'css-text'})],
-      watch: {
-        onRebuild(error, result) {
-          count++
+      plugins: [
+        sassPlugin({type: 'css-text'}),
+        {
+          name: 'counter',
+          setup(build) {
+            build.onStart(() => {
+              count++
+            })
+          }
         }
-      }
+      ]
     })
+
+    await ctx.watch()
+    await ctx.rebuild()
 
     expect(readTextFile('./out/index.js')).to.match(/crimson/)
 
@@ -452,9 +460,9 @@ describe('e2e tests', function () {
 
     expect(readTextFile('./out/index.js')).to.match(/cornflowerblue/)
 
-    expect(count).to.eq(1)
+    expect(count).to.eq(2)
 
-    result.stop!()
+    await ctx.dispose()
   })
 
   it('precompile allows to add additional data', async function () {

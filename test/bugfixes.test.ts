@@ -33,45 +33,60 @@ describe('tests covering github issues', function () {
   it('#20 Plugin stops working after a SASS failure', async function () {
     const options = useFixture('../issues/20')
 
+    this.timeout(10000);
+
     writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
     writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color }`)
 
     let step = 0
 
-    const result = await esbuild.build({
+    const ctx = await esbuild.context({
       ...options,
       entryPoints: ['./tmp.scss'],
       outfile: './tmp.css',
-      plugins: [sassPlugin()],
-      logLevel: 'silent',
-      watch: {
-        onRebuild(failure, result) {
-          switch (step) {
-            case 0:
-              expect(failure).to.be.null
-              writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0 color: $primary-color; }`)
-              return step++
-            case 1:
-              expect(failure).to.be.not.null
-              writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
-              return step++
-            case 2:
-              expect(failure).to.be.null
-              writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color color: red }`)
-              return step++
-            case 3:
-              expect(failure).to.be.not.null
-              writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
-              return step++
-            case 4:
-              expect(failure).to.be.null
-              expect(result).to.be.not.null
-              result!.stop!()
-              return step++
-          }
+      plugins: [sassPlugin(), {
+        name: "listener",
+        setup({onEnd}) {
+          onEnd(({errors, warnings})=>{
+            const [failure] = errors
+            switch (step) {
+              case 0:
+                expect(failure).to.be.undefined
+                writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0 color: $primary-color; }`)
+                step++
+                return
+              case 1:
+                expect(failure.pluginName).to.eq("sass-plugin")
+                writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
+                step++
+                return
+              case 2:
+                expect(failure).to.be.undefined
+                writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color color: red }`)
+                step++
+                return
+              case 3:
+                expect(failure.pluginName).to.eq("sass-plugin")
+                writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
+                step++
+                return
+              case 4:
+                expect(failure).to.be.undefined
+                expect(warnings.length).to.equal(0)
+                setTimeout(()=>{
+                  ctx!.dispose()
+                },100)
+                step++
+                return
+            }
+          })
         }
-      }
+      }],
+      logLevel: 'silent'
     })
+
+    await ctx.watch()
+    await ctx.rebuild()
 
     await new Promise((resolve, reject) => {
       writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
@@ -80,7 +95,7 @@ describe('tests covering github issues', function () {
           clearInterval(interval)
           try {
             expect(readTextFile('./tmp.css')).to.match(/background-color: #333;/)
-            result.stop!()
+            ctx.dispose()
             resolve(null)
           } catch (e) {
             reject(e)
@@ -284,7 +299,10 @@ describe('tests covering github issues', function () {
       sourcemap: true
     })
 
-    expect(readJsonFile('./dist/index.css.map')).to.eql({
+    let map = readJsonFile('./dist/index.css.map')
+    map.sourcesContent[0] = map.sourcesContent[0].replace(/\r\n/g, "\n")
+
+    expect(map).to.eql({
       'version': 3,
       'sources': ['../src/index.scss'],
       'sourcesContent': ['body {\n    background: black;\n}\n'],

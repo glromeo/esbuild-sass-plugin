@@ -1,5 +1,5 @@
 const {pnpPlugin} = require("@yarnpkg/esbuild-plugin-pnp");
-const {sassPlugin} = require("../esbuild-sass-plugin/lib/index.js");
+const {sassPlugin} = require("../../../lib/index.js");
 
 require("esbuild").build({
   entryPoints: ["./src/index.js"],
