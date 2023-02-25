@@ -39,26 +39,21 @@
       "ts-node/register"
     ]
   },
-  "dependencies": {
-    "resolve": "^1.22.1"
-  },
   "devDependencies": {
     "@types/node": "^18.11.18",
     "@types/resolve": "^1.20.2",
     "@types/sass": "^1.43.1",
-    "esbuild": "^0.16.12",
     "mocha-toolkit": "^1.0.7",
-    "postcss": "^8.4.20",
+    "postcss": "^8.4.21",
     "postcss-modules": "^6.0.0",
     "postcss-url": "^10.1.3",
-    "sass": "^1.57.1",
     "source-map": "^0.7.4",
     "ts-node": "^10.9.1",
-    "typescript": "^4.9.4"
+    "typescript": "^4.9.5"
   },
   "peerDependencies": {
-    "esbuild": "^0.15.17",
+    "esbuild": "^0.17.5",
     "resolve": "^1.22.1",
-    "sass": "^1.56.1"
+    "sass": "^1.58.0"
   }
 }
