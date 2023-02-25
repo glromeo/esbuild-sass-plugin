@@ -1,6 +1,7 @@
 import React from "react"
 import ReactDOM from "react-dom"
 
+import "@fluentui/react/dist/sass/_References.scss";
 import "bootstrap/scss/bootstrap.scss";
 import styles from "./index.scss"
 
