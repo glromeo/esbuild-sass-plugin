@@ -72,44 +72,45 @@ describe('unit tests', function () {
 
     writeTextFile('./index.sass', readTextFile('./index-v1.sass'))
 
-    const result = await esbuild.build({
+    const ctx = await esbuild.context({
       ...options,
       entryPoints: ['./index.js'],
       outdir: './out',
       bundle: true,
-      incremental: true,
       plugins: [sassPlugin()] // caching is enabled by default!
     })
+
+    await ctx.rebuild()
 
     expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { font: 100% Helvetica, sans-serif; color: #333; }
     `)
 
     writeTextFile('./index.sass', readTextFile('./index-v1.sass'))
-    await result.rebuild()
+    await ctx.rebuild()
     expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { font: 100% Helvetica, sans-serif; color: #333; }
     `)
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v1.sass'))
     writeTextFile('./index.sass', readTextFile('./index-v2.sass'))
-    await result.rebuild()
+    await ctx.rebuild()
     expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { background-color: red; } 
       body { font: 99% "Times New Roman", serif; color: #666; }
     `)
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v2.sass'))
-    await result.rebuild().catch(ignored => {})
+    await ctx.rebuild().catch(ignored => {})
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v3.sass'))
-    await result.rebuild()
+    await ctx.rebuild()
     expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { background-color: blue; } 
       body { font: 99% "Times New Roman", serif; color: #666; }
     `)
 
-    result.rebuild.dispose()
+    await ctx.dispose()
   })
 
   it('allows to specify a nonce for the <style> tag', async function () {

@@ -56,9 +56,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         try {
           let {cssText, watchFiles} = renderSync(path)
 
-          if (watched) {
-            watched[path] = watchFiles
-          }
+          watched[path] = watchFiles
 
           const resolveDir = dirname(path)
 
@@ -92,7 +90,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         } catch (err: any) {
           return {
             errors: [{text: err.message}],
-            watchFiles: watched?.[path] ?? [path]
+            watchFiles: watched[path] ?? [path]
           }
         }
       }))

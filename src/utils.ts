@@ -37,7 +37,7 @@ export type PluginContext = {
   instance: number
   namespace: string
   sourcemap: boolean
-  watched: { [path: string]: string[] } | null
+  watched: { [path: string]: string[] }
 }
 
 const SASS_PLUGIN_CONTEXT = Symbol()
@@ -56,7 +56,7 @@ export function getContext(buildOptions: BuildOptions): PluginContext {
     instance,
     namespace: `sass-plugin-${instance}`,
     sourcemap: !!buildOptions.sourcemap,
-    watched: buildOptions.watch ? {} : null
+    watched: {}
   }
 }
 

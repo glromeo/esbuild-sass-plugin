@@ -49,7 +49,7 @@ export function writeTextFile(pathname: string, content: string) {
 
 export function pluginInternals(options: SassPluginOptions = {}) {
   const {setup} = sassPlugin(options)
-  let resolveCallback, loadCallback, startCallback, endCallback
+  let resolveCallback, loadCallback, startCallback, endCallback, disposeCallback
   setup({
     esbuild: {} as any,
     initialOptions: {},
@@ -65,10 +65,13 @@ export function pluginInternals(options: SassPluginOptions = {}) {
     onEnd(callback) {
       endCallback = callback
     },
+    onDispose(callback) {
+      disposeCallback = callback
+    },
     resolve: fake()
   })
   return {
-    resolveCallback, loadCallback, startCallback, endCallback
+    resolveCallback, loadCallback, startCallback, endCallback, disposeCallback
   }
 }
 
