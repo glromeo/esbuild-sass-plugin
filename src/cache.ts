@@ -5,7 +5,7 @@ import {promises as fsp, Stats} from 'fs'
 type OnLoadCallback = (args: OnLoadArgs) => (OnLoadResult | null | undefined | Promise<OnLoadResult | null | undefined>)
 type PluginLoadCallback = (path: string) => (OnLoadResult | null | undefined | Promise<OnLoadResult | null | undefined>)
 
-function collectStats(watchFiles): Promise<Stats[]> {
+function collectStats(watchFiles:string[]): Promise<Stats[]>|[] {
   return Promise.all(watchFiles.map(filename => fsp.stat(filename)))
 }
 
@@ -30,20 +30,22 @@ export function useCache(options: SassPluginOptions = {}, loadCallback: PluginLo
       try {
         let cached = cache.get(path)
         if (cached) {
-          let watchFiles = cached.result.watchFiles!
-          let stats = await collectStats(watchFiles)
-          for (const {mtimeMs} of stats) {
-            if (mtimeMs > cached.mtimeMs) {
-              cached.result = (await loadCallback(watchFiles[0]))!
-              cached.mtimeMs = maxMtimeMs(stats)
-              break
+          let watchFiles = cached.result.watchFiles
+          if (watchFiles) {
+            let stats = await collectStats(watchFiles)
+            for (const {mtimeMs} of stats) {
+              if (mtimeMs > cached.mtimeMs) {
+                cached.result = (await loadCallback(watchFiles[0]))!
+                cached.mtimeMs = maxMtimeMs(stats)
+                break
+              }
             }
           }
         } else {
           let result = await loadCallback(path)
           if (result) {
             cached = {
-              mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+              mtimeMs: maxMtimeMs(await collectStats(result.watchFiles ?? [])),
               result
             }
             cache.set(path, cached)
