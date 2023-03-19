@@ -65,7 +65,7 @@ export type SassPluginOptions = StringOptions<'sync'> & {
    *
    * @default undefined
    */
-  transform?: (this: TransformContext, css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>
+  transform?: (this: SassPluginOptions, css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>
 
   /**
    *
@@ -86,11 +86,6 @@ export type SassPluginOptions = StringOptions<'sync'> & {
    *
    */
   prefer?: "sass" | "style" | "main"
-}
-
-export type TransformContext = SassPluginOptions & {
-  type: Type
-  chunks: Record<string, string>
 }
 
 export default sassPlugin
