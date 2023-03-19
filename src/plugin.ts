@@ -1,6 +1,6 @@
 import {OnLoadResult, Plugin} from 'esbuild'
 import {dirname} from 'path'
-import {SassPluginOptions} from './index'
+import {SassPluginOptions, TransformContext} from './index'
 import {getContext, makeModule, modulesPaths, parseNonce} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
@@ -22,12 +22,14 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
   }
 
   const type = options.type ?? 'css'
-
-  if (options['picomatch'] || options['exclude'] || typeof type !== 'string') {
-    console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
-  }
-
   const nonce = parseNonce(options.nonce)
+  const shouldExclude = options.exclude ? options.exclude.test.bind(options.exclude) : () => false
+
+  const transformContext:TransformContext = {
+    ...options,
+    type,
+    chunks: {}
+  };
 
   return {
     name: 'sass-plugin',
@@ -43,17 +45,34 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         watched
       } = getContext(initialOptions)
 
-      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
-      const transform = options.transform ? options.transform.bind(options) : null
-
-      if (options.cssImports) {
-        onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
-          return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
+      if (options.external) {
+        onResolve({filter: options.external}, args => {
+          return {path: args.path, external: true}
         })
       }
 
+      if (options.cssImports) {
+        onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
+          if (shouldExclude(path)) {
+            return null;
+          } else {
+            return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
+          }
+        })
+      }
+
+      const transform = options.transform ? options.transform.bind(transformContext) : null
+
+      if (transform) {
+
+      }
+
+      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
+
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
-        try {
+        if (shouldExclude(path)) {
+          return null;
+        } else try {
           let {cssText, watchFiles} = renderSync(path)
 
           watched[path] = watchFiles

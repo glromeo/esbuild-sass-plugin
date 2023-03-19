@@ -2,8 +2,8 @@ import {CachedResult, SassPluginOptions} from './index'
 import {OnLoadArgs, OnLoadResult} from 'esbuild'
 import {promises as fsp, Stats} from 'fs'
 
-type OnLoadCallback = (args: OnLoadArgs) => (OnLoadResult | Promise<OnLoadResult>)
-type PluginLoadCallback = (path: string) => (OnLoadResult | Promise<OnLoadResult>)
+type OnLoadCallback = (args: OnLoadArgs) => (OnLoadResult | null | undefined | Promise<OnLoadResult | null | undefined>)
+type PluginLoadCallback = (path: string) => (OnLoadResult | null | undefined | Promise<OnLoadResult | null | undefined>)
 
 function collectStats(watchFiles): Promise<Stats[]> {
   return Promise.all(watchFiles.map(filename => fsp.stat(filename)))
@@ -34,18 +34,22 @@ export function useCache(options: SassPluginOptions = {}, loadCallback: PluginLo
           let stats = await collectStats(watchFiles)
           for (const {mtimeMs} of stats) {
             if (mtimeMs > cached.mtimeMs) {
-              cached.result = await loadCallback(watchFiles[0])
+              cached.result = (await loadCallback(watchFiles[0]))!
               cached.mtimeMs = maxMtimeMs(stats)
               break
             }
           }
         } else {
           let result = await loadCallback(path)
-          cached = {
-            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
-            result
+          if (result) {
+            cached = {
+              mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+              result
+            }
+            cache.set(path, cached)
+          } else {
+            return null;
           }
-          cache.set(path, cached)
         }
         if (cached.result.errors) {
           cache.delete(path)

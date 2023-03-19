@@ -8,6 +8,7 @@
     "bootstrap",
     "caching",
     "css-modules",
+    "exclude",
     "lit-element",
     "multiple",
     "open-iconic",

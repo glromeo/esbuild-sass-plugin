@@ -91,6 +91,7 @@ describe('tests covering github issues', function () {
     await new Promise((resolve, reject) => {
       writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
       const interval = setInterval(() => {
+        console.log("interval", step)
         if (step === 5) {
           clearInterval(interval)
           try {
@@ -151,10 +152,10 @@ describe('tests covering github issues', function () {
 
     expect(readTextFile('./out/index.js')).to.match(/background-color: rgb\(174, 101, 255\);/)
 
-    // NOTE: even with quietDeps: true we get 7 warnings!
+    // NOTE: even with quietDeps: true we get 6 warnings!
 
     expect(debug).to.be.callCount(0)
-    expect(warn).to.be.callCount(7)
+    expect(warn).to.be.callCount(6)
   })
 
   it('#25 why require.resolve is set to cwd ?', async function () {

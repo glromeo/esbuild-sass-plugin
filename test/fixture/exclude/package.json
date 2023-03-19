@@ -1,0 +1,14 @@
+{
+  "name": "exckude",
+  "version": "1.0.0",
+  "license": "MIT",
+  "dependencies": {
+    "autoprefixer": "^10.4.12",
+    "postcss": "^8.4.18",
+    "postcss-modules": "^5.0.0"
+  },
+  "scripts": {
+    "build": "node ./build",
+    "serve": "node ../serve css-modules"
+  }
+}
