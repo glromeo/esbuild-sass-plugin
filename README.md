@@ -21,6 +21,7 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
 * The support for [node-sass](https://github.com/sass/node-sass) has been removed and for good.
   Sadly, node-sass is at a dead end and so it's 1.x. I don't exclude updates or fixes on it but it's down in the list of
   my priorities.
+* `transform` now is expected to send back the CSS text in contents and anything that has to be default exported in `pluginData`.
 
 ### Install
 
@@ -359,7 +360,7 @@ esbuild.build({
 })
 
 ```
-`postcssModules` produces Javascript modules which are handled by esbuild's `js` loader, so the `type` option is **ignored**
+`postcssModules` produces Javascript modules which are handled by esbuild's `js` loader
 
 `postcssModules` also accepts an optional array of plugins for PostCSS as second parameter.
 
