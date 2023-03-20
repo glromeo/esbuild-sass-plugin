@@ -124,6 +124,10 @@ will be in `index.css` alongside your bundle.
 In all other cases `esbuild` won't process the CSS content which instead will be handled by the plugin.
 > if you want `url()` resolution or other processing you have to use `postcss` like in [this example](https://github.com/glromeo/esbuild-sass-plugin/issues/92#issuecomment-1219209442) 
 
+**NOTE:** Since version `2.7.0` the `css` type works also with postcss, CSS modules and more in general 
+with any transformation function by keeping an internal cache of CSS chunks (virtual CSS files) 
+importing them in the module wrapping the contents
+
 #### `type: "style"`
 In this mode the stylesheet will be in the javascript bundle 
 and will be dynamically added to the page when the bundle is loaded.
