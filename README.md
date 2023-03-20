@@ -40,15 +40,93 @@ await esbuild.build({
   plugins: [sassPlugin()]
 })
 ```
-There are two main options that control the plugin: `filter` which has the same meaning of filter in esbuild 
-[onLoad](https://esbuild.github.io/plugins/#on-load) and `type` that's what specifies how the css should be
-rendered and imported. 
 
-The example above uses the default type `css` and will use esbuild CSS loader so your transpiled Sass 
+### Options
+
+You can pass a series of **options** to the plugin that are a superset of Sass
+[compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter). \
+The following are the options specific to the plugin with their defaults whether provided:
+
+| Option        | Type                                                    | Default                                 |
+|---------------|---------------------------------------------------------|-----------------------------------------|
+| filter        | regular expression (in Go syntax)                       | <code>/\.(s[ac]ss&vert;css)$/</code>    |
+| exclude       | regular expression (in Js syntax)                       |                                         |
+| external      | regular expression (in Go syntax)                       |                                         |
+| type          | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"`  | `"css"`                                 |
+| cache         | boolean or Map                                          | `true` (there is one Map per namespace) |
+| transform     | function                                                |                                |
+| [loadPaths](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths) | string[] | []                                   |
+| precompile    | function                              |                                |
+| importMapper  | function                              |                                |
+| cssImports    | boolean                               | false                                   |
+| nonce         | string                                |                                |
+| prefer        | string                                | preferred package.json field            |
+| quietDeps     | boolean                               | false            |
+
+Two main options control the plugin: `filter` which has the same meaning of filter in [esbuild](https://esbuild.github.io/plugins/#on-load) 
+allowing to select the URLs handled by a plugin instance and then `type` that's what specifies how the css should be rendered and imported. 
+
+### `filter`
+The default filter is quite simple but also quite permissive. When specifying a custom regex bear in mind that this
+is in [Go syntax](https://pkg.go.dev/regexp/syntax)
+
+> e.g. If you have URLs in your imports and you want the plugin to ignore them you can't just a filter expression like:
+`/^(?!https?:).*\.(s[ac]ss|css)$/` because in Go the regex engine doesn't support lookarounds.
+
+You can try to list multiple plugin instances in order so that the most specific RegEx come first: 
+```javascript
+await esbuild.build({
+  ...
+  plugins: [
+    sassPlugin({
+      filter: /\.module\.scss$/,
+      transform: postcssModules()
+    }),
+    sassPlugin({
+      filter: /\.scss$/
+    }),
+  ],
+  ...   
+})
+```
+
+But for cases in which this won't work there's the `exclude` RegEx.
+
+### `exclude`
+
+This is a [Javascript RegEx](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet),
+the URLs matching it will be ignored by the plugin and passed on to the next plugins configured.
+
+This means that these URLs have to be handled by some other plugin, if you want them to be ignored and left unresolved
+you can use a [solution like this](https://esbuild.github.io/plugins/#on-resolve) which is quite verbose so to make
+life easier for the users of this plugin it is available as `external` option.
+
+e.g. This way:
+```javascript
+await esbuild.build({
+  ...
+  plugins: [
+    sassPlugin({
+      external: /^https?:.*\.css$/
+    }),
+  ],
+  ...   
+})
+```
+...all http `css` URLs are marked as external. 
+
+
+### `type`
+
+The example in [Usage](#usage) uses the default type `css` and will use esbuild CSS loader so your transpiled Sass 
 will be in `index.css` alongside your bundle.
 
 In all other cases `esbuild` won't process the CSS content which instead will be handled by the plugin.
 > if you want `url()` resolution or other processing you have to use `postcss` like in [this example](https://github.com/glromeo/esbuild-sass-plugin/issues/92#issuecomment-1219209442) 
+
+**NOTE:** Since version `2.7.0` the `css` type works also with postcss, CSS modules and more in general 
+with any transformation function by keeping an internal cache of CSS chunks (virtual CSS files) 
+importing them in the module wrapping the contents
 
 #### `type: "style"`
 In this mode the stylesheet will be in the javascript bundle 
@@ -102,34 +180,12 @@ export default class HelloWorld extends LitElement {
 
 Look in `test/fixtures` folder for more usage examples.
 
-### Options
-
-The **options** passed to the plugin are a superset of Sass
-[compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter).
-
-| Option                                               | Type                                  | Default                                 |
-|------------------------------------------------------|---------------------------------------|-----------------------------------------|
-| [filter](https://esbuild.github.io/plugins/#on-load) | regular expression                    | <code>/\.(s[ac]ss&vert;css)$/</code>    |
-| cache                                                | boolean or Map                        | `true` (there is one Map per namespace) |
-| type                                                 | `"css"`<br/>`"style"`<br/>`"lit-css"` <br/> `"css-text"` | `"css"`                                 |
-| transform                                            | function                              | undefined                               |
-| [loadPaths](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths) | string[] | []                                   |
-| precompile                                           | function                              | undefined                               |
-| importMapper                                         | function                              | undefined                               |
-| cssImports                                           | boolean                               | false                                   |
-| nonce                                                | string                                | undefined                               |
-| prefer                                               | string                                | preferred package.json field            |
-| quietDeps                                            | boolean                               | false            |
-
-### What happened to `exclude` ?
-the option has been removed in favour of using `filter`. The default filter is quite simple but also quite permissive.
-If you have URLs in your imports and you want the plugin to ignore them you can just change the filter to something like:
-```javascript
-sassPlugin({
-  filter: /^(?!https?:).*\.(s[ac]ss|css)$/
-  ...
-})
-```
+### `cache`
+The cache is enabled by default and can be turned off with `cache: false`. 
+Each plugin instance creates and maintain its own cache (as a Map) and this cache lives for the duration of the build. 
+If you want to pass a Map to preserve the cache amongst subsequent builds bear in mind that sharing the very same cache 
+between different instances might work just fine or it might lead to issues if the contents are incompatible. 
+> If you are not sure of what to do just keep a separate Map for each plugin instance.
 
 ### `cssImports`
 when this is set to `true` the plugin rewrites the node-modules relative URLs startig with the `~` prefix so that

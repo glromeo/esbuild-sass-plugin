@@ -7,9 +7,19 @@ export type Type = 'css' | 'style' | 'css-text' | 'lit-css'
 export type SassPluginOptions = StringOptions<'sync'> & {
 
   /**
-   *
+   * Careful: this RegExp has to respect Go limitations!!!
    */
   filter?: RegExp
+
+  /**
+   * This allows to further filter out to work around the limitations of filter
+   */
+  exclude?: RegExp
+
+  /**
+   * The paths matching this (Go) regexp are marked as external (e.g. exclude: /^http:/)
+   */
+  external?: RegExp
 
   /**
    * Function to transform import path. Not just paths by @import
@@ -55,7 +65,7 @@ export type SassPluginOptions = StringOptions<'sync'> & {
    *
    * @default undefined
    */
-  transform?: (css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>
+  transform?: (this: SassPluginOptions, css: string, resolveDir: string, filePath: string) => string | OnLoadResult | Promise<string | OnLoadResult>
 
   /**
    *

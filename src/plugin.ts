@@ -1,5 +1,5 @@
 import {OnLoadResult, Plugin} from 'esbuild'
-import {dirname} from 'path'
+import {dirname, relative} from 'path'
 import {SassPluginOptions} from './index'
 import {getContext, makeModule, modulesPaths, parseNonce} from './utils'
 import {useCache} from './cache'
@@ -22,12 +22,10 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
   }
 
   const type = options.type ?? 'css'
-
-  if (options['picomatch'] || options['exclude'] || typeof type !== 'string') {
-    console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
-  }
-
   const nonce = parseNonce(options.nonce)
+  const shouldExclude = options.exclude ? options.exclude.test.bind(options.exclude) : () => false
+
+  const cwd = process.cwd();
 
   return {
     name: 'sass-plugin',
@@ -43,17 +41,46 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         watched
       } = getContext(initialOptions)
 
-      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
-      const transform = options.transform ? options.transform.bind(options) : null
-
-      if (options.cssImports) {
-        onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
-          return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
+      if (options.external) {
+        onResolve({filter: options.external}, args => {
+          return {path: args.path, external: true}
         })
       }
 
+      if (options.cssImports) {
+        onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
+          if (shouldExclude(path)) {
+            return null;
+          } else {
+            return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
+          }
+        })
+      }
+
+      const transform = options.transform ? options.transform.bind(options) : null
+
+      const cssChunks:Record<string, string | Uint8Array | undefined> = {}
+
+      if (transform) {
+        const namespace = 'esbuild-sass-plugin';
+
+        onResolve({filter: /^css-chunk:/}, ({path})=>({
+          path,
+          namespace
+        }))
+
+        onLoad({filter: /./, namespace}, ({path})=>({
+          contents: cssChunks[path],
+          loader: 'css'
+        }))
+      }
+
+      const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
+
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
-        try {
+        if (shouldExclude(path)) {
+          return null;
+        } else try {
           let {cssText, watchFiles} = renderSync(path)
 
           watched[path] = watchFiles
@@ -63,9 +90,21 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
           if (transform) {
             const out: string | OnLoadResult = await transform(cssText, resolveDir, path)
             if (typeof out !== 'string') {
+              let {contents, pluginData} = out
+              if (type === "css") {
+                let name = `css-chunk:${relative(cwd, path)}`
+                cssChunks[name] = contents
+                contents = `import '${name}';`
+              } else if (type === "style") {
+                contents = makeModule(String(contents), 'style', nonce)
+              } else {
+                return {
+                  errors: [{text: `unsupported type '${type}' for postCSS modules`}]
+                }
+              }
               return {
-                contents: out.contents,
-                loader: out.loader,
+                contents: `${contents}export default ${pluginData.exports};`,
+                loader: 'js',
                 resolveDir,
                 watchFiles: [...watchFiles, ...(out.watchFiles || [])],
                 watchDirs: out.watchDirs || []

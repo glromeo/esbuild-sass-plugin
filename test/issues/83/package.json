@@ -1,0 +1,12 @@
+{
+  "name": "tabler-esbuild-sample",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node esbuild.config.js"
+  },
+  "dependencies": {
+    "@tabler/core": "^1.0.0-beta16",
+    "esbuild": "^0.15.14",
+    "esbuild-sass-plugin": "^2.4.0"
+  }
+}

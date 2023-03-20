@@ -113,10 +113,15 @@ export {css};
 `
 
 export function makeModule(contents: string, type: Type, nonce?: string) {
-  if (type === 'style') {
-    return styleModule(contents, nonce)
-  } else {
-    return type === 'lit-css' ? cssResultModule(contents) : cssTextModule(contents)
+  switch (type) {
+    case 'style':
+      return styleModule(contents, nonce)
+    case 'lit-css':
+      return cssResultModule(contents)
+    case 'css-text':
+      return cssTextModule(contents)
+    default:
+      return contents
   }
 }
 
@@ -136,12 +141,14 @@ export type PostcssModulesParams = Parameters<PostcssModulesPlugin>[0] & {
   basedir?: string
 };
 
+let chunk = 0;
+
 export function postcssModules(options: PostcssModulesParams, plugins: AcceptedPlugin[] = []) {
 
   const postcss: Postcss = requireTool('postcss', options.basedir)
   const postcssModulesPlugin: PostcssModulesPlugin = requireTool('postcss-modules', options.basedir)
 
-  return async function (this: SassPluginOptions, source: string, dirname: string, path: string): Promise<OnLoadResult> {
+  return async function (source: string, dirname: string, path: string): Promise<OnLoadResult> {
 
     let cssModule
 
@@ -157,7 +164,8 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
     ]).process(source, {from: path, map: false})
 
     return {
-      contents: `${makeModule(css, 'style', this.nonce)}export default ${cssModule};`,
+      contents: css,
+      pluginData: { exports: cssModule },
       loader: 'js'
     }
   }

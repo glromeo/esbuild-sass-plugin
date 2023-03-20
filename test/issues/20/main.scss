@@ -1,0 +1,8 @@
+
+// This wil fail
+@use 'base';
+
+.inverse {
+  background-color: base.$primary-color
+  color: red;
+}    
