@@ -197,7 +197,7 @@ describe('tests covering github issues', function () {
       },
       plugins: [
         sassPlugin({
-          type: 'css-text',
+          type: 'css',
           transform: postcssModules({}, [
             postcssUrl({
               basePath: '../../',
@@ -208,7 +208,7 @@ describe('tests covering github issues', function () {
       ]
     })
 
-    expect(readTextFile('./dist/FontA.js')).match(/data:font\/woff2;base64/)
+    expect(readTextFile('./dist/FontA.css')).match(/data:font\/woff2;base64/)
   })
 
   it('#61 npm exports and url encode/decode', async function () {
