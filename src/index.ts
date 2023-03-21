@@ -12,16 +12,6 @@ export type SassPluginOptions = StringOptions<'sync'> & {
   filter?: RegExp
 
   /**
-   * This allows to further filter out to work around the limitations of filter
-   */
-  exclude?: RegExp
-
-  /**
-   * The paths matching this (Go) regexp are marked as external (e.g. exclude: /^http:/)
-   */
-  external?: RegExp
-
-  /**
    * Function to transform import path. Not just paths by @import
    * directive, but also paths imported by ts code.
    */

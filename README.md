@@ -19,8 +19,7 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
   You can have a look at the [**multiple** fixture](https://github.com/glromeo/esbuild-sass-plugin/blob/main/test/fixture/multiple) 
   for an example where **lit CSS** and **CSS modules** are both used in the same app
 * The support for [node-sass](https://github.com/sass/node-sass) has been removed and for good.
-  Sadly, node-sass is at a dead end and so it's 1.x. I don't exclude updates or fixes on it but it's down in the list of
-  my priorities.
+  Sadly, node-sass is at a dead end and so it's 1.x.
 * `transform` now is expected to send back the CSS text in contents and anything that has to be default exported in `pluginData`.
 
 ### Install
@@ -51,8 +50,6 @@ The following are the options specific to the plugin with their defaults whether
 | Option        | Type                                                    | Default                                 |
 |---------------|---------------------------------------------------------|-----------------------------------------|
 | filter        | regular expression (in Go syntax)                       | <code>/\.(s[ac]ss&vert;css)$/</code>    |
-| exclude       | regular expression (in Js syntax)                       |                                         |
-| external      | regular expression (in Go syntax)                       |                                         |
 | type          | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"`  | `"css"`                                 |
 | cache         | boolean or Map                                          | `true` (there is one Map per namespace) |
 | transform     | function                                                |                                |
@@ -71,8 +68,9 @@ allowing to select the URLs handled by a plugin instance and then `type` that's 
 The default filter is quite simple but also quite permissive. When specifying a custom regex bear in mind that this
 is in [Go syntax](https://pkg.go.dev/regexp/syntax)
 
-> e.g. If you have URLs in your imports and you want the plugin to ignore them you can't just a filter expression like:
-`/^(?!https?:).*\.(s[ac]ss|css)$/` because in Go the regex engine doesn't support lookarounds.
+> If you have URLs in your imports and you want the plugin to ignore them you can't just a filter expression like:
+`/^(?!https?:).*\.(s[ac]ss|css)$/` because *Go regex engine doesn't support lookarounds* but you can use 
+> **esbuild**'s `external` option to ignore these imports or try a [solution like this one](https://esbuild.github.io/plugins/#on-resolve).
 
 You can try to list multiple plugin instances in order so that the most specific RegEx come first: 
 ```javascript
@@ -90,32 +88,6 @@ await esbuild.build({
   ...   
 })
 ```
-
-But for cases in which this won't work there's the `exclude` RegEx.
-
-### `exclude`
-
-This is a [Javascript RegEx](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions/Cheatsheet),
-the URLs matching it will be ignored by the plugin and passed on to the next plugins configured.
-
-This means that these URLs have to be handled by some other plugin, if you want them to be ignored and left unresolved
-you can use a [solution like this](https://esbuild.github.io/plugins/#on-resolve) which is quite verbose so to make
-life easier for the users of this plugin it is available as `external` option.
-
-e.g. This way:
-```javascript
-await esbuild.build({
-  ...
-  plugins: [
-    sassPlugin({
-      external: /^https?:.*\.css$/
-    }),
-  ],
-  ...   
-})
-```
-...all http `css` URLs are marked as external. 
-
 
 ### `type`
 
