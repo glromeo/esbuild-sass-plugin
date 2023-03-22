@@ -3,11 +3,15 @@ import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
 import {BuildOptions, OnLoadResult} from 'esbuild'
 import {Syntax} from 'sass'
-import {parse, resolve} from 'path'
+import {parse, relative, resolve} from 'path'
 import {existsSync} from 'fs'
 import {SyncOpts} from 'resolve'
 
-export const RELATIVE_PATH = /^\.\.?\//
+const cwd = process.cwd()
+
+export const posixRelative = require("path").sep === '/'
+  ? (path: string) => `css-chunk:${relative(cwd, path)}`
+  : (path: string) => `css-chunk:${relative(cwd, path).replace(/\\/g, '/')}`
 
 export function modulesPaths(absWorkingDir?: string): string[] {
   let path = absWorkingDir || process.cwd()
@@ -140,8 +144,6 @@ export function parseNonce(nonce: string | undefined): string | undefined {
 export type PostcssModulesParams = Parameters<PostcssModulesPlugin>[0] & {
   basedir?: string
 };
-
-let chunk = 0;
 
 export function postcssModules(options: PostcssModulesParams, plugins: AcceptedPlugin[] = []) {
 

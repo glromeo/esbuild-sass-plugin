@@ -1,7 +1,7 @@
 import {OnLoadResult, Plugin} from 'esbuild'
-import {dirname, relative} from 'path'
+import {dirname} from 'path'
 import {SassPluginOptions} from './index'
-import {getContext, makeModule, modulesPaths, parseNonce} from './utils'
+import {getContext, makeModule, modulesPaths, parseNonce, posixRelative} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
 
@@ -22,10 +22,12 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
   }
 
   const type = options.type ?? 'css'
-  const nonce = parseNonce(options.nonce)
-  const shouldExclude = options.exclude ? options.exclude.test.bind(options.exclude) : () => false
 
-  const cwd = process.cwd();
+  if (options['picomatch'] || options['exclude'] || typeof type !== 'string') {
+    console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
+  }
+
+  const nonce = parseNonce(options.nonce)
 
   return {
     name: 'sass-plugin',
@@ -41,19 +43,9 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         watched
       } = getContext(initialOptions)
 
-      if (options.external) {
-        onResolve({filter: options.external}, args => {
-          return {path: args.path, external: true}
-        })
-      }
-
       if (options.cssImports) {
         onResolve({filter: /^~.*\.css$/}, ({path, importer, resolveDir}) => {
-          if (shouldExclude(path)) {
-            return null;
-          } else {
-            return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
-          }
+          return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
         })
       }
 
@@ -78,9 +70,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
       const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
-        if (shouldExclude(path)) {
-          return null;
-        } else try {
+        try {
           let {cssText, watchFiles} = renderSync(path)
 
           watched[path] = watchFiles
@@ -92,7 +82,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             if (typeof out !== 'string') {
               let {contents, pluginData} = out
               if (type === "css") {
-                let name = `css-chunk:${relative(cwd, path)}`
+                let name = posixRelative(path)
                 cssChunks[name] = contents
                 contents = `import '${name}';`
               } else if (type === "style") {
