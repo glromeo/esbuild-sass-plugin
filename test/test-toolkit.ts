@@ -1,4 +1,4 @@
-import {BuildOptions} from 'esbuild'
+import {BuildOptions, PluginBuild} from 'esbuild'
 import path from 'path'
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from 'fs'
 import {sassPlugin, SassPluginOptions} from '../src'
@@ -51,7 +51,7 @@ export function pluginInternals(options: SassPluginOptions = {}) {
   const {setup} = sassPlugin(options)
   let resolveCallback, loadCallback, startCallback, endCallback, disposeCallback
   setup({
-    esbuild: {} as any,
+    esbuild: {} as PluginBuild.esbuild,
     initialOptions: {},
     onResolve(options, callback) {
       resolveCallback = callback

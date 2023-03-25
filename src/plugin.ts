@@ -116,10 +116,14 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             watchFiles
           }
 
-        } catch (err: any) {
-          return {
-            errors: [{text: err.message}],
-            watchFiles: watched[path] ?? [path]
+        } catch (err) {
+          if (err instanceof Error) {
+            return {
+              errors: [{text: err.message}],
+              watchFiles: watched[path] ?? [path]
+            }
+          } else {
+            console.error({ err })
           }
         }
       }))
