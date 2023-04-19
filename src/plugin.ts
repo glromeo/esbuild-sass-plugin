@@ -71,7 +71,10 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
         try {
-          let {cssText, watchFiles} = renderSync(path)
+          let {cssText, watchFiles, warnings} = renderSync(path)
+          if (!warnings) {
+            warnings = []
+          }
 
           watched[path] = watchFiles
 
@@ -108,11 +111,13 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             contents: cssText,
             loader: 'css',
             resolveDir,
+            warnings,
             watchFiles
           } : {
             contents: makeModule(cssText, type, nonce),
             loader: 'js',
             resolveDir,
+            warnings,
             watchFiles
           }
 

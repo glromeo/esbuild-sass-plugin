@@ -1,6 +1,7 @@
 import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
 import {createResolver, fileSyntax, sourceMappingURL} from './utils'
+import {PartialMessage} from 'esbuild'
 import * as sass from 'sass'
 import {ImporterResult} from 'sass'
 import {fileURLToPath, pathToFileURL} from 'url'
@@ -11,6 +12,7 @@ export type RenderSync = (path: string) => RenderResult
 export type RenderResult = {
   cssText: string
   watchFiles: string[]
+  warnings?: PartialMessage[]
 }
 
 export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderSync {
@@ -80,6 +82,32 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       options.url = pathToFileURL(path)
     }
 
+    const warnings: PartialMessage[] = []
+    const logger = options.logger ?? {
+      warn: function (message, opts) {
+        if (!opts.span) {
+          warnings.push({ text: `sass warning: ${message}` })
+        } else {
+          const filename = opts.span.url?.pathname ?? path
+          const esbuildMsg = {
+            text: message,
+            location: {
+              file: filename,
+              line: opts.span.start.line,
+              column: opts.span.start.column,
+              lineText: opts.span.text,
+            },
+            detail: {
+              deprecation: opts.deprecation,
+              stack: opts.stack,
+            }
+          }
+
+          warnings.push(esbuildMsg)
+        }
+      }
+    }
+
     const {
       css,
       loadedUrls,
@@ -87,6 +115,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
     } = sass.compileString(source, {
       sourceMapIncludeSources: true,
       ...options,
+      logger,
       syntax,
       importer: {
         load(canonicalUrl: URL): ImporterResult | null {
@@ -147,6 +176,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
 
     return {
       cssText,
+      warnings: warnings,
       watchFiles: [path, ...loadedUrls.map(fileURLToPath)]
     }
   }
