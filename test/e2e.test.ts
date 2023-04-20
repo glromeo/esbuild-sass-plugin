@@ -48,7 +48,14 @@ describe('e2e tests', function () {
       plugins: [
         sassPlugin({
           quietDeps: true,
-          prefer: 'sass'
+          prefer: 'sass',
+          precompile(source, path, isRoot) {
+            if (path.endsWith('_functions.scss')) {
+              return source.replace('opacity($foreground) * 100)', 'opacity($foreground) * 100%)');
+            } else {
+              return source;
+            }
+          }
         })
       ]
     })
@@ -89,7 +96,7 @@ describe('e2e tests', function () {
       })
 
       expect(
-        consumer.originalPositionFor({line: 10309, column: 0})
+        consumer.originalPositionFor({line: 10259, column: 0})
       ).to.eql({
         source: `../src/entrypoint.scss`,
         line: 3,
