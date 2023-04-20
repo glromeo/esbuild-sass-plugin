@@ -156,8 +156,8 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
 
     const {css} = await postcss([
       postcssModulesPlugin({
-        ...options,
-        getJSON(cssFilename: string, json: { [name: string]: string }, outputFileName: string): void {
+        ...(options as Parameters<PostcssModulesPlugin>[0]),
+        getJSON(cssFilename: string, json: { [name: string]: string }, outputFileName?: string): void {
           cssModule = JSON.stringify(json, null, 2)
           options.getJSON?.(cssFilename, json, outputFileName)
         }
@@ -192,7 +192,7 @@ export function createResolver(options: SassPluginOptions = {}, loadPaths: strin
     return (id: string, basedir: string) => {
       try {
         opts.basedir = basedir
-        return resolve.sync(id, opts)
+        return resolve.sync!(id, opts)
       } catch (ignored) {
         return id
       }

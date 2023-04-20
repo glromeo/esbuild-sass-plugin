@@ -80,6 +80,14 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
           if (transform) {
             const out: string | OnLoadResult = await transform(cssText, resolveDir, path)
             if (typeof out !== 'string') {
+              if (out.loader && out.loader !== 'js') {
+                return {
+                  ...out,
+                  resolveDir,
+                  watchFiles: [...watchFiles, ...(out.watchFiles || [])],
+                  watchDirs: out.watchDirs || []
+                }
+              }
               let {contents, pluginData} = out
               if (type === "css") {
                 let name = posixRelative(path)
