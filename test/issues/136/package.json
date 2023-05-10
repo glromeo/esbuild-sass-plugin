@@ -1,0 +1,7 @@
+{
+  "name": "import-mapper-issue",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node esbuild.config.js"
+  }
+}
