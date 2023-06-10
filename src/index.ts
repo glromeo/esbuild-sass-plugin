@@ -4,7 +4,7 @@ import {sassPlugin} from './plugin'
 
 export type Type = 'css' | 'style' | 'css-text' | 'lit-css'
 
-export type SassPluginOptions = StringOptions<'sync'> & {
+export type SassPluginOptions = StringOptions<'async'> & {
 
   /**
    * Careful: this RegExp has to respect Go limitations!!!

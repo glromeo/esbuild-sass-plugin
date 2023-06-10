@@ -71,7 +71,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
         try {
-          let {cssText, watchFiles, warnings} = renderSync(path)
+          let {cssText, watchFiles, warnings} = await renderSync(path)
           if (!warnings) {
             warnings = []
           }

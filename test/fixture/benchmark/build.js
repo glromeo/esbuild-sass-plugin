@@ -1,55 +1,60 @@
 const esbuild = require('esbuild')
+const sass = require('sass')
 const {sassPlugin} = require('../../../lib')
-const chokidar = require('chokidar')
 const {cleanFixture} = require('../utils')
 
 cleanFixture(__dirname)
 
 console.time('generate')
-require("./generate");
-console.timeEnd('generate')
+require("./generate")
+console.timeEnd('generate');
 
-let result
+(async ()=>{
 
-const watcher = chokidar.watch('./src', {ignoreInitial: true})
+  console.time('context')
 
-watcher.on('ready', async function () {
-
-  console.time('initial build')
-
-  result = await esbuild.build({
+  const ctx = await esbuild.context({
     entryPoints: ["./src/generated/index.ts"],
     bundle: true,
     format: 'esm',
     sourcemap: false,
     outdir: './out',
     define: {'process.env.NODE_ENV': '"development"'},
-    incremental: true,
     plugins: [
       sassPlugin({
-        'filter': /^\.\.\/index.scss$/,
-        'type': 'style',
-        'cache': true
+        filter: /^\.\.\/index.scss$/,
+        type: 'style',
+        cache: true,
+        logger: sass.Logger.silent
       }),
       sassPlugin({
-        'type': 'lit-css',
-        'cache': true
-      })
+        type: 'lit-css',
+        cache: true,
+        quietDeps: true,
+        logger: sass.Logger.silent
+      }),
+      {
+        name: "watcher",
+        setup: ({onStart, onEnd}) => {
+          onStart(()=>{
+            console.time("(re)build");
+          })
+
+          onEnd(()=>{
+            console.timeEnd("(re)build");
+          })
+        }
+      }
     ],
     logLevel: 'debug'
   })
 
-  console.timeEnd('initial build')
-})
+  console.timeEnd('context');
+  console.time('watch')
 
-watcher.on('change', async function () {
-  if (result !== null) {
-    console.time('incremental build')
+  await ctx.watch();
+  await ctx.rebuild();
 
-    const rebuild = result.rebuild()
-    result = null
-    result = await rebuild
+  console.timeEnd('watch');
 
-    console.timeEnd('incremental build')
-  }
-})
+})().catch(console.error);
