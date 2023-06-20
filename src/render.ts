@@ -86,7 +86,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
     const logger = options.logger ?? {
       warn: function (message, opts) {
         if (!opts.span) {
-          warnings.push({ text: `sass warning: ${message}` })
+          warnings.push({text: `sass warning: ${message}`})
         } else {
           const filename = opts.span.url?.pathname ?? path
           const esbuildMsg = {
@@ -95,11 +95,11 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
               file: filename,
               line: opts.span.start.line,
               column: opts.span.start.column,
-              lineText: opts.span.text,
+              lineText: opts.span.text
             },
             detail: {
               deprecation: opts.deprecation,
-              stack: opts.stack,
+              stack: opts.stack
             }
           }
 
