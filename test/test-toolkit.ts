@@ -19,7 +19,8 @@ export function useFixture(name: string): BuildOptions {
   } catch (ignored) {
   }
   return {
-    absWorkingDir // esbuild cwd is initialized when imported, we have to change it at each test case!
+    absWorkingDir, // esbuild cwd is initialized when imported, we have to change it at each test case!
+    target: 'chrome100'
   }
 }
 

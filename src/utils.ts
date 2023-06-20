@@ -9,7 +9,7 @@ import {SyncOpts} from 'resolve'
 
 const cwd = process.cwd()
 
-export const posixRelative = require("path").sep === '/'
+export const posixRelative = require('path').sep === '/'
   ? (path: string) => `css-chunk:${relative(cwd, path)}`
   : (path: string) => `css-chunk:${relative(cwd, path).replace(/\\/g, '/')}`
 
@@ -167,7 +167,7 @@ export function postcssModules(options: PostcssModulesParams, plugins: AcceptedP
 
     return {
       contents: css,
-      pluginData: { exports: cssModule },
+      pluginData: {exports: cssModule},
       loader: 'js'
     }
   }

@@ -75,7 +75,7 @@ export type SassPluginOptions = StringOptions<'sync'> & {
   /**
    *
    */
-  prefer?: "sass" | "style" | "main"
+  prefer?: 'sass' | 'style' | 'main'
 }
 
 export default sassPlugin

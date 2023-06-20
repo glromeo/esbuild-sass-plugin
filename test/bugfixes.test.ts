@@ -33,7 +33,7 @@ describe('tests covering github issues', function () {
   it('#20 Plugin stops working after a SASS failure', async function () {
     const options = useFixture('../issues/20')
 
-    this.timeout(10000);
+    this.timeout(10000)
 
     writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
     writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color }`)
@@ -45,9 +45,9 @@ describe('tests covering github issues', function () {
       entryPoints: ['./tmp.scss'],
       outfile: './tmp.css',
       plugins: [sassPlugin(), {
-        name: "listener",
+        name: 'listener',
         setup({onEnd}) {
-          onEnd(({errors, warnings})=>{
+          onEnd(({errors, warnings}) => {
             const [failure] = errors
             switch (step) {
               case 0:
@@ -56,7 +56,7 @@ describe('tests covering github issues', function () {
                 step++
                 return
               case 1:
-                expect(failure.pluginName).to.eq("sass-plugin")
+                expect(failure.pluginName).to.eq('sass-plugin')
                 writeTextFile('dep.scss', `$primary-color: #333; body { padding: 0; color: $primary-color; }`)
                 step++
                 return
@@ -66,16 +66,16 @@ describe('tests covering github issues', function () {
                 step++
                 return
               case 3:
-                expect(failure.pluginName).to.eq("sass-plugin")
+                expect(failure.pluginName).to.eq('sass-plugin')
                 writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
                 step++
                 return
               case 4:
                 expect(failure).to.be.undefined
                 expect(warnings.length).to.equal(0)
-                setTimeout(()=>{
+                setTimeout(() => {
                   ctx!.dispose()
-                },100)
+                }, 100)
                 step++
                 return
             }
@@ -91,7 +91,7 @@ describe('tests covering github issues', function () {
     await new Promise((resolve, reject) => {
       writeTextFile('tmp.scss', `@use 'dep'; body {background-color: dep.$primary-color; color: red }`)
       const interval = setInterval(() => {
-        console.log("interval", step)
+        console.log('interval', step)
         if (step === 5) {
           clearInterval(interval)
           try {
@@ -301,7 +301,7 @@ describe('tests covering github issues', function () {
     })
 
     let map = readJsonFile('./dist/index.css.map')
-    map.sourcesContent[0] = map.sourcesContent[0].replace(/\r\n/g, "\n")
+    map.sourcesContent[0] = map.sourcesContent[0].replace(/\r\n/g, '\n')
 
     expect(map).to.eql({
       'version': 3,

@@ -51,17 +51,17 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       const transform = options.transform ? options.transform.bind(options) : null
 
-      const cssChunks:Record<string, string | Uint8Array | undefined> = {}
+      const cssChunks: Record<string, string | Uint8Array | undefined> = {}
 
       if (transform) {
-        const namespace = 'esbuild-sass-plugin';
+        const namespace = 'esbuild-sass-plugin'
 
-        onResolve({filter: /^css-chunk:/}, ({path})=>({
+        onResolve({filter: /^css-chunk:/}, ({path}) => ({
           path,
           namespace
         }))
 
-        onLoad({filter: /./, namespace}, ({path})=>({
+        onLoad({filter: /./, namespace}, ({path}) => ({
           contents: cssChunks[path],
           loader: 'css'
         }))
@@ -92,11 +92,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 }
               }
               let {contents, pluginData} = out
-              if (type === "css") {
+              if (type === 'css') {
                 let name = posixRelative(path)
                 cssChunks[name] = contents
                 contents = `import '${name}';`
-              } else if (type === "style") {
+              } else if (type === 'style') {
                 contents = makeModule(String(contents), 'style', nonce)
               } else {
                 return {

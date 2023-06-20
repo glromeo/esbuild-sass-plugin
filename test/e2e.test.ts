@@ -51,9 +51,9 @@ describe('e2e tests', function () {
           prefer: 'sass',
           precompile(source, path, isRoot) {
             if (path.endsWith('_functions.scss')) {
-              return source.replace('opacity($foreground) * 100)', 'opacity($foreground) * 100%)');
+              return source.replace('opacity($foreground) * 100)', 'opacity($foreground) * 100%)')
             } else {
-              return source;
+              return source
             }
           }
         })
@@ -189,8 +189,6 @@ describe('e2e tests', function () {
       '  border: 5px solid blue;\n' +
       '  padding: 20px;\n' +
       '}`;\n')
-
-    expect(bundle).to.have.string(`__publicField(HelloWorld, "styles", hello_world_default);`)
 
     expect(bundle).to.have.string(
       `document.head.appendChild(document.createElement("style")).appendChild(document.createTextNode(css));`

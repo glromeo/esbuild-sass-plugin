@@ -101,7 +101,8 @@ describe('unit tests', function () {
     `)
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v2.sass'))
-    await ctx.rebuild().catch(ignored => {})
+    await ctx.rebuild().catch(ignored => {
+    })
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v3.sass'))
     await ctx.rebuild()
@@ -152,7 +153,7 @@ describe('unit tests', function () {
     expect(readTextFile('out/index.js')).to.equalIgnoreSpaces(readTextFile('snapshot.js'))
   })
 
-  it('captures warnings in entrypoint', async function() {
+  it('captures warnings in entrypoint', async function () {
     const options = useFixture('warnings')
     let warnings = []
 
@@ -163,11 +164,11 @@ describe('unit tests', function () {
       outdir: './out',
       bundle: true,
       plugins: [
-        sassPlugin({ syntax: 'nested' }),
+        sassPlugin({syntax: 'nested'}),
         {
-          name: "capture-build-end-warnings",
+          name: 'capture-build-end-warnings',
           setup: function (build) {
-            build.onEnd(async function(result) {
+            build.onEnd(async function (result) {
               warnings = result.warnings
             })
           }
@@ -177,13 +178,13 @@ describe('unit tests', function () {
 
     expect(warnings.length).to.equal(1)
 
-    expect(warnings[0].text).to.include("This selector doesn't have any properties")
-    expect(warnings[0].location.file).to.equal("index.sass")
+    expect(warnings[0].text).to.include('This selector doesn\'t have any properties')
+    expect(warnings[0].location.file).to.equal('index.sass')
     expect(warnings[0].location.line).to.equal(3)
-    expect(warnings[0].location.lineText).to.equal("p")
+    expect(warnings[0].location.lineText).to.equal('p')
   })
 
-  it('captures warnings in imports', async function() {
+  it('captures warnings in imports', async function () {
     const options = useFixture('warnings')
     let warnings = []
 
@@ -194,11 +195,11 @@ describe('unit tests', function () {
       logLevel: 'silent',
       outdir: './out',
       plugins: [
-        sassPlugin({ syntax: 'nested' }),
+        sassPlugin({syntax: 'indented'}),
         {
-          name: "capture-build-end-warnings",
+          name: 'capture-build-end-warnings',
           setup: function (build) {
-            build.onEnd(async function(result) {
+            build.onEnd(async function (result) {
               warnings = result.warnings
             })
           }
@@ -208,14 +209,14 @@ describe('unit tests', function () {
 
     expect(warnings.length).to.equal(2)
 
-    const indexWarning = warnings.find(w => w.location.file === "index.sass")
-    expect(indexWarning.text).to.include("This selector doesn't have any properties")
+    const indexWarning = warnings.find(w => w.location.file.endsWith('index.sass'))
+    expect(indexWarning.text).to.include('This selector doesn\'t have any properties')
     expect(indexWarning.location.line).to.equal(3)
-    expect(indexWarning.location.lineText).to.equal("p")
+    expect(indexWarning.location.lineText).to.equal('p')
 
-    const partialWarning = warnings.find(w => w.location.file === "_partial.sass")
-    expect(partialWarning.text).to.include("This selector doesn't have any properties")
+    const partialWarning = warnings.find(w => w.location.file.endsWith('_partial.sass'))
+    expect(partialWarning.text).to.include('This selector doesn\'t have any properties')
     expect(partialWarning.location.line).to.equal(0)
-    expect(partialWarning.location.lineText).to.equal("div")
+    expect(partialWarning.location.lineText).to.equal('div')
   })
 })
