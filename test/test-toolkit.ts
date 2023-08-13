@@ -1,8 +1,9 @@
 import {BuildOptions} from 'esbuild'
-import path from 'path'
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from 'fs'
 import {sassPlugin, SassPluginOptions} from '../src'
 import {fake} from 'mocha-toolkit'
+
+const path = require('path')
 
 export * from 'mocha-toolkit'
 

@@ -96,7 +96,7 @@ describe('e2e tests', function () {
       })
 
       expect(
-        consumer.originalPositionFor({line: 10259, column: 0})
+        consumer.originalPositionFor({line: 10263, column: 0})
       ).to.eql({
         source: `../src/entrypoint.scss`,
         line: 3,

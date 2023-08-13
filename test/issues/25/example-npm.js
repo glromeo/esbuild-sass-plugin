@@ -12,6 +12,6 @@ esbuild.build({
     bundle: true,
     outdir: "./out",
     plugins: [sassPlugin({
-        includePaths: [includePath]
+        loadPaths: [includePath]
     })]
 });

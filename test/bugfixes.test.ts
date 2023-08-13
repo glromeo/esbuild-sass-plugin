@@ -150,7 +150,7 @@ describe('tests covering github issues', function () {
       })]
     })
 
-    expect(readTextFile('./out/index.js')).to.match(/background-color: rgb\(174, 101, 255\);/)
+    expect(readTextFile('./out/index.js')).to.match(/background-color: rgb\(255, 40, 174\);/)
 
     // NOTE: even with quietDeps: true we get 6 warnings!
 
@@ -169,7 +169,7 @@ describe('tests covering github issues', function () {
       bundle: true,
       outdir: './out',
       plugins: [sassPlugin({
-        includePaths: [includePath]
+        loadPaths: [includePath]
       })]
     })
 
@@ -265,7 +265,7 @@ describe('tests covering github issues', function () {
       'version': 3,
       'sources': ['../src/with_use.scss', '../scss_utils/_colors.scss'],
       'sourcesContent': ['@use \'colors\';\n\na {\n  color: colors.$red;\n}', '$red: red;'],
-      'mappings': 'AAEA;AACE;;',
+      "mappings": "AAEA;AACE,SCHI;;",
       'names': []
     })
   })
@@ -307,7 +307,7 @@ describe('tests covering github issues', function () {
       'version': 3,
       'sources': ['../src/index.scss'],
       'sourcesContent': ['body {\n    background: black;\n}\n'],
-      'mappings': 'AAAA;AACI;;',
+      "mappings": "AAAA;AACI,cAAA;;",
       'names': []
     })
   })

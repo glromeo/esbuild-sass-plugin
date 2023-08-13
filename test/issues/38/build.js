@@ -11,7 +11,7 @@ esbuild.build({
     bundle: true,
     plugins: [
         sassPlugin({
-            includePaths: [
+            loadPaths: [
                 path.resolve(__dirname, "./node_modules"),
                 path.resolve(__dirname, "./node_modules/.pnpm/node_modules"),
             ]
