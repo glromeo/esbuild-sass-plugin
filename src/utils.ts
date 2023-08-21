@@ -91,14 +91,12 @@ function requireTool(module: string, basedir?: string) {
 }
 
 const cssTextModule = cssText => `\
-export default \`
-${cssText.replace(/([$`\\])/g, '\\$1')}\`;
+export default \`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
 const cssResultModule = cssText => `\
 import {css} from "lit-element/lit-element.js";
-export default css\`
-${cssText.replace(/([$`\\])/g, '\\$1')}\`;
+export default css\`${cssText.replace(/([$`\\])/g, '\\$1')}\`;
 `
 
 const styleModule = (cssText: string, nonce?: string) => nonce ? `\
