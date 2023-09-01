@@ -56,13 +56,15 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
       if (transform) {
         const namespace = 'esbuild-sass-plugin'
 
-        onResolve({filter: /^css-chunk:/}, ({path}) => ({
+        onResolve({filter: /^css-chunk:/}, ({path, resolveDir}) => ({
           path,
-          namespace
+          namespace,
+          pluginData: {resolveDir}
         }))
 
-        onLoad({filter: /./, namespace}, ({path}) => ({
+        onLoad({filter: /./, namespace}, ({path, pluginData: {resolveDir}}) => ({
           contents: cssChunks[path],
+          resolveDir,
           loader: 'css'
         }))
       }
