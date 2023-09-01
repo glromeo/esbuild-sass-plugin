@@ -181,7 +181,7 @@ describe('e2e tests', function () {
       };
     `)
 
-    expect(bundle).to.have.string('var hello_world_default = i`\n' +
+    expect(bundle).to.have.string('var hello_world_default = i`' +
       '.banner {\n' +
       '  font-family: sans-serif;\n' +
       '  color: blue;\n' +
