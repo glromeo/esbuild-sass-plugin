@@ -5,8 +5,14 @@ import {promises as fsp, Stats} from 'fs'
 type OnLoadCallback = (args: OnLoadArgs) => (OnLoadResult | Promise<OnLoadResult>)
 type PluginLoadCallback = (path: string) => (OnLoadResult | Promise<OnLoadResult>)
 
-function collectStats(watchFiles): Promise<Stats[]> {
-  return Promise.all(watchFiles.map(filename => fsp.stat(filename)))
+function collectStats(watchFiles: string[], fsStatCache: Map<string, Stats>): Promise<Stats[]> {
+  return Promise.all(watchFiles.map(async filename => {
+    if (!fsStatCache.has(filename)) {
+      const stats = await fsp.stat(filename)
+      fsStatCache.set(filename, stats)
+    }
+    return fsStatCache.get(filename) as Stats
+  }))
 }
 
 function maxMtimeMs(stats: Stats[]) {
@@ -23,7 +29,7 @@ function getCache(options: SassPluginOptions): Map<string, CachedResult> | undef
   }
 }
 
-export function useCache(options: SassPluginOptions = {}, loadCallback: PluginLoadCallback): OnLoadCallback {
+export function useCache(options: SassPluginOptions = {}, fsStatCache: Map<string, Stats>, loadCallback: PluginLoadCallback): OnLoadCallback {
   const cache = getCache(options)
   if (cache) {
     return async ({path}: OnLoadArgs) => {
@@ -31,7 +37,7 @@ export function useCache(options: SassPluginOptions = {}, loadCallback: PluginLo
         let cached = cache.get(path)
         if (cached) {
           let watchFiles = cached.result.watchFiles!
-          let stats = await collectStats(watchFiles)
+          let stats = await collectStats(watchFiles, fsStatCache)
           for (const {mtimeMs} of stats) {
             if (mtimeMs > cached.mtimeMs) {
               cached.result = await loadCallback(watchFiles[0])
@@ -42,7 +48,7 @@ export function useCache(options: SassPluginOptions = {}, loadCallback: PluginLo
         } else {
           let result = await loadCallback(path)
           cached = {
-            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles)),
+            mtimeMs: maxMtimeMs(await collectStats(result.watchFiles!, fsStatCache)),
             result
           }
           cache.set(path, cached)
