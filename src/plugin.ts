@@ -31,7 +31,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
   return {
     name: 'sass-plugin',
-    setup({initialOptions, onResolve, onLoad, resolve}) {
+    setup({initialOptions, onResolve, onLoad, resolve, onStart}) {
 
       options.loadPaths = Array.from(new Set([
         ...options.loadPaths || modulesPaths(initialOptions.absWorkingDir),
@@ -48,6 +48,9 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
           return resolve(path.slice(1), {importer, resolveDir, kind: 'import-rule'})
         })
       }
+
+      const fsStatCache = new Map()
+      onStart(() => fsStatCache.clear())
 
       const transform = options.transform ? options.transform.bind(options) : null
 
@@ -71,7 +74,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       const renderSync = createRenderer(options, options.sourceMap ?? sourcemap)
 
-      onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, async path => {
+      onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, fsStatCache, async path => {
         try {
           let {cssText, watchFiles, warnings} = renderSync(path)
           if (!warnings) {
