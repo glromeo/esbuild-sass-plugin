@@ -161,7 +161,7 @@ between different instances might work just fine or it might lead to issues if t
 > If you are not sure of what to do just keep a separate Map for each plugin instance.
 
 ### `cssImports`
-when this is set to `true` the plugin rewrites the node-modules relative URLs startig with the `~` prefix so that
+when this is set to `true` the plugin rewrites the node-modules relative URLs starting with the `~` prefix so that
 esbuild can resolve them similarly to what `css-loader` does. 
 > Although this practice is [kind of deprecated nowadays](https://webpack.js.org/loaders/sass-loader/#resolving-import-at-rules) 
 > some packages out there still use this notation (e.g. `formio`)
