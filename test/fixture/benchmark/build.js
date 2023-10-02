@@ -1,55 +1,44 @@
 const esbuild = require('esbuild')
 const {sassPlugin} = require('../../../lib')
-const chokidar = require('chokidar')
 const {cleanFixture} = require('../utils')
 
 cleanFixture(__dirname)
 
 console.time('generate')
-require("./generate");
+require('./generate')
 console.timeEnd('generate')
 
-let result
-
-const watcher = chokidar.watch('./src', {ignoreInitial: true})
-
-watcher.on('ready', async function () {
-
-  console.time('initial build')
-
-  result = await esbuild.build({
-    entryPoints: ["./src/generated/index.ts"],
+esbuild.context({
+    entryPoints: ['./src/generated/index.ts'],
     bundle: true,
     format: 'esm',
     sourcemap: false,
     outdir: './out',
     define: {'process.env.NODE_ENV': '"development"'},
-    incremental: true,
     plugins: [
-      sassPlugin({
-        'filter': /^\.\.\/index.scss$/,
-        'type': 'style',
-        'cache': true
-      }),
-      sassPlugin({
-        'type': 'lit-css',
-        'cache': true
-      })
+        sassPlugin({
+            'filter': /^\.\.\/index.scss$/,
+            'type': 'style',
+            'cache': true
+        }),
+        sassPlugin({
+            'type': 'lit-css',
+            'cache': true
+        }), {
+            name: 'logger',
+            setup({onStart, onEnd}) {
+                onStart(() => {
+                    console.time('built in')
+                })
+                onEnd(() => {
+                    console.timeEnd('built in')
+                })
+            }
+        }
     ],
-    logLevel: 'debug'
-  })
+    logLevel: 'error'
+}).then(async context => {
+    await context.watch()
+    await context.rebuild()
+}).catch(console.error)
 
-  console.timeEnd('initial build')
-})
-
-watcher.on('change', async function () {
-  if (result !== null) {
-    console.time('incremental build')
-
-    const rebuild = result.rebuild()
-    result = null
-    result = await rebuild
-
-    console.timeEnd('incremental build')
-  }
-})
