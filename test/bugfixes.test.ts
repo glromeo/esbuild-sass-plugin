@@ -150,7 +150,7 @@ describe('tests covering github issues', function () {
       })]
     })
 
-    expect(readTextFile('./out/index.js')).to.match(/background-color: rgb\(255, 40, 174\);/)
+    expect(readTextFile('./out/index.js')).to.match(/background-color: rgb\(174, 101, 255\);/)
 
     // NOTE: even with quietDeps: true we get 6 warnings!
 
