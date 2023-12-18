@@ -13,6 +13,7 @@
     "css-modules"
   ],
   "files": [
+    "src",
     "lib",
     "LICENSE",
     "README.MD"
