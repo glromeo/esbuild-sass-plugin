@@ -2,12 +2,12 @@ import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
 import {createResolver, fileSyntax, sourceMappingURL} from './utils'
 import {PartialMessage} from 'esbuild'
-import * as sass from 'sass'
-import {ImporterResult} from 'sass'
+import * as sass from 'sass-embedded'
+import {ImporterResult, initAsyncCompiler} from 'sass-embedded'
 import {fileURLToPath, pathToFileURL} from 'url'
 import {SassPluginOptions} from './index'
 
-export type RenderSync = (path: string) => RenderResult
+export type RenderAsync = (path: string) => Promise<RenderResult>
 
 export type RenderResult = {
   cssText: string
@@ -15,7 +15,7 @@ export type RenderResult = {
   warnings?: PartialMessage[]
 }
 
-export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderSync {
+export function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): RenderAsync {
 
   const loadPaths = options.loadPaths!
   const resolveModule = createResolver(options, loadPaths)
@@ -64,7 +64,7 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
   /**
    * renderSync
    */
-  return function (path: string): RenderResult {
+  return async function (path: string): Promise<RenderResult> {
 
     const basedir = dirname(path)
 
@@ -108,11 +108,12 @@ export function createRenderer(options: SassPluginOptions = {}, sourcemap: boole
       }
     }
 
+    const compiler = await initAsyncCompiler();
     const {
       css,
       loadedUrls,
       sourceMap
-    } = sass.compileString(source, {
+    } = await compiler.compileStringAsync(source, {
       sourceMapIncludeSources: true,
       ...options,
       logger,
