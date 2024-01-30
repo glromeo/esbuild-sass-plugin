@@ -42,7 +42,7 @@
   },
   "dependencies": {
     "resolve": "^1.22.6",
-    "sass": "^1.7.3"
+    "sass-embedded": "1.70.0"
   },
   "devDependencies": {
     "@types/node": "^18.15.12",
