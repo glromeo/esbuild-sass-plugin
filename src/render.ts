@@ -6,8 +6,9 @@ import * as sass from 'sass-embedded'
 import {ImporterResult, initAsyncCompiler} from 'sass-embedded'
 import {fileURLToPath, pathToFileURL} from 'url'
 import {SassPluginOptions} from './index'
+import {AsyncCompiler} from 'sass-embedded/dist/types/compile'
 
-export type RenderSync = (path: string) => Promise<RenderResult>
+export type RenderAsync = (path: string) => Promise<RenderResult>
 
 export type RenderResult = {
   cssText: string
@@ -15,7 +16,7 @@ export type RenderResult = {
   warnings?: PartialMessage[]
 }
 
-export async function createRenderer(options: SassPluginOptions = {}, sourcemap: boolean): Promise<RenderSync> {
+export function createRenderer(compiler: AsyncCompiler, options: SassPluginOptions = {}, sourcemap: boolean): RenderAsync {
 
   const loadPaths = options.loadPaths!
   const resolveModule = createResolver(options, loadPaths)
@@ -61,10 +62,8 @@ export async function createRenderer(options: SassPluginOptions = {}, sourcemap:
 
   const sepTilde = `${sep}~`
 
-  const compiler = await initAsyncCompiler();
-
   /**
-   * renderSync
+   * renderAsync
    */
   return async function (path: string): Promise<RenderResult> {
 

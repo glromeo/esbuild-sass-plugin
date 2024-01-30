@@ -4,6 +4,7 @@ import {SassPluginOptions} from './index'
 import {getContext, makeModule, modulesPaths, parseNonce, posixRelative} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
+import {initAsyncCompiler} from 'sass-embedded'
 
 const DEFAULT_FILTER = /\.(s[ac]ss|css)$/
 
@@ -31,7 +32,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
   return {
     name: 'sass-plugin',
-    async setup({initialOptions, onResolve, onLoad, resolve, onStart}) {
+    async setup({initialOptions, onResolve, onLoad, resolve, onStart, onDispose}) {
 
       options.loadPaths = Array.from(new Set([
         ...options.loadPaths || modulesPaths(initialOptions.absWorkingDir),
@@ -72,11 +73,15 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         }))
       }
 
-      const renderSync = await createRenderer(options, options.sourceMap ?? sourcemap)
+      const compiler = await initAsyncCompiler();
+
+      onDispose(()=> compiler.dispose())
+
+      const renderAsync = createRenderer(compiler, options, options.sourceMap ?? sourcemap)
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, fsStatCache, async path => {
         try {
-          let {cssText, watchFiles, warnings} = await renderSync(path)
+          let {cssText, watchFiles, warnings} = await renderAsync(path)
           if (!warnings) {
             warnings = []
           }
