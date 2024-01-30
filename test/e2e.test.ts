@@ -96,7 +96,7 @@ describe('e2e tests', function () {
       })
 
       expect(
-        consumer.originalPositionFor({line: 10263, column: 0})
+        consumer.originalPositionFor({line: 10286, column: 0})
       ).to.eql({
         source: `../src/entrypoint.scss`,
         line: 3,
@@ -358,7 +358,7 @@ describe('e2e tests', function () {
     })
 
     const outCSS = readTextFile('./out/styles.css')
-    expect(outCSS).to.match(/url\(\.\/open-iconic-[^.]+\.eot\?#iconic-sm\) format\("embedded-opentype"\)/)
+    expect(outCSS).to.match(/url\("\.\/open-iconic-[^.]+\.eot\?#iconic-sm"\) format\("embedded-opentype"\)/)
 
     await esbuild.build({
       ...options,

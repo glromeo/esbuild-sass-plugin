@@ -19,7 +19,7 @@ esbuild.context({
         sassPlugin({
             'filter': /^\.\.\/index.scss$/,
             'type': 'style',
-            'cache': true
+            'cache': false
         }),
         sassPlugin({
             'type': 'lit-css',
