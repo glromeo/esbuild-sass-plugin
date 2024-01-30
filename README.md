@@ -1,5 +1,5 @@
 ![cooltext394785080075403](https://user-images.githubusercontent.com/160981/136289874-26ce7269-ea08-47dd-be31-9bf0ef7a0b8d.png)
-![image](https://user-images.githubusercontent.com/160981/150880682-4915c4dd-726b-4fea-8f3b-597d191f05bc.png)
+![image](https://github.com/glromeo/esbuild-sass-plugin/assets/160981/6a686a7c-ddd0-499f-b98d-03e607aac0a7)
 
 [![Build Status][travis-image]][travis-url]
 
@@ -8,7 +8,7 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
 ### Features
 * **PostCSS** & **CSS modules**
 * support for **constructable stylesheet** to be used in custom elements or `dynamic style` to be added to the html page
-* **[Sass Embedded](https://github.com/sass/sass/issues/3296) Async API**. (Thank you @NathanBeddoeWebDev)
+* **[Sass Embedded](https://github.com/sass/sass/issues/3296) Async API**. (thanks to @NathanBeddoeWebDev)
 * caching
 * **url rewriting**
 * pre-compiling (to add **global resources** to the sass files)
