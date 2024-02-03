@@ -1,6 +1,6 @@
 import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
-import {createResolver, fileSyntax, sourceMappingURL} from './utils'
+import {createResolver, fileSyntax, sourceMappingURL, DEFAULT_FILTER} from './utils'
 import {PartialMessage} from 'esbuild'
 import * as sass from 'sass-embedded'
 import {ImporterResult, initAsyncCompiler} from 'sass-embedded'
@@ -53,7 +53,7 @@ export function createRenderer(compiler: AsyncCompiler, options: SassPluginOptio
   function resolveRelativeImport(loadPath: string, filename: string): string | null {
     const absolute = resolve(loadPath, filename)
     const pathParts = parse(absolute)
-    if (pathParts.ext) {
+    if (DEFAULT_FILTER.test(pathParts.ext)) {
       return resolveImport(pathParts.dir + sep + pathParts.name, pathParts.ext)
     } else {
       return resolveImport(absolute)

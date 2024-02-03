@@ -311,4 +311,20 @@ describe('tests covering github issues', function () {
       'names': []
     })
   })
+
+  it('#166 Import of sass files without extension containing multiple dots (like common.mixins.scss)', async function () {
+    const options = useFixture('../issues/166')
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./index.scss'],
+      outdir: './out',
+      bundle: true,
+      plugins: [
+        sassPlugin()
+      ]
+    })
+
+    expect(readTextFile('out/index.css')).to.equalIgnoreSpaces(readTextFile('snapshot/index.css'))
+  })
 })

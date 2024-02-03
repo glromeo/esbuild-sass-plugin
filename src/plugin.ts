@@ -1,12 +1,10 @@
 import {OnLoadResult, Plugin} from 'esbuild'
 import {dirname} from 'path'
 import {SassPluginOptions} from './index'
-import {getContext, makeModule, modulesPaths, parseNonce, posixRelative} from './utils'
+import {getContext, makeModule, modulesPaths, parseNonce, posixRelative, DEFAULT_FILTER} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
 import {initAsyncCompiler} from 'sass-embedded'
-
-const DEFAULT_FILTER = /\.(s[ac]ss|css)$/
 
 /**
  *
