@@ -1,0 +1,12 @@
+/* index.scss */
+.button {
+  border-radius: 3px;
+}
+a:active {
+  color: crimson;
+}
+body {
+  font: 100% Helvetica, sans-serif;
+  color: #333;
+  padding: 10px;
+}
