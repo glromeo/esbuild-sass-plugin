@@ -12,6 +12,11 @@ export type SassPluginOptions = StringOptions<'async'> & {
   filter?: RegExp
 
   /**
+   * Custom style module to use when @param type is "style"
+   */
+  customStyleModule?: CustomStyleModule;
+  
+  /**
    * Function to transform import path. Not just paths by @import
    * directive, but also paths imported by ts code.
    */
