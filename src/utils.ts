@@ -116,16 +116,18 @@ document.head
 export {css};
 `
 
-export function makeModule(contents: string, type: Type, nonce?: string) {
+export type CustomStyleModule = (cssText: string, nonce?: string) => string;
+
+export function makeModule(contents: string, type: Type, customStyleModule?: CustomStyleModule, nonce?: string) {
   switch (type) {
-    case 'style':
-      return styleModule(contents, nonce)
-    case 'lit-css':
-      return cssResultModule(contents)
-    case 'css-text':
-      return cssTextModule(contents)
+    case "style":
+      return customStyleModule ? customStyleModule(contents, nonce) : styleModule(contents, nonce);
+    case "lit-css":
+      return cssResultModule(contents);
+    case "css-text":
+      return cssTextModule(contents);
     default:
-      return contents
+      return contents;
   }
 }
 
