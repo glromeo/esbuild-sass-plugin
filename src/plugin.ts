@@ -105,7 +105,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 cssChunks[name] = contents
                 contents = `import '${name}';`
               } else if (type === 'style') {
-                contents = makeModule(String(contents), "style", options.customStyleModule, nonce);
+                contents = makeModule(String(contents), 'style', options.customStyleModule, nonce);
               } else {
                 return {
                   errors: [{text: `unsupported type '${type}' for postCSS modules`}]
