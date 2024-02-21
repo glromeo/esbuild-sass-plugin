@@ -1,6 +1,7 @@
 import {OnLoadResult} from 'esbuild'
 import {StringOptions} from 'sass-embedded'
 import {sassPlugin} from './plugin'
+import {CustomStyleModule} from './utils'
 
 export type Type = 'css' | 'style' | 'css-text' | 'lit-css'
 
