@@ -120,11 +120,11 @@ export type CustomStyleModule = (cssText: string, nonce?: string) => string;
 
 export function makeModule(contents: string, type: Type, customStyleModule?: CustomStyleModule, nonce?: string) {
   switch (type) {
-    case "style":
+    case 'style':
       return customStyleModule ? customStyleModule(contents, nonce) : styleModule(contents, nonce);
-    case "lit-css":
+    case 'lit-css':
       return cssResultModule(contents);
-    case "css-text":
+    case 'css-text':
       return cssTextModule(contents);
     default:
       return contents;
