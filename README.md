@@ -45,7 +45,7 @@ The following are the options specific to the plugin with their defaults whether
 | Option       | Type                                                                                                   | Default                                  |
 |--------------|--------------------------------------------------------------------------------------------------------|------------------------------------------|
 | filter       | regular expression (in Go syntax)                                                                      | <code>/\.(s[ac]ss&vert;css)$/</code>     |
-| type         | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css: string, nonce?: string) => string` | `"css"`                                  |
+| type         | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css:string,nonce?:string)=>string`      | `"css"`                                  |
 | cache        | boolean or Map                                                                                         | `true` (there is one Map per namespace)  |
 | transform    | function                                                                                               |                                          |
 | loadPaths    | [string[]](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths)                    | []                                       |
