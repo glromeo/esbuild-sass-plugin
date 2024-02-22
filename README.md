@@ -8,13 +8,14 @@ A plugin for [esbuild](https://esbuild.github.io/) to handle Sass & SCSS files.
 ### Features
 * **PostCSS** & **CSS modules**
 * support for **constructable stylesheet** to be used in custom elements or `dynamic style` to be added to the html page
-* **[Sass Embedded](https://github.com/sass/sass/issues/3296) Async API**. (thanks to @NathanBeddoeWebDev)
+* Support for **[Sass Embedded](https://github.com/sass/sass/issues/3296) Async API**. (thanks to @NathanBeddoeWebDev)
 * caching
 * **url rewriting**
 * pre-compiling (to add **global resources** to the sass files)
 
 ### Breaking Changes (...maybe)
-* upgraded to esbuild 0.20
+* It turned out that sass-embedded is not available on every platform (this sucks!) so, in order to improve the compatibility of the
+plugin I had to make it a peer dependency. Once installed, it can be used by setting the new option `embedded` to `true`
 
 ### Install
 
@@ -41,20 +42,20 @@ You can pass a series of **options** to the plugin that are a superset of Sass
 [compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter). \
 The following are the options specific to the plugin with their defaults whether provided:
 
-| Option        | Type                                                    | Default                                 |
-|---------------|---------------------------------------------------------|-----------------------------------------|
-| filter        | regular expression (in Go syntax)                       | <code>/\.(s[ac]ss&vert;css)$/</code>    |
-| type          | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"`  | `"css"`                                 |
-| cache         | boolean or Map                                          | `true` (there is one Map per namespace) |
-| transform     | function                                                |                                |
-| [loadPaths](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths) | string[] | []                                   |
-| precompile    | function                              |                                |
-| importMapper  | function                              |                                |
-| cssImports    | boolean                               | false                                   |
-| nonce         | string                                |                                |
-| prefer        | string                                | preferred package.json field            |
-| quietDeps     | boolean                               | false            |
-
+| Option       | Type                                                                                                   | Default                                  |
+|--------------|--------------------------------------------------------------------------------------------------------|------------------------------------------|
+| filter       | regular expression (in Go syntax)                                                                      | <code>/\.(s[ac]ss&vert;css)$/</code>     |
+| type         | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css: string, nonce?: string) => string` | `"css"`                                  |
+| cache        | boolean or Map                                                                                         | `true` (there is one Map per namespace)  |
+| transform    | function                                                                                               |                                          |
+| loadPaths    | [string[]](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths)                    | []                                       |
+| precompile   | function                                                                                               |                                          |
+| importMapper | function                                                                                               |                                          |
+| cssImports   | boolean                                                                                                | false                                    |
+| nonce        | string                                                                                                 |                                          |
+| prefer       | string                                                                                                 | preferred package.json field             |
+| quietDeps    | boolean                                                                                                | false                                    |
+| embedded     | boolean                                                                                                | false                                    | 
 Two main options control the plugin: `filter` which has the same meaning of filter in [esbuild](https://esbuild.github.io/plugins/#on-load) 
 allowing to select the URLs handled by a plugin instance and then `type` that's what specifies how the css should be rendered and imported. 
 
@@ -82,6 +83,14 @@ await esbuild.build({
   ...   
 })
 ```
+
+### `embedded`
+
+This option enables the usage of the faster `sass-embedded` and is **false** by default just **for compatibility reason**.
+
+> Make sure that the `sass-embedded` has been installed as a peer dependency 
+> or add it manually to your project if your package manager doesn't do that for you 
+> then set this option to `true` and enjoy the speed boost!
 
 ### `type`
 
@@ -144,6 +153,11 @@ export default class HelloWorld extends LitElement {
   }
 }
 ```
+
+#### `type: 'function'`
+
+You can now provide your own module factory as type. It has to be a function that receives 2 parameters
+the css text and the nonce token and returns the source content to be added in place of the import.
 
 Look in `test/fixtures` folder for more usage examples.
 

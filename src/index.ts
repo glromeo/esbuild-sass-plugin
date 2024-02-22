@@ -1,10 +1,10 @@
 import {OnLoadResult} from 'esbuild'
-import {StringOptions} from 'sass-embedded'
+import {StringOptions} from 'sass'
 import {sassPlugin} from './plugin'
 
-export type Type = 'css' | 'style' | 'css-text' | 'lit-css'
+export type Type = 'css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
 
-export type SassPluginOptions = StringOptions<'async'> & {
+export type SassPluginOptions = StringOptions<'sync'|'async'> & {
 
   /**
    * Careful: this RegExp has to respect Go limitations!!!
@@ -76,6 +76,11 @@ export type SassPluginOptions = StringOptions<'async'> & {
    *
    */
   prefer?: 'sass' | 'style' | 'main'
+
+  /**
+   * To enable the sass-embedded compiler
+   */
+  embedded?: boolean
 }
 
 export default sassPlugin

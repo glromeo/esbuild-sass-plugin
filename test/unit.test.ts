@@ -3,6 +3,7 @@ import {sassPlugin} from '../src'
 import {readCssFile, readTextFile, useFixture, writeTextFile} from './test-toolkit'
 import fs from 'fs'
 import {expect} from 'chai'
+import {BuildResult} from 'esbuild'
 
 describe('unit tests', function () {
 
@@ -155,7 +156,7 @@ describe('unit tests', function () {
 
   it('captures warnings in entrypoint', async function () {
     const options = useFixture('warnings')
-    let warnings = []
+    let warnings = [] as BuildResult["warnings"]
 
     await esbuild.build({
       ...options,
@@ -164,7 +165,7 @@ describe('unit tests', function () {
       outdir: './out',
       bundle: true,
       plugins: [
-        sassPlugin({syntax: 'nested'}),
+        sassPlugin({syntax: 'indented'}),
         {
           name: 'capture-build-end-warnings',
           setup: function (build) {
@@ -179,14 +180,14 @@ describe('unit tests', function () {
     expect(warnings.length).to.equal(1)
 
     expect(warnings[0].text).to.include('This selector doesn\'t have any properties')
-    expect(warnings[0].location.file).to.equal('index.sass')
-    expect(warnings[0].location.line).to.equal(3)
-    expect(warnings[0].location.lineText).to.equal('p')
+    expect(warnings[0].location!.file).to.equal('index.sass')
+    expect(warnings[0].location!.line).to.equal(3)
+    expect(warnings[0].location!.lineText).to.equal('p')
   })
 
   it('captures warnings in imports', async function () {
     const options = useFixture('warnings')
-    let warnings = []
+    let warnings = [] as BuildResult["warnings"]
 
     await esbuild.build({
       ...options,
@@ -209,14 +210,14 @@ describe('unit tests', function () {
 
     expect(warnings.length).to.equal(2)
 
-    const indexWarning = warnings.find(w => w.location.file.endsWith('index.sass'))
+    const indexWarning = warnings.find(w => w.location!.file.endsWith('index.sass'))!
     expect(indexWarning.text).to.include('This selector doesn\'t have any properties')
-    expect(indexWarning.location.line).to.equal(3)
-    expect(indexWarning.location.lineText).to.equal('p')
+    expect(indexWarning.location!.line).to.equal(3)
+    expect(indexWarning.location!.lineText).to.equal('p')
 
-    const partialWarning = warnings.find(w => w.location.file.endsWith('_partial.sass'))
+    const partialWarning = warnings.find(w => w.location!.file.endsWith('_partial.sass'))!
     expect(partialWarning.text).to.include('This selector doesn\'t have any properties')
-    expect(partialWarning.location.line).to.equal(0)
-    expect(partialWarning.location.lineText).to.equal('div')
+    expect(partialWarning.location!.line).to.equal(0)
+    expect(partialWarning.location!.lineText).to.equal('div')
   })
 })

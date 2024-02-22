@@ -2,7 +2,7 @@ import {SassPluginOptions, Type} from './index'
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
 import {BuildOptions, OnLoadResult} from 'esbuild'
-import {Syntax} from 'sass-embedded'
+import {Syntax} from 'sass'
 import {parse, relative, resolve} from 'path'
 import {existsSync} from 'fs'
 import {SyncOpts} from 'resolve'
@@ -116,7 +116,7 @@ document.head
 export {css};
 `
 
-export function makeModule(contents: string, type: Type, nonce?: string) {
+export function makeModule(contents: string, type: Type, nonce?: string):string {
   switch (type) {
     case 'style':
       return styleModule(contents, nonce)
@@ -124,8 +124,10 @@ export function makeModule(contents: string, type: Type, nonce?: string) {
       return cssResultModule(contents)
     case 'css-text':
       return cssTextModule(contents)
-    default:
+    case 'css':
       return contents
+    default:
+      return type(contents, nonce)
   }
 }
 

@@ -2,13 +2,13 @@ import {dirname, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
 import {createResolver, fileSyntax, sourceMappingURL, DEFAULT_FILTER} from './utils'
 import {PartialMessage} from 'esbuild'
-import * as sass from 'sass-embedded'
-import {ImporterResult, initAsyncCompiler} from 'sass-embedded'
 import {fileURLToPath, pathToFileURL} from 'url'
 import {SassPluginOptions} from './index'
-import {AsyncCompiler} from 'sass-embedded/dist/types/compile'
+import {ImporterResult} from 'sass'
+import {StringOptions} from 'sass/types/options'
+import {CompileResult} from 'sass/types/compile'
 
-export type RenderAsync = (path: string) => Promise<RenderResult>
+export type RenderSass = (path: string) => Promise<RenderResult>
 
 export type RenderResult = {
   cssText: string
@@ -16,7 +16,25 @@ export type RenderResult = {
   warnings?: PartialMessage[]
 }
 
-export function createRenderer(compiler: AsyncCompiler, options: SassPluginOptions = {}, sourcemap: boolean): RenderAsync {
+export type Compiler = (source: string, options?: StringOptions<any>) => CompileResult | Promise<CompileResult>
+
+async function createCompiler(embedded:boolean|undefined, onDispose: (callback: () => void) => void): Promise<Compiler> {
+  if (embedded) {
+    const {initAsyncCompiler} = await import('sass-embedded')
+    const compiler = await initAsyncCompiler();
+    onDispose(compiler.dispose.bind(compiler))
+    return compiler.compileStringAsync.bind(compiler) as Compiler
+  } else {
+    const {compileString} = await import('sass')
+    return compileString
+  }
+}
+
+export async function createRenderer(
+    options: SassPluginOptions = {},
+    sourcemap: boolean,
+    onDispose: (callback: () => void) => void
+): Promise<RenderSass> {
 
   const loadPaths = options.loadPaths!
   const resolveModule = createResolver(options, loadPaths)
@@ -61,6 +79,8 @@ export function createRenderer(compiler: AsyncCompiler, options: SassPluginOptio
   }
 
   const sepTilde = `${sep}~`
+
+  const compileString = await createCompiler(options.embedded, onDispose)
 
   /**
    * renderAsync
@@ -113,7 +133,7 @@ export function createRenderer(compiler: AsyncCompiler, options: SassPluginOptio
       css,
       loadedUrls,
       sourceMap
-    } = await compiler.compileStringAsync(source, {
+    } = await compileString(source, {
       sourceMapIncludeSources: true,
       ...options,
       logger,

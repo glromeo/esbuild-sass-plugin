@@ -4,7 +4,6 @@ import {SassPluginOptions} from './index'
 import {getContext, makeModule, modulesPaths, parseNonce, posixRelative, DEFAULT_FILTER} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
-import {initAsyncCompiler} from 'sass-embedded'
 
 /**
  *
@@ -22,7 +21,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
   const type = options.type ?? 'css'
 
-  if (options['picomatch'] || options['exclude'] || typeof type !== 'string') {
+  if (options['picomatch'] || options['exclude'] || typeof type !== 'string' && typeof type !== 'function') {
     console.log('The type array, exclude and picomatch options are no longer supported, please refer to the README for alternatives.')
   }
 
@@ -71,15 +70,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         }))
       }
 
-      const compiler = await initAsyncCompiler();
-
-      onDispose(()=> compiler.dispose())
-
-      const renderAsync = createRenderer(compiler, options, options.sourceMap ?? sourcemap)
+      const renderSass = await createRenderer(options, options.sourceMap ?? sourcemap, onDispose)
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, fsStatCache, async path => {
         try {
-          let {cssText, watchFiles, warnings} = await renderAsync(path)
+          let {cssText, watchFiles, warnings} = await renderSass(path)
           if (!warnings) {
             warnings = []
           }
