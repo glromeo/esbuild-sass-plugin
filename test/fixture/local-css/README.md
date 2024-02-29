@@ -10,10 +10,7 @@ esbuild.build({
     format: "esm",
     plugins: [
         sassPlugin({
-            transform: postcssModules({
-                // ...put here the options for the cssModules plugin
-                // see: https://github.com/madyankin/postcss-modules
-            })
+            type: 'local-css'
         }),
     ]
 }).catch(() => process.exit(1));
@@ -24,9 +21,7 @@ esbuild.build({
   "dependencies": {
     ...
     "esbuild": "^0.12.20",
-    "esbuild-sass-plugin": "^1.5.0",
-    "postcss": "^8.3.6",
-    "postcss-modules": "^4.2.2"
+    "esbuild-sass-plugin": "^1.5.0"
     ...
   }
 ```

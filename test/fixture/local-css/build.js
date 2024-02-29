@@ -11,12 +11,7 @@ esbuild.build({
   format: 'esm',
   plugins: [
     sassPlugin({
-      filter: /\.module\.scss$/,
       type: 'local-css'
-    }),
-    sassPlugin({
-      filter: /\.scss$/,
-      type: 'css'
     }),
   ]
 }).then(logSuccess, logFailure)

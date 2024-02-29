@@ -344,12 +344,7 @@ describe('e2e tests', function () {
       format: 'esm',
       plugins: [
         sassPlugin({
-          filter: /\.module\.scss$/,
           type: 'local-css'
-        }),
-        sassPlugin({
-          filter: /\.scss$/,
-          type: 'css'
         }),
       ]
     })
