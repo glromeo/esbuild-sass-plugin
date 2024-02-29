@@ -104,6 +104,27 @@ In all other cases `esbuild` won't process the CSS content which instead will be
 with any transformation function by keeping an internal cache of CSS chunks (virtual CSS files) 
 importing them in the module wrapping the contents
 
+#### `type: "local-css"`
+This mode uses esbuild's built-in CSS modules support (i.e. the [`local-css` loader](https://esbuild.github.io/content-types/#local-css)).
+Use this for lightweight Sass integration that then leverages esbuild's [built-in CSS processing features](https://esbuild.github.io/content-types/#css):
+
+```javascript
+await esbuild.build({
+  ...
+  plugins: [
+    sassPlugin({
+      filter: /\.module\.scss$/,
+      type: 'local-css'
+    }),
+    sassPlugin({
+      filter: /\.scss$/
+      type: 'css'
+    }),
+  ],
+  ...   
+})
+```
+
 #### `type: "style"`
 In this mode the stylesheet will be in the javascript bundle 
 and will be dynamically added to the page when the bundle is loaded.

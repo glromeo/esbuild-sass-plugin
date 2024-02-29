@@ -333,6 +333,40 @@ describe('e2e tests', function () {
     `)
   })
 
+  it('local-css', async function () {
+    const options = useFixture('local-css')
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./src/index.js'],
+      outdir: './out',
+      bundle: true,
+      format: 'esm',
+      plugins: [
+        sassPlugin({
+          filter: /\.module\.scss$/,
+          type: 'local-css'
+        }),
+        sassPlugin({
+          filter: /\.scss$/,
+          type: 'css'
+        }),
+      ]
+    })
+
+    const bundle = readTextFile('./out/index.js')
+
+    expect(bundle).to.containIgnoreSpaces('class="${message} ${message2}"')
+
+    expect(bundle).to.containIgnoreSpaces(`
+      var message = "example_module_message";
+    `)
+
+    expect(bundle).to.containIgnoreSpaces(`
+      var message2 = "common_module_message";
+    `)
+  })
+
   it('open-iconic (dealing with relative paths & data urls)', async function () {
     const options = useFixture('open-iconic')
 
