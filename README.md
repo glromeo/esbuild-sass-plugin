@@ -376,6 +376,42 @@ In order for `quietDeps` to correctly identify external dependencies the `url` o
 
 > The `url` option creates problems when importing source SASS files from 3rd party modules in which case the best workaround is to avoid `quietDeps` and [mute the logger](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter#logger) if that's a big issue.
 
+### namedExports
+
+Type: `boolean` `function`<br>
+Default: `false`
+
+Use named exports alongside default export.
+
+You can supply a function to control how exported named is generated:
+
+```js
+namedExports(name) {
+  // Maybe you simply want to convert dash to underscore
+  return name.replace(/-/g, '_')
+}
+```
+
+If you set it to `true`, the following will happen when importing specific classNames:
+
+- dashed class names will be transformed by replacing all the dashes to `$` sign wrapped underlines, eg. `--` => `$__$`
+- js protected names used as your style class names, will be transformed by wrapping the names between `$` signs, eg. `switch` => `$switch$`
+
+All transformed names will be logged in your terminal like:
+
+```bash
+Exported "new" as "$new$" in test/fixtures/named-exports/style.css
+```
+
+The original will not be removed, it's still available on `default` export:
+
+```js
+import style, { class$_$name, class$__$name, $switch$ } from './style.css'
+console.log(style['class-name'] === class$_$name) // true
+console.log(style['class--name'] === class$__$name) // true
+console.log(style['switch'] === $switch$) // true
+```
+
 ### pnpm
 
 There's a working example of using `pnpm` with `@material` design
