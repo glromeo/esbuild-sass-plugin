@@ -58,7 +58,7 @@
     "sass-embedded": "^1.71.1"
   },
   "peerDependencies": {
-    "esbuild": "^0.20.1",
+    "esbuild": ">=0.20.1",
     "sass-embedded": "^1.71.1"
   }
 }
