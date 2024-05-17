@@ -45,7 +45,7 @@ The following are the options specific to the plugin with their defaults whether
 | Option       | Type                                                                                                   | Default                                  |
 |--------------|--------------------------------------------------------------------------------------------------------|------------------------------------------|
 | filter       | regular expression (in Go syntax)                                                                      | <code>/\.(s[ac]ss&vert;css)$/</code>     |
-| type         | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css: string, nonce?: string) => string` | `"css"`                                  |
+| type         | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css:string,nonce?:string)=>string`      | `"css"`                                  |
 | cache        | boolean or Map                                                                                         | `true` (there is one Map per namespace)  |
 | transform    | function                                                                                               |                                          |
 | loadPaths    | [string[]](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths)                    | []                                       |
@@ -103,6 +103,27 @@ In all other cases `esbuild` won't process the CSS content which instead will be
 **NOTE:** Since version `2.7.0` the `css` type works also with postcss, CSS modules and more in general 
 with any transformation function by keeping an internal cache of CSS chunks (virtual CSS files) 
 importing them in the module wrapping the contents
+
+#### `type: "local-css"`
+This mode uses esbuild's built-in CSS modules support (i.e. the [`local-css` loader](https://esbuild.github.io/content-types/#local-css)).
+Use this for lightweight Sass integration that then leverages esbuild's [built-in CSS processing features](https://esbuild.github.io/content-types/#css):
+
+```javascript
+await esbuild.build({
+  ...
+  plugins: [
+    sassPlugin({
+      filter: /\.module\.scss$/,
+      type: 'local-css'
+    }),
+    sassPlugin({
+      filter: /\.scss$/
+      type: 'css'
+    }),
+  ],
+  ...   
+})
+```
 
 #### `type: "style"`
 In this mode the stylesheet will be in the javascript bundle 

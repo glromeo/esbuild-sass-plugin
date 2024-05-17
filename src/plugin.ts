@@ -118,9 +118,9 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
             }
           }
 
-          return type === 'css' ? {
+          return type === 'css' || type === 'local-css' ? {
             contents: cssText,
-            loader: 'css',
+            loader: type,
             resolveDir,
             warnings,
             watchFiles

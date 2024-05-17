@@ -2,7 +2,7 @@ import {OnLoadResult} from 'esbuild'
 import {StringOptions} from 'sass'
 import {sassPlugin} from './plugin'
 
-export type Type = 'css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
+export type Type = 'css' | 'local-css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
 
 export type SassPluginOptions = StringOptions<'sync'|'async'> & {
 

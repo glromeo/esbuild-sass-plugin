@@ -125,6 +125,7 @@ export function makeModule(contents: string, type: Type, nonce?: string):string 
     case 'css-text':
       return cssTextModule(contents)
     case 'css':
+    case 'local-css':
       return contents
     default:
       return type(contents, nonce)

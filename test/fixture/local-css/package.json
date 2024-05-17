@@ -1,0 +1,9 @@
+{
+  "name": "local-css-fixture",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ./build",
+    "serve": "node ../serve css-modules"
+  }
+}
