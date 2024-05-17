@@ -280,6 +280,42 @@ describe('e2e tests', function () {
     `)
   })
 
+  it('css modules (style)', async function () {
+    const options = useFixture('css-modules')
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./src/index.js'],
+      outdir: './out',
+      bundle: true,
+      format: 'esm',
+      plugins: [
+        sassPlugin({
+          type: 'style',
+          transform: postcssModules({
+            localsConvention: 'camelCaseOnly'
+          })
+        })
+      ]
+    })
+
+    const bundle = readTextFile('./out/index.js')
+
+    expect(bundle).to.containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"')
+
+    expect(bundle).to.containIgnoreSpaces(`
+      var common_module_default = {
+        "message": "_message_bxgcs_1"
+      };
+    `)
+
+    expect(bundle).to.containIgnoreSpaces(`
+      var example_module_default = {
+        "message": "_message_1vmzm_1"
+      };
+    `)
+  })
+
   it('css modules & lit-element together', async function () {
     const options = useFixture('multiple')
 
