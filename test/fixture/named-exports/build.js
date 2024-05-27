@@ -16,7 +16,7 @@ esbuild.build({
         localsConvention: 'camelCaseOnly'
       }),
       namedExports: (name) => {
-        return `${name.replace(/-/g, "_")}`;
+        return `${name.replace(/-/g, "_")}`
       },
     })
   ]

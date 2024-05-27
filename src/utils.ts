@@ -229,8 +229,8 @@ export function createResolver(options: SassPluginOptions = {}, loadPaths: strin
 }
 
 const escapeClassNameDashes = (name: string) =>
-  name.replace(/-+/g, (match) => `$${match.replace(/-/g, "_")}$`);
+  name.replace(/-+/g, (match) => `$${match.replace(/-/g, "_")}$`)
 export const ensureClassName = (name: string) => {
-  const escaped = escapeClassNameDashes(name);
-  return identifier(escaped);
+  const escaped = escapeClassNameDashes(name)
+  return identifier(escaped)
 };
