@@ -1,7 +1,7 @@
 import {OnLoadResult, Plugin} from 'esbuild'
 import {dirname} from 'path'
 import {SassPluginOptions} from './index'
-import {getContext, makeModule, modulesPaths, parseNonce, posixRelative, DEFAULT_FILTER} from './utils'
+import {getContext, makeModule, modulesPaths, parseNonce, posixRelative, DEFAULT_FILTER, ensureClassName} from './utils'
 import {useCache} from './cache'
 import {createRenderer} from './render'
 
@@ -106,8 +106,24 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                   errors: [{text: `unsupported type '${type}' for postCSS modules`}]
                 }
               }
+
+              let exportConstants = "";
+              if (options.namedExports && pluginData.exports) {
+                const json = JSON.parse(pluginData.exports)
+                const getClassName =
+                  typeof options.namedExports === "function"
+                    ? options.namedExports
+                    : ensureClassName
+                Object.keys(json).forEach((name) => {
+                  const newName = getClassName(name);
+                  exportConstants += `export const ${newName} = ${JSON.stringify(
+                    json[name]
+                  )};\n`
+                })
+              }
+
               return {
-                contents: `${contents}export default ${pluginData.exports};`,
+                contents: `${contents}${exportConstants}export default ${pluginData.exports};`,
                 loader: 'js',
                 resolveDir,
                 watchFiles: [...watchFiles, ...(out.watchFiles || [])],

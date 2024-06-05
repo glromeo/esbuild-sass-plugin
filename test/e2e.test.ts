@@ -261,7 +261,7 @@ describe('e2e tests', function () {
           })
         })
       ]
-    })
+    });
 
     const bundle = readTextFile('./out/index.js')
 
@@ -278,6 +278,36 @@ describe('e2e tests', function () {
         "message": "_message_1vmzm_1"
       };
     `)
+  })
+
+  it('named exports', async function () {
+    const options = useFixture('named-exports')
+
+    await esbuild.build({
+      ...options,
+      entryPoints: ['./src/index.js'],
+      outdir: './out',
+      bundle: true,
+      format: 'esm',
+      plugins: [
+        sassPlugin({
+          transform: postcssModules({
+            localsConvention: 'camelCaseOnly'
+          }),
+          namedExports: (name) => {
+            return `${name.replace(/-/g, "_")}`;
+          },
+        })
+      ]
+    });
+
+    const bundle = readTextFile('./out/index.js')
+
+    expect(bundle).to.containIgnoreSpaces('class="${message} ${message2}')
+
+    expect(bundle).to.containIgnoreSpaces(`var message = "_message_1vmzm_1"`)
+
+    expect(bundle).to.containIgnoreSpaces(`var message2 = "_message_bxgcs_1";`)
   })
 
   it('css modules & lit-element together', async function () {

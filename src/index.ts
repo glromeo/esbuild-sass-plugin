@@ -3,6 +3,7 @@ import {StringOptions} from 'sass'
 import {sassPlugin} from './plugin'
 
 export type Type = 'css' | 'local-css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
+export type NamedExport = boolean | ((name: string) => string)
 
 export type SassPluginOptions = StringOptions<'sync'|'async'> & {
 
@@ -81,6 +82,11 @@ export type SassPluginOptions = StringOptions<'sync'|'async'> & {
    * To enable the sass-embedded compiler
    */
   embedded?: boolean
+
+  /**
+   * Use named exports alongside default export.
+   */
+  namedExports?: NamedExport
 }
 
 export default sassPlugin
