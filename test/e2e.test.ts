@@ -321,7 +321,14 @@ describe('e2e tests', function () {
       format: 'esm',
       plugins: [
         sassPlugin({
-          filter: /\.module\.scss$/,
+          filter: /common\.module\.scss$/,
+          transform: postcssModules({
+            localsConvention: 'camelCaseOnly'
+          }),
+          type: 'css'
+        }),
+        sassPlugin({
+          filter: /example\.module\.scss$/,
           transform: postcssModules({
             localsConvention: 'camelCaseOnly'
           }),
