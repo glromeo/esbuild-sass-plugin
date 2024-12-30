@@ -13,8 +13,8 @@ const cwd = process.cwd()
 export const DEFAULT_FILTER = /\.(s[ac]ss|css)$/
 
 export const posixRelative = require('path').sep === '/'
-  ? (path: string) => `css-chunk:${relative(cwd, path)}`
-  : (path: string) => `css-chunk:${relative(cwd, path).replace(/\\/g, '/')}`
+  ? (path: string) => relative(cwd, path)
+  : (path: string) => relative(cwd, path).replace(/\\/g, '/')
 
 export function modulesPaths(absWorkingDir?: string): string[] {
   let path = absWorkingDir || process.cwd()
