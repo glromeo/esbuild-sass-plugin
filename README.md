@@ -42,20 +42,21 @@ You can pass a series of **options** to the plugin that are a superset of Sass
 [compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter). \
 The following are the options specific to the plugin with their defaults whether provided:
 
-| Option       | Type                                                                                                   | Default                                  |
-|--------------|--------------------------------------------------------------------------------------------------------|------------------------------------------|
-| filter       | regular expression (in Go syntax)                                                                      | <code>/\.(s[ac]ss&vert;css)$/</code>     |
-| type         | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css:string,nonce?:string)=>string`      | `"css"`                                  |
-| cache        | boolean or Map                                                                                         | `true` (there is one Map per namespace)  |
-| transform    | function                                                                                               |                                          |
-| loadPaths    | [string[]](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths)                    | []                                       |
-| precompile   | function                                                                                               |                                          |
-| importMapper | function                                                                                               |                                          |
-| cssImports   | boolean                                                                                                | false                                    |
-| nonce        | string                                                                                                 |                                          |
-| prefer       | string                                                                                                 | preferred package.json field             |
-| quietDeps    | boolean                                                                                                | false                                    |
-| embedded     | boolean                                                                                                | false                                    | 
+| Option              | Type                                                                                              | Default                                  |
+|---------------------|---------------------------------------------------------------------------------------------------|------------------------------------------|
+| filter              | regular expression (in Go syntax)                                                                 | <code>/\.(s[ac]ss&vert;css)$/</code>     |
+| type                | `"css"`<br/>`"style"`<br/>`"lit-css"`<br/>`"css-text"` <br/> `(css:string,nonce?:string)=>string` | `"css"`                                  |
+| cache               | boolean or Map                                                                                    | `true` (there is one Map per namespace)  |
+| transform           | function                                                                                          |                                          |
+| loadPaths           | [string[]](https://sass-lang.com/documentation/js-api/interfaces/Options#loadPaths)               | []                                       |
+| precompile          | function                                                                                          |                                          |
+| importMapper        | function                                                                                          |                                          |
+| cssImports          | boolean                                                                                           | false                                    |
+| nonce               | string                                                                                            |                                          |
+| prefer              | string                                                                                            | preferred package.json field             |
+| quietDeps           | boolean                                                                                           | false                                    |
+| silenceDeprecations | [string[]](https://sass-lang.com/documentation/js-api/interfaces/deprecations/)                   | []                                       |
+| embedded            | boolean                                                                                           | false                                    | 
 Two main options control the plugin: `filter` which has the same meaning of filter in [esbuild](https://esbuild.github.io/plugins/#on-load) 
 allowing to select the URLs handled by a plugin instance and then `type` that's what specifies how the css should be rendered and imported. 
 
@@ -375,6 +376,10 @@ the complete example.
 In order for `quietDeps` to correctly identify external dependencies the `url` option is defaulted to the importing file path URL.
 
 > The `url` option creates problems when importing source SASS files from 3rd party modules in which case the best workaround is to avoid `quietDeps` and [mute the logger](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter#logger) if that's a big issue.
+
+### `silenceDeprecations`
+
+This option accepts an array of properties for deprecations that will omitted from the logs during a build.
 
 ### namedExports
 
