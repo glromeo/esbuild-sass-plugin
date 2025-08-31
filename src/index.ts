@@ -4,6 +4,7 @@ import {sassPlugin} from './plugin'
 import {LoadCacheOptions} from "esbuild-plugin-helpers";
 
 export type Type = 'css' | 'local-css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
+export type NamedExport = boolean | ((name: string) => string)
 
 export type SassPluginOptions = StringOptions<'sync'|'async'> & LoadCacheOptions & {
 
@@ -74,6 +75,11 @@ export type SassPluginOptions = StringOptions<'sync'|'async'> & LoadCacheOptions
    * To enable the sass-embedded compiler
    */
   embedded?: boolean
+
+  /**
+   * Use named exports alongside default export.
+   */
+  namedExports?: NamedExport
 }
 
 export default sassPlugin

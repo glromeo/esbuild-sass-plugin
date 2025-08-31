@@ -6,6 +6,7 @@ import {Syntax} from 'sass'
 import {parse, relative, resolve} from 'path'
 import {existsSync} from 'fs'
 import {SyncOpts} from 'resolve'
+import {identifier} from 'safe-identifier'
 
 const cwd = process.cwd()
 
@@ -226,3 +227,10 @@ export function createResolver(options: SassPluginOptions = {}, loadPaths: strin
     }
   }
 }
+
+const escapeClassNameDashes = (name: string) =>
+  name.replace(/-+/g, (match) => `$${match.replace(/-/g, "_")}$`)
+export const ensureClassName = (name: string) => {
+  const escaped = escapeClassNameDashes(name)
+  return identifier(escaped)
+};
