@@ -198,7 +198,7 @@ export async function createRenderer(
     return {
       cssText,
       warnings: warnings,
-      watchFiles: [path, ...loadedUrls.map(fileURLToPath)]
+      watchFiles: [path, ...loadedUrls.map(fileURLToPath as (url:URL)=>string)]
     }
   }
 }

@@ -2,7 +2,7 @@ import {OnLoadResult, Plugin} from 'esbuild'
 import {dirname} from 'path'
 import {SassPluginOptions} from './index'
 import {getContext, makeModule, modulesPaths, parseNonce, posixRelative, DEFAULT_FILTER} from './utils'
-import {useCache} from './cache'
+import {useCache} from 'esbuild-plugin-helpers'
 import {createRenderer} from './render'
 
 /**
@@ -47,9 +47,6 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
         })
       }
 
-      const fsStatCache = new Map()
-      onStart(() => fsStatCache.clear())
-
       const transform = options.transform ? options.transform.bind(options) : null
 
       const cssChunks: Record<string, string | Uint8Array | undefined> = {}
@@ -72,7 +69,11 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       const renderSass = await createRenderer(options, options.sourceMap ?? sourcemap, onDispose)
 
-      onLoad({filter: options.filter ?? DEFAULT_FILTER}, useCache(options, fsStatCache, async path => {
+      const [cached, resetCache] = useCache(options)
+
+      onStart(resetCache);
+
+      onLoad({filter: options.filter ?? DEFAULT_FILTER}, cached(async ({path}) => {
         try {
           let {cssText, watchFiles, warnings} = await renderSass(path)
           if (!warnings) {

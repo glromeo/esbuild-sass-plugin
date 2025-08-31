@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild'
 import {sassPlugin} from '../src'
 import {readCssFile, readTextFile, useFixture, writeTextFile} from './test-toolkit'
-import fs from 'fs'
+import {readFileSync} from 'fs'
 import {expect} from 'chai'
 import {BuildResult} from 'esbuild'
 
@@ -83,20 +83,20 @@ describe('unit tests', function () {
 
     await ctx.rebuild()
 
-    expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { font: 100% Helvetica, sans-serif; color: #333; }
     `)
 
     writeTextFile('./index.sass', readTextFile('./index-v1.sass'))
     await ctx.rebuild()
-    expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { font: 100% Helvetica, sans-serif; color: #333; }
     `)
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v1.sass'))
     writeTextFile('./index.sass', readTextFile('./index-v2.sass'))
     await ctx.rebuild()
-    expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { background-color: red; }
       body { font: 99% "Times New Roman", serif; color: #666; }
     `)
@@ -107,7 +107,7 @@ describe('unit tests', function () {
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v3.sass'))
     await ctx.rebuild()
-    expect(fs.readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
       body { background-color: blue; }
       body { font: 99% "Times New Roman", serif; color: #666; }
     `)

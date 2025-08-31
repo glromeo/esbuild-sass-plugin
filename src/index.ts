@@ -1,10 +1,11 @@
 import {OnLoadResult} from 'esbuild'
 import {StringOptions} from 'sass'
 import {sassPlugin} from './plugin'
+import {LoadCacheOptions} from "esbuild-plugin-helpers";
 
 export type Type = 'css' | 'local-css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
 
-export type SassPluginOptions = StringOptions<'sync'|'async'> & {
+export type SassPluginOptions = StringOptions<'sync'|'async'> & LoadCacheOptions & {
 
   /**
    * Careful: this RegExp has to respect Go limitations!!!
@@ -43,14 +44,6 @@ export type SassPluginOptions = StringOptions<'sync'|'async'> & {
   type?: Type
 
   /**
-   * Enable the cache or pass your own Map to recycle its contents although
-   * it's advisable to use esbuild incremental or watch for repeated builds
-   *
-   * @default true
-   */
-  cache?: Map<string, CachedResult> | boolean
-
-  /**
    * A function which will post process the css file before wrapping it in a module
    *
    * @default undefined
@@ -86,8 +79,3 @@ export type SassPluginOptions = StringOptions<'sync'|'async'> & {
 export default sassPlugin
 export {sassPlugin}
 export {makeModule, postcssModules} from './utils'
-
-export type CachedResult = {
-  mtimeMs: number
-  result: OnLoadResult
-}
