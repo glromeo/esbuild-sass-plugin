@@ -5,6 +5,8 @@ import {SassPluginOptions} from './index'
 import {createRenderer} from './render'
 import {DEFAULT_FILTER, getContext, makeModule, modulesPaths, parseNonce, posixRelative, safeExport} from './utils'
 
+let id = 0
+
 /**
  *
  * @param options
@@ -51,11 +53,13 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
       const namedExports = options.namedExports === 'safe' ? safeExport : options.namedExports
 
       const cssChunks: Record<string, string | Uint8Array | undefined> = {}
+      const pluginInstanceId = id++
+      const cssChunkPrefix = `css-chunk-${pluginInstanceId}:`
 
       if (transform) {
-        const namespace = 'esbuild-sass-plugin'
+        const namespace = `esbuild-sass-plugin-${pluginInstanceId}`
 
-        onResolve({filter: /^css-chunk:/}, ({path, resolveDir}) => ({
+        onResolve({filter: new RegExp(`^${cssChunkPrefix}`)}, ({path, resolveDir}) => ({
           path,
           namespace,
           pluginData: {resolveDir}
@@ -98,7 +102,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
               }
               let {contents, pluginData} = out
               if (type === 'css') {
-                let name = posixRelative(path)
+                let name = cssChunkPrefix + posixRelative(path)
                 cssChunks[name] = contents
                 contents = `import '${name}';`
               } else if (type === 'style') {
