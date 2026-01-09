@@ -1,12 +1,11 @@
-import {SassPluginOptions, Type} from './index'
+import {BuildOptions, OnLoadResult} from 'esbuild'
+import {existsSync} from 'fs'
+import {parse, relative, resolve} from 'path'
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
-import {BuildOptions, OnLoadResult} from 'esbuild'
-import {Syntax} from 'sass'
-import {parse, relative, resolve} from 'path'
-import {existsSync} from 'fs'
 import {SyncOpts} from 'resolve'
-import {identifier} from 'safe-identifier'
+import {Syntax} from 'sass'
+import {SassPluginOptions, Type} from './index'
 
 const cwd = process.cwd()
 
@@ -117,7 +116,7 @@ document.head
 export {css};
 `
 
-export function makeModule(contents: string, type: Type, nonce?: string):string {
+export function makeModule(contents: string, type: Type, nonce?: string): string {
   switch (type) {
     case 'style':
       return styleModule(contents, nonce)
@@ -228,9 +227,59 @@ export function createResolver(options: SassPluginOptions = {}, loadPaths: strin
   }
 }
 
-const escapeClassNameDashes = (name: string) =>
-  name.replace(/-+/g, (match) => `$${match.replace(/-/g, "_")}$`)
-export const ensureClassName = (name: string) => {
-  const escaped = escapeClassNameDashes(name)
-  return identifier(escaped)
-};
+const reserved = {
+  await: true,
+  break: true,
+  case: true,
+  catch: true,
+  class: true,
+  const: true,
+  continue: true,
+  debugger: true,
+  default: true,
+  delete: true,
+  do: true,
+  else: true,
+  enum: true,
+  export: true,
+  extends: true,
+  false: true,
+  finally: true,
+  for: true,
+  function: true,
+  if: true,
+  implements: true,
+  import: true,
+  in: true,
+  instanceof: true,
+  interface: true,
+  let: true,
+  new: true,
+  null: true,
+  package: true,
+  private: true,
+  protected: true,
+  public: true,
+  return: true,
+  static: true,
+  super: true,
+  switch: true,
+  this: true,
+  throw: true,
+  true: true,
+  try: true,
+  typeof: true,
+  var: true,
+  void: true,
+  while: true,
+  with: true,
+  yield: true
+}
+
+export function safeExport(identifier: string): string {
+  if (reserved[identifier]) {
+    return '_' + identifier
+  } else {
+    return identifier.trim().replace(/\W+([a-z])/g, (esc, c) => esc[0] === '-' ? c.toUpperCase() : '_')
+  }
+}

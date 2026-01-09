@@ -1,7 +1,7 @@
-import { message as stylesMessage } from "./example.module.scss";
-import { message as commonMessage } from "./common.module.scss";
+import { exampleMessage } from "./example.module.scss";
+import { common_message } from "./common.module.scss";
 
 document.body.insertAdjacentHTML(
 	"afterbegin",
-	`<div class="${stylesMessage} ${commonMessage}">Hello World</div>`,
+	`<div class="${common_message} ${exampleMessage}">Hello World</div>`,
 );

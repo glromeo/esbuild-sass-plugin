@@ -12,12 +12,9 @@ esbuild.build({
   plugins: [
     sassPlugin({
       transform: postcssModules({
-        generateScopedName: '[hash:base64:8]--[local]',
-        localsConvention: 'camelCaseOnly'
+        generateScopedName: '[hash:base64:8]--[local]'
       }),
-      namedExports: (name) => {
-        return `${name.replace(/-/g, "_")}`
-      },
+      namedExports: "safe",
     })
   ]
 }).then(logSuccess, logFailure)
