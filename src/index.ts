@@ -1,11 +1,9 @@
-import {OnLoadResult} from 'esbuild'
-import {StringOptions} from 'sass'
-import {sassPlugin} from './plugin'
-import {LoadCacheOptions} from "esbuild-plugin-helpers";
+import {OnLoadResult} from "esbuild";
+import {LoadCacheOptions} from "./cache";
+import {StringOptions} from "sass";
+import {sassPlugin} from "./plugin";
 
 export type Type = 'css' | 'local-css' | 'style' | 'css-text' | 'lit-css' | ((cssText: string, nonce?: string) => string)
-export type NamedExport = boolean | ((name: string) => string)
-
 export type SassPluginOptions = StringOptions<'sync'|'async'> & LoadCacheOptions & {
 
   /**
@@ -79,7 +77,7 @@ export type SassPluginOptions = StringOptions<'sync'|'async'> & LoadCacheOptions
   /**
    * Use named exports alongside default export.
    */
-  namedExports?: NamedExport
+  namedExports?: boolean | "safe" | ((name: string) => string | null | undefined | false)
 }
 
 export default sassPlugin

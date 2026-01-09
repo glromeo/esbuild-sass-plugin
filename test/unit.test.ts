@@ -208,7 +208,7 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(warnings.length).to.equal(2)
+    expect(warnings.length).to.equal(4)
 
     const indexWarning = warnings.find(w => w.location!.file.endsWith('index.sass'))!
     expect(indexWarning.text).to.include('This selector doesn\'t have any properties')

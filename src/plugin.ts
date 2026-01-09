@@ -1,9 +1,9 @@
 import {OnLoadResult, Plugin} from 'esbuild'
+import {useCache} from './cache'
 import {dirname} from 'path'
 import {SassPluginOptions} from './index'
-import {getContext, makeModule, modulesPaths, parseNonce, posixRelative, DEFAULT_FILTER, ensureClassName} from './utils'
-import {useCache} from 'esbuild-plugin-helpers'
 import {createRenderer} from './render'
+import {DEFAULT_FILTER, getContext, makeModule, modulesPaths, parseNonce, posixRelative, safeExport} from './utils'
 
 /**
  *
@@ -48,6 +48,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
       }
 
       const transform = options.transform ? options.transform.bind(options) : null
+      const namedExports = options.namedExports === 'safe' ? safeExport : options.namedExports
 
       const cssChunks: Record<string, string | Uint8Array | undefined> = {}
 
@@ -71,7 +72,7 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
 
       const [cached, resetCache] = useCache(options)
 
-      onStart(resetCache);
+      onStart(resetCache)
 
       onLoad({filter: options.filter ?? DEFAULT_FILTER}, cached(async ({path}) => {
         try {
@@ -108,23 +109,48 @@ export function sassPlugin(options: SassPluginOptions = {}): Plugin {
                 }
               }
 
-              let exportConstants = "";
-              if (options.namedExports && pluginData.exports) {
+              if (namedExports) {
                 const json = JSON.parse(pluginData.exports)
-                const getClassName =
-                  typeof options.namedExports === "function"
-                    ? options.namedExports
-                    : ensureClassName
-                Object.keys(json).forEach((name) => {
-                  const newName = getClassName(name);
-                  exportConstants += `export const ${newName} = ${JSON.stringify(
-                    json[name]
-                  )};\n`
-                })
+                const keys = Object.keys(json)
+                if (typeof namedExports === 'function') {
+                  const vars: Array<[string, string]> = []
+                  for (const name of keys) {
+                    const safe = namedExports(name)
+                    if (safe) {
+                      if (safe !== name) {
+                        if (json[safe]) {
+                          return {errors: [{text: `clash detected in safe named export '${safe}'`}]}
+                        }
+                        console.log(`exported '${name}' as '${safe}' in '${path}'`)
+                      }
+                      vars.push([safe, name])
+                    }
+                  }
+                  if (vars.length > 0) {
+                    contents += `export const ${
+                      vars.map(([name, key]) => {
+                        const assignment = `${name}=${JSON.stringify(json[key])}`
+                        json[key] = name
+                        return assignment
+                      }).join(',')};`
+                  }
+                } else {
+                  contents += `export const ${
+                    keys.map(key => {
+                      const assignment = `${key}=${JSON.stringify(json[key])}`
+                      json[key] = key
+                      return assignment
+                    }).join(',')};`
+                }
+                contents += `export default {${
+                  keys.map(key => `${JSON.stringify(key)}:${json[key]}`).join(',')
+                }};`
+              } else {
+                contents += `export default ${pluginData.exports};`
               }
 
               return {
-                contents: `${contents}${exportConstants}export default ${pluginData.exports};`,
+                contents,
                 loader: 'js',
                 resolveDir,
                 watchFiles: [...watchFiles, ...(out.watchFiles || [])],

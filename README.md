@@ -383,38 +383,34 @@ This option accepts an array of properties for deprecations that will omitted fr
 
 ### namedExports
 
-Type: `boolean` `function`<br>
-Default: `false`
+This option allows named exports alongside default export when using transform (e.g.PostCSS). 
+When this option is `true` "safe-identifiers" is used to sanitize the names
+and make sure they are valid Js identifiers.
 
-Use named exports alongside default export.
-
-You can supply a function to control how exported named is generated:
-
-```js
-namedExports(name) {
-  // Maybe you simply want to convert dash to underscore
-  return name.replace(/-/g, '_')
-}
-```
-
-If you set it to `true`, the following will happen when importing specific classNames:
-
-- dashed class names will be transformed by replacing all the dashes to `$` sign wrapped underlines, eg. `--` => `$__$`
-- js protected names used as your style class names, will be transformed by wrapping the names between `$` signs, eg. `switch` => `$switch$`
-
-All transformed names will be logged in your terminal like:
+Any altered identifier name will be logged in your terminal like:
 
 ```bash
-Exported "new" as "$new$" in test/fixtures/named-exports/style.css
+Exported 'class-name' as 'class_name' in 'test/fixtures/named-exports/style.css'
+Exported 'switch' as '_switch' in 'test/fixtures/named-exports/style.css'
 ```
 
-The original will not be removed, it's still available on `default` export:
+The original name, is still available on `default` export:
 
 ```js
-import style, { class$_$name, class$__$name, $switch$ } from './style.css'
-console.log(style['class-name'] === class$_$name) // true
-console.log(style['class--name'] === class$__$name) // true
-console.log(style['switch'] === $switch$) // true
+import style, { class_name, _switch } from './style.css'
+console.log(style['class-name'] === class_name) // true
+console.log(style['switch'] === _switch) // true
+```
+
+Alternatively you can supply a function to control how exported named is generated.
+
+e.g This function implements escaping as it was in the previous version:
+- dashed class names were transformed by replacing all the dashes to `$` sign wrapped underlines, eg. `--` => `$__$`
+- js protected names used as your style class names, were transformed by wrapping the names between `$` signs, eg. `switch` => `$switch$`
+```js
+namedExports: name => {
+    return /-/.test(name) && name.replace(/-/g, '_')
+}
 ```
 
 ### pnpm

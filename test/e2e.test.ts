@@ -1,6 +1,6 @@
 import * as esbuild from 'esbuild'
-import {postcssModules, sassPlugin} from '../src'
 import {readFileSync, statSync} from 'fs'
+import {postcssModules, sassPlugin} from '../src'
 import {consumeSourceMap, readCssFile, readJsonFile, readTextFile, useFixture} from './test-toolkit'
 
 describe('e2e tests', function () {
@@ -96,7 +96,7 @@ describe('e2e tests', function () {
       })
 
       expect(
-        consumer.originalPositionFor({line: 10286, column: 0})
+        consumer.originalPositionFor({line: 10308, column: 0})
       ).to.eql({
         source: `../src/entrypoint.scss`,
         line: 3,
@@ -170,13 +170,11 @@ describe('e2e tests', function () {
 
     expect(bundle).to.containIgnoreSpaces(`
       var i = (t3, ...e7) => {
-        const n6 = 1 === t3.length ? t3[0] : e7.reduce((e8, s5, n7) => e8 + ((t4) => {
-          if (true === t4._$cssResult$)
-            return t4.cssText;
-          if ("number" == typeof t4)
-            return t4;
+        const n6 = 1 === t3.length ? t3[0] : e7.reduce(((e8, s5, n7) => e8 + ((t4) => {
+          if (true === t4._$cssResult$) return t4.cssText;
+          if ("number" == typeof t4) return t4;
           throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
-        })(s5) + t3[n7 + 1], t3[0]);
+        })(s5) + t3[n7 + 1]), t3[0]);
         return new o(n6, t3, s);
       };
     `)
@@ -292,22 +290,17 @@ describe('e2e tests', function () {
       plugins: [
         sassPlugin({
           transform: postcssModules({
-            localsConvention: 'camelCaseOnly'
+            generateScopedName: '[hash:base64:8]--[local]'
           }),
-          namedExports: (name) => {
-            return `${name.replace(/-/g, "_")}`
-          }
+          namedExports: "safe",
         })
       ]
-    });
+    })
 
     const bundle = readTextFile('./out/index.js')
-
-    expect(bundle).to.containIgnoreSpaces('class="${message} ${message2}')
-
-    expect(bundle).to.containIgnoreSpaces(`var message = "_message_1vmzm_1"`)
-
-    expect(bundle).to.containIgnoreSpaces(`var message2 = "_message_bxgcs_1";`)
+    expect(bundle).to.containIgnoreSpaces('class="${common_message} ${exampleMessage}')
+    expect(bundle).to.containIgnoreSpaces(`var common_message = "lBO0kLyH--common_message"`)
+    expect(bundle).to.containIgnoreSpaces(`var exampleMessage = "EeePjFcs--example-message"`)
   })
 
   it('css modules (style)', async function () {
@@ -411,7 +404,7 @@ describe('e2e tests', function () {
       plugins: [
         sassPlugin({
           type: 'local-css'
-        }),
+        })
       ]
     })
 
