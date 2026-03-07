@@ -18,7 +18,7 @@ await esbuild.build({
   plugins: [
     sassPlugin({
       filter: /\.module\.scss$/,
-      transform: postcssModules({}),
+      transformWithESBuild: postcssModules({}),
       precompile(source, pathname) {
         const basedir = path.dirname(pathname);
         return source.replace(/(url\(['"]?)(\.\.?\/)([^'")]+['"]?\))/g, `$1${basedir}/$2$3`);

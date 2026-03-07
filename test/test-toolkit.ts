@@ -1,11 +1,49 @@
 import {BuildOptions} from 'esbuild'
 import {mkdirSync, readFileSync, rmSync, writeFileSync} from 'fs'
 import {sassPlugin, SassPluginOptions} from '../src'
-import {fake} from 'mocha-toolkit'
 
 const path = require('path')
 
-export * from 'mocha-toolkit'
+function normalizeSpaces(str: string): string {
+  return str.replace(/\s+/g, '')
+}
+
+expect.extend({
+  equalIgnoreSpaces(received: string, expected: string) {
+    const normalizedReceived = normalizeSpaces(received)
+    const normalizedExpected = normalizeSpaces(expected)
+    const pass = normalizedReceived === normalizedExpected
+    return {
+      pass,
+      message: () => pass
+        ? `Expected strings not to be equal ignoring spaces`
+        : `Expected (ignoring spaces):\n${normalizedExpected}\n\nReceived (ignoring spaces):\n${normalizedReceived}`
+    }
+  },
+  containIgnoreSpaces(received: string, expected: string) {
+    const normalizedReceived = normalizeSpaces(received)
+    const normalizedExpected = normalizeSpaces(expected)
+    const pass = normalizedReceived.includes(normalizedExpected)
+    return {
+      pass,
+      message: () => pass
+        ? `Expected string not to contain (ignoring spaces): ${normalizedExpected}`
+        : `Expected to find (ignoring spaces):\n${normalizedExpected}\n\nIn:\n${normalizedReceived}`
+    }
+  }
+})
+
+declare global {
+  namespace jest {
+    interface Matchers<R> {
+      equalIgnoreSpaces(expected: string): R
+      containIgnoreSpaces(expected: string): R
+    }
+  }
+}
+
+export const fake = jest.fn
+export const sinon = {fake: jest.fn}
 
 export function useFixture(name: string): BuildOptions {
   const absWorkingDir = path.resolve(__dirname, `fixture/${name}`)

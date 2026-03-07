@@ -22,14 +22,14 @@ esbuild.build({
   plugins: [
     sassPlugin({
       filter: /common\.module\.scss$/,
-      transform: postcssModules({
+      transformWithESBuild: postcssModules({
         localsConvention: 'camelCaseOnly'
       }),
       type: 'css'
     }),
     sassPlugin({
       filter: /example\.module\.scss$/,
-      transform: postcssModules({
+      transformWithESBuild: postcssModules({
         localsConvention: 'camelCaseOnly'
       }),
       type: 'css'

@@ -3,15 +3,13 @@ import {readFileSync, statSync} from 'fs'
 import {postcssModules, sassPlugin} from '../src'
 import {consumeSourceMap, readCssFile, readJsonFile, readTextFile, useFixture} from './test-toolkit'
 
-describe('e2e tests', function () {
-
-  this.timeout(5000)
+describe('e2e tests', () => {
 
   let cwd
-  beforeEach(function () {
+  beforeEach(() => {
     cwd = process.cwd()
   })
-  afterEach(function () {
+  afterEach(() => {
     process.chdir(cwd)
   })
 
@@ -36,7 +34,7 @@ describe('e2e tests', function () {
     return null
   }
 
-  it('boostrap with sourcemaps', async function () {
+  it('boostrap with sourcemaps', async () => {
     const options = useFixture('bootstrap')
 
     await esbuild.build({
@@ -62,17 +60,17 @@ describe('e2e tests', function () {
 
     const sourceMap = readJsonFile('out/index.css.map')
 
-    expect(parseSourceMap('./out/index.css')).to.deep.equal(sourceMap)
+    expect(parseSourceMap('./out/index.css')).toEqual(sourceMap)
 
     sourceMap.sources = sourceMap.sources.map(relativeToNodeModules)
 
     const {sources} = JSON.parse(readFileSync('../node_modules/bootstrap/dist/css/bootstrap.css.map', 'utf8'))
     expect(sourceMap.sources.slice(0, -1).map(entry => entry.replace('../../node_modules/bootstrap/', '')))
-      .to.include.members(sources.slice(1).map(entry => entry.replace('../../', '')))
+      .toEqual(expect.arrayContaining(sources.slice(1).map(entry => entry.replace('../../', ''))))
 
-    expect(sourceMap.sources).not.to.include.members([
+    expect(sourceMap.sources).not.toEqual(expect.arrayContaining([
       '../../node_modules/bootstrap/scss/_functions.scss'
-    ])
+    ]))
 
     await consumeSourceMap(sourceMap, consumer => {
       expect(
@@ -81,7 +79,7 @@ describe('e2e tests', function () {
           line: 1,
           column: 0
         })
-      ).to.eql({
+      ).toEqual({
         line: null, column: null, lastColumn: null
       })
       // :root {
@@ -91,13 +89,13 @@ describe('e2e tests', function () {
           line: 1,
           column: 0
         })
-      ).to.eql({
+      ).toEqual({
         line: 4, column: 0, lastColumn: null
       })
 
       expect(
         consumer.originalPositionFor({line: 10308, column: 0})
-      ).to.eql({
+      ).toEqual({
         source: `../src/entrypoint.scss`,
         line: 3,
         column: 0,
@@ -106,7 +104,7 @@ describe('e2e tests', function () {
     })
   })
 
-  it('react with css loader', async function () {
+  it('react with css loader', async () => {
     const options = useFixture('react')
 
     await esbuild.build({
@@ -122,17 +120,17 @@ describe('e2e tests', function () {
 
     let cssBundle = readTextFile('./out/index.css')
 
-    expect(cssBundle, 'contribute from antd').to.containIgnoreSpaces(
+    expect(cssBundle).containIgnoreSpaces(
       '@-ms-viewport { width: device-width; }'
     )
-    expect(cssBundle, 'contribute from App.scss').to.containIgnoreSpaces(
+    expect(cssBundle).containIgnoreSpaces(
       '.App .header {\n' +
       '  color: blue;\n' +
       '  border: 1px solid aliceblue;\n' +
       '  padding: 4px;\n' +
       '}'
     )
-    expect(cssBundle, 'contribute from index.css').to.containIgnoreSpaces(
+    expect(cssBundle).containIgnoreSpaces(
       'code {\n' +
       '  font-family:\n' +
       '    source-code-pro,\n' +
@@ -146,7 +144,7 @@ describe('e2e tests', function () {
 
   })
 
-  it('lit-element component (mix of dynamic style and imported css result)', async function () {
+  it('lit-element component (mix of dynamic style and imported css result)', async () => {
     const options = useFixture('lit-element')
 
     await esbuild.build({
@@ -168,7 +166,7 @@ describe('e2e tests', function () {
 
     const bundle = readTextFile('./out/index.js')
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var i = (t3, ...e7) => {
         const n6 = 1 === t3.length ? t3[0] : e7.reduce(((e8, s5, n7) => e8 + ((t4) => {
           if (true === t4._$cssResult$) return t4.cssText;
@@ -179,7 +177,7 @@ describe('e2e tests', function () {
       };
     `)
 
-    expect(bundle).to.have.string('var hello_world_default = i`' +
+    expect(bundle).toContain('var hello_world_default = i`' +
       '.banner {\n' +
       '  font-family: sans-serif;\n' +
       '  color: blue;\n' +
@@ -188,11 +186,11 @@ describe('e2e tests', function () {
       '  padding: 20px;\n' +
       '}`;\n')
 
-    expect(bundle).to.have.string(
+    expect(bundle).toContain(
       `document.head.appendChild(document.createElement("style")).appendChild(document.createTextNode(css));`
     )
 
-    expect(bundle).to.have.string('var css = `.container {\n' +
+    expect(bundle).toContain('var css = `.container {\n' +
       '  display: flex;\n' +
       '  flex-direction: column;\n' +
       '}\n' +
@@ -206,7 +204,7 @@ describe('e2e tests', function () {
       '}`;')
   })
 
-  it('post-css', async function () {
+  it('post-css', async () => {
     const options = useFixture('post-css')
 
     const resolveOptions = {paths: [options.absWorkingDir!]}
@@ -240,10 +238,10 @@ describe('e2e tests', function () {
     let actual = readCssFile('./out/app.css')
     actual = actual.slice(actual.indexOf('\n') + 1).replace(/url\(data:image\/jpeg,\)/g, 'url()')
 
-    expect(actual.replace(/;/g, '')).to.equalIgnoreSpaces(expected.replace(/;/g, ''))
+    expect(actual.replace(/;/g, '')).equalIgnoreSpaces(expected.replace(/;/g, ''))
   })
 
-  it('css modules', async function () {
+  it('css modules', async () => {
     const options = useFixture('css-modules')
 
     await esbuild.build({
@@ -263,22 +261,22 @@ describe('e2e tests', function () {
 
     const bundle = readTextFile('./out/index.js')
 
-    expect(bundle).to.containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"')
+    expect(bundle).containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"')
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var common_module_default = {
         "message": "_message_bxgcs_1"
       };
     `)
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var example_module_default = {
         "message": "_message_1vmzm_1"
       };
     `)
   })
 
-  it('named exports', async function () {
+  it('named exports', async () => {
     const options = useFixture('named-exports')
 
     await esbuild.build({
@@ -298,12 +296,12 @@ describe('e2e tests', function () {
     })
 
     const bundle = readTextFile('./out/index.js')
-    expect(bundle).to.containIgnoreSpaces('class="${common_message} ${exampleMessage}')
-    expect(bundle).to.containIgnoreSpaces(`var common_message = "lBO0kLyH--common_message"`)
-    expect(bundle).to.containIgnoreSpaces(`var exampleMessage = "EeePjFcs--example-message"`)
+    expect(bundle).containIgnoreSpaces('class="${common_message} ${exampleMessage}')
+    expect(bundle).containIgnoreSpaces(`var common_message = "lBO0kLyH--common_message"`)
+    expect(bundle).containIgnoreSpaces(`var exampleMessage = "EeePjFcs--example-message"`)
   })
 
-  it('css modules (style)', async function () {
+  it('css modules (style)', async () => {
     const options = useFixture('css-modules')
 
     await esbuild.build({
@@ -324,22 +322,22 @@ describe('e2e tests', function () {
 
     const bundle = readTextFile('./out/index.js')
 
-    expect(bundle).to.containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"')
+    expect(bundle).containIgnoreSpaces('class="${example_module_default.message} ${common_module_default.message}"')
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var common_module_default = {
         "message": "_message_bxgcs_1"
       };
     `)
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var example_module_default = {
         "message": "_message_1vmzm_1"
       };
     `)
   })
 
-  it('css modules & lit-element together', async function () {
+  it('css modules & lit-element together', async () => {
     const options = useFixture('multiple')
 
     await esbuild.build({
@@ -371,22 +369,22 @@ describe('e2e tests', function () {
 
     const main = readTextFile('./out/main.js')
 
-    expect(main).to.containIgnoreSpaces(
+    expect(main).containIgnoreSpaces(
       `class="$\{example_module_default.message} $\{common_module_default.message}"`
     )
 
-    expect(main).to.containIgnoreSpaces(`
+    expect(main).containIgnoreSpaces(`
       var common_module_default = {
         "message": "_message_bxgcs_1"
       };
     `)
-    expect(main).to.containIgnoreSpaces(`
+    expect(main).containIgnoreSpaces(`
       var example_module_default = {
         "message": "_message_kto8s_1"
       };
     `)
 
-    expect(main).to.containIgnoreSpaces(`
+    expect(main).containIgnoreSpaces(`
       // src/lit/styles.scss
       var styles_default = i\`
       .message {
@@ -399,7 +397,7 @@ describe('e2e tests', function () {
     `)
   })
 
-  it('local-css', async function () {
+  it('local-css', async () => {
     const options = useFixture('local-css')
 
     await esbuild.build({
@@ -417,22 +415,22 @@ describe('e2e tests', function () {
 
     const bundle = readTextFile('./out/index.js')
 
-    expect(bundle).to.containIgnoreSpaces('class="${message} ${message2}"')
+    expect(bundle).containIgnoreSpaces('class="${message} ${message2}"')
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var message = "example_module_message";
     `)
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       var message2 = "common_module_message";
     `)
   })
 
-  it('open-iconic (dealing with relative paths & data urls)', async function () {
+  it('open-iconic (dealing with relative paths & data urls)', async () => {
     const options = useFixture('open-iconic')
 
     let styleSCSS = readTextFile('./src/styles.scss')
-    expect(styleSCSS).to.have.string(
+    expect(styleSCSS).toContain(
       '$iconic-font-path: \'open-iconic/font/fonts/\';'
     )
 
@@ -453,7 +451,7 @@ describe('e2e tests', function () {
     })
 
     const outCSS = readTextFile('./out/styles.css')
-    expect(outCSS).to.match(/url\("\.\/open-iconic-[^.]+\.eot\?#iconic-sm"\) format\("embedded-opentype"\)/)
+    expect(outCSS).toMatch(/url\("\.\/open-iconic-[^.]+\.eot\?#iconic-sm"\) format\("embedded-opentype"\)/)
 
     await esbuild.build({
       ...options,
@@ -472,7 +470,7 @@ describe('e2e tests', function () {
     })
 
     const outFile = readTextFile('./out/bundle.css')
-    expect(outFile).to.have.string(
+    expect(outFile).toContain(
       'src: url(data:application/vnd.ms-fontobject;base64,JG4AAHxt'
     )
 
@@ -508,13 +506,13 @@ describe('e2e tests', function () {
     })
 
     const outJS = readTextFile('./out/index.js')
-    expect(outJS).to.have.string(
+    expect(outJS).toContain(
       'src: url(data:application/vnd.ms-fontobject;base64,JG4AAHxt'
     )
 
   })
 
-  it('watched files', async function () {
+  it('watched files', async () => {
     const options = useFixture('watch')
 
     require('./fixture/watch/initial')
@@ -542,7 +540,7 @@ describe('e2e tests', function () {
     await ctx.watch()
     await ctx.rebuild()
 
-    expect(readTextFile('./out/index.js')).to.match(/crimson/)
+    expect(readTextFile('./out/index.js')).toMatch(/crimson/)
 
     let {mtimeMs} = statSync('./out/index.js')
     await new Promise<void>((resolve, reject) => {
@@ -558,14 +556,14 @@ describe('e2e tests', function () {
       require('./fixture/watch/update')
     })
 
-    expect(readTextFile('./out/index.js')).to.match(/cornflowerblue/)
+    expect(readTextFile('./out/index.js')).toMatch(/cornflowerblue/)
 
-    expect(count).to.eq(2)
+    expect(count).toBe(2)
 
     await ctx.dispose()
   })
 
-  it('precompile allows to add additional data', async function () {
+  it('precompile allows to add additional data', async () => {
     const options = useFixture('precompile')
 
     const env = readTextFile('./env.scss')
@@ -589,19 +587,19 @@ describe('e2e tests', function () {
 
     const bundle = readTextFile('./out/index.css')
 
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       .included {
         color: blue;
       }
     `)
-    expect(bundle).to.containIgnoreSpaces(`
+    expect(bundle).containIgnoreSpaces(`
       .excluded {
         color: red;
       }
     `)
   })
 
-  it('precompile respects sourcemaps', async function () {
+  it('precompile respects sourcemaps', async () => {
     console.warn('NOT IMPLEMENTED YET')
   })
 })

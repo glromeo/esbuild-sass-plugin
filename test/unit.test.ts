@@ -2,22 +2,19 @@ import * as esbuild from 'esbuild'
 import {sassPlugin} from '../src'
 import {readCssFile, readTextFile, useFixture, writeTextFile} from './test-toolkit'
 import {readFileSync} from 'fs'
-import {expect} from 'chai'
 import {BuildResult} from 'esbuild'
 
-describe('unit tests', function () {
-
-  this.timeout(5000)
+describe('unit tests', () => {
 
   let cwd
-  beforeEach(function () {
+  beforeEach(() => {
     cwd = process.cwd()
   })
-  afterEach(function () {
+  afterEach(() => {
     process.chdir(cwd)
   })
 
-  it('can handle a css import', async function () {
+  it('can handle a css import', async () => {
     const options = useFixture('variables')
 
     await esbuild.build({
@@ -30,11 +27,11 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(readTextFile('out/index-css.js')).to.equalIgnoreSpaces(readTextFile('snapshot/index-css.js'))
-    expect(readCssFile('out/index-css.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-css.css'))
+    expect(readTextFile('out/index-css.js')).equalIgnoreSpaces(readTextFile('snapshot/index-css.js'))
+    expect(readCssFile('out/index-css.css')).equalIgnoreSpaces(readCssFile('snapshot/index-css.css'))
   })
 
-  it('can handle a scss import', async function () {
+  it('can handle a scss import', async () => {
     const options = useFixture('variables')
 
     await esbuild.build({
@@ -47,11 +44,11 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(readTextFile('out/index-scss.js')).to.equalIgnoreSpaces(readTextFile('snapshot/index-scss.js'))
-    expect(readCssFile('out/index-scss.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-scss.css'))
+    expect(readTextFile('out/index-scss.js')).equalIgnoreSpaces(readTextFile('snapshot/index-scss.js'))
+    expect(readCssFile('out/index-scss.css')).equalIgnoreSpaces(readCssFile('snapshot/index-scss.css'))
   })
 
-  it('can handle a sass import', async function () {
+  it('can handle a sass import', async () => {
     const options = useFixture('variables')
 
     await esbuild.build({
@@ -64,11 +61,11 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(readTextFile('out/index-sass.js')).to.equalIgnoreSpaces(readTextFile('snapshot/index-sass.js'))
-    expect(readCssFile('out/index-sass.css')).to.equalIgnoreSpaces(readCssFile('snapshot/index-sass.css'))
+    expect(readTextFile('out/index-sass.js')).equalIgnoreSpaces(readTextFile('snapshot/index-sass.js'))
+    expect(readCssFile('out/index-sass.css')).equalIgnoreSpaces(readCssFile('snapshot/index-sass.css'))
   })
 
-  it('caching test', async function () {
+  it('caching test', async () => {
     const options = useFixture('caching')
 
     writeTextFile('./index.sass', readTextFile('./index-v1.sass'))
@@ -83,20 +80,20 @@ describe('unit tests', function () {
 
     await ctx.rebuild()
 
-    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).equalIgnoreSpaces(`
       body { font: 100% Helvetica, sans-serif; color: #333; }
     `)
 
     writeTextFile('./index.sass', readTextFile('./index-v1.sass'))
     await ctx.rebuild()
-    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).equalIgnoreSpaces(`
       body { font: 100% Helvetica, sans-serif; color: #333; }
     `)
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v1.sass'))
     writeTextFile('./index.sass', readTextFile('./index-v2.sass'))
     await ctx.rebuild()
-    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).equalIgnoreSpaces(`
       body { background-color: red; }
       body { font: 99% "Times New Roman", serif; color: #666; }
     `)
@@ -107,7 +104,7 @@ describe('unit tests', function () {
 
     writeTextFile('./dependency.sass', readTextFile('./dependency-v3.sass'))
     await ctx.rebuild()
-    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).to.equalIgnoreSpaces(`
+    expect(readFileSync('./out/index.css', 'utf-8').replace(/\/\*.+\*\//g, '')).equalIgnoreSpaces(`
       body { background-color: blue; }
       body { font: 99% "Times New Roman", serif; color: #666; }
     `)
@@ -115,7 +112,7 @@ describe('unit tests', function () {
     await ctx.dispose()
   })
 
-  it('allows to specify a nonce for the <style> tag', async function () {
+  it('allows to specify a nonce for the <style> tag', async () => {
     const options = useFixture('nonce')
 
     await esbuild.build({
@@ -131,10 +128,10 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(readTextFile('out/index.js')).to.equalIgnoreSpaces(readTextFile('snapshot.js'))
+    expect(readTextFile('out/index.js')).equalIgnoreSpaces(readTextFile('snapshot.js'))
   })
 
-  it('if nonce starts with window, process or globalThis it is treated as a variable (ubound)', async function () {
+  it('if nonce starts with window, process or globalThis it is treated as a variable (ubound)', async () => {
     const options = useFixture('nonce')
 
     await esbuild.build({
@@ -151,10 +148,10 @@ describe('unit tests', function () {
       define: {'window.__esbuild_nonce__': '"12345"'}
     })
 
-    expect(readTextFile('out/index.js')).to.equalIgnoreSpaces(readTextFile('snapshot.js'))
+    expect(readTextFile('out/index.js')).equalIgnoreSpaces(readTextFile('snapshot.js'))
   })
 
-  it('captures warnings in entrypoint', async function () {
+  it('captures warnings in entrypoint', async () => {
     const options = useFixture('warnings')
     let warnings = [] as BuildResult["warnings"]
 
@@ -177,15 +174,15 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(warnings.length).to.equal(1)
+    expect(warnings.length).toBe(1)
 
-    expect(warnings[0].text).to.include('This selector doesn\'t have any properties')
-    expect(warnings[0].location!.file).to.equal('index.sass')
-    expect(warnings[0].location!.line).to.equal(3)
-    expect(warnings[0].location!.lineText).to.equal('p')
+    expect(warnings[0].text).toContain('This selector doesn\'t have any properties')
+    expect(warnings[0].location!.file).toBe('index.sass')
+    expect(warnings[0].location!.line).toBe(3)
+    expect(warnings[0].location!.lineText).toBe('p')
   })
 
-  it('captures warnings in imports', async function () {
+  it('captures warnings in imports', async () => {
     const options = useFixture('warnings')
     let warnings = [] as BuildResult["warnings"]
 
@@ -208,16 +205,16 @@ describe('unit tests', function () {
       ]
     })
 
-    expect(warnings.length).to.equal(4)
+    expect(warnings.length).toBe(4)
 
     const indexWarning = warnings.find(w => w.location!.file.endsWith('index.sass'))!
-    expect(indexWarning.text).to.include('This selector doesn\'t have any properties')
-    expect(indexWarning.location!.line).to.equal(3)
-    expect(indexWarning.location!.lineText).to.equal('p')
+    expect(indexWarning.text).toContain('This selector doesn\'t have any properties')
+    expect(indexWarning.location!.line).toBe(3)
+    expect(indexWarning.location!.lineText).toBe('p')
 
     const partialWarning = warnings.find(w => w.location!.file.endsWith('_partial.sass'))!
-    expect(partialWarning.text).to.include('This selector doesn\'t have any properties')
-    expect(partialWarning.location!.line).to.equal(0)
-    expect(partialWarning.location!.lineText).to.equal('div')
+    expect(partialWarning.text).toContain('This selector doesn\'t have any properties')
+    expect(partialWarning.location!.line).toBe(0)
+    expect(partialWarning.location!.lineText).toBe('div')
   })
 })

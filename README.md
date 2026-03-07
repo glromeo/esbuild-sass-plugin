@@ -68,20 +68,23 @@ is in [Go syntax](https://pkg.go.dev/regexp/syntax)
 `/^(?!https?:).*\.(s[ac]ss|css)$/` because *Go regex engine doesn't support lookarounds* but you can use 
 > **esbuild**'s `external` option to ignore these imports or try a [solution like this one](https://esbuild.github.io/plugins/#on-resolve).
 
-You can try to list multiple plugin instances in order so that the most specific RegEx come first: 
+You can try to list multiple plugin instances in order so that the most specific RegEx come first:
+
 ```javascript
 await esbuild.build({
-  ...
-  plugins: [
+    ...
+        plugins
+:
+[
     sassPlugin({
-      filter: /\.module\.scss$/,
-      transform: postcssModules()
+        filter: /\.module\.scss$/,
+        transformWithESBuild: postcssModules()
     }),
     sassPlugin({
-      filter: /\.scss$/
+        filter: /\.scss$/
     }),
-  ],
-  ...   
+],
+...
 })
 ```
 
@@ -333,13 +336,15 @@ const autoprefixer = require('autoprefixer')
 const postcssPresetEnv = require('postcss-preset-env')
 
 esbuild.build({
-  ...,
-  plugins: [sassPlugin({
-    async transform(source, resolveDir) {
-      const {css} = await postcss([autoprefixer, postcssPresetEnv({stage: 0})]).process(source)
-      return css
-    }
-  })]
+    ...,
+    plugins: [
+        sassPlugin({
+            async transformWithESBuild(source, resolveDir) {
+                const {css} = await postcss([autoprefixer, postcssPresetEnv({stage: 0})]).process(source)
+                return css
+            }
+        })
+    ]
 })
 
 ```
