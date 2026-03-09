@@ -20,6 +20,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+!test/issues/195/node_modules/
 
 # Optional npm cache directory
 .npm
