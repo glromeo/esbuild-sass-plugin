@@ -21,6 +21,7 @@ build/Release
 # Dependency directories
 node_modules/
 !test/issues/195/node_modules/
+!test/issues/195/node_modules/test-exports-pkg/dist/
 
 # Optional npm cache directory
 .npm
