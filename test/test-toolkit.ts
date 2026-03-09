@@ -43,7 +43,6 @@ declare global {
 }
 
 export const fake = jest.fn
-export const sinon = {fake: jest.fn}
 
 export function useFixture(name: string): BuildOptions {
   const absWorkingDir = path.resolve(__dirname, `fixture/${name}`)
