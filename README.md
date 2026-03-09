@@ -39,7 +39,7 @@ await esbuild.build({
 ### Options
 
 You can pass a series of **options** to the plugin that are a superset of Sass
-[compile string options](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter). \
+[compile string options](https://sass-lang.com/documentation/js-api/interfaces/stringoptions/). \
 The following are the options specific to the plugin with their defaults whether provided:
 
 | Option              | Type                                                                                              | Default                                  |
@@ -380,7 +380,7 @@ the complete example.
 
 In order for `quietDeps` to correctly identify external dependencies the `url` option is defaulted to the importing file path URL.
 
-> The `url` option creates problems when importing source SASS files from 3rd party modules in which case the best workaround is to avoid `quietDeps` and [mute the logger](https://sass-lang.com/documentation/js-api/interfaces/StringOptionsWithImporter#logger) if that's a big issue.
+> The `url` option creates problems when importing source SASS files from 3rd party modules in which case the best workaround is to avoid `quietDeps` and [mute the logger](https://sass-lang.com/documentation/js-api/interfaces/stringoptions/#logger) if that's a big issue.
 
 ### `silenceDeprecations`
 

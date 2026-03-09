@@ -332,4 +332,20 @@ describe('tests covering github issues', () => {
 
         expect(readTextFile('out/index.css')).equalIgnoreSpaces(readTextFile('snapshot/index.css'))
     })
+
+    it('#195 resolve stylesheet imports that use package.json exports field', async () => {
+        const options = useFixture('../issues/195')
+
+        await esbuild.build({
+            ...options,
+            entryPoints: ['./src/index.scss'],
+            outdir: './out',
+            bundle: true,
+            plugins: [sassPlugin()]
+        })
+
+        const css = readTextFile('./out/index.css')
+        expect(css).toContain('.from-exports')
+        expect(css).toContain('.local')
+    })
 })

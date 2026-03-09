@@ -1,6 +1,6 @@
 import {BuildOptions, OnLoadResult} from 'esbuild'
-import {existsSync} from 'fs'
-import {parse, relative, resolve} from 'path'
+import {existsSync, readFileSync} from 'fs'
+import {dirname, parse, relative, resolve} from 'path'
 import {AcceptedPlugin, Postcss} from 'postcss'
 import PostcssModulesPlugin from 'postcss-modules'
 import {SyncOpts} from 'resolve'
@@ -207,19 +207,29 @@ export function createResolver(options: SassPluginOptions = {}, loadPaths: strin
     return (id: string, basedir: string) => {
       try {
         opts.paths[0] = basedir
-        let resolved = require.resolve(id, opts)
-        // pretty ugly patch to avoid resolving erroneously to .js files ///////////////////////////////////////////////
-        if (resolved.endsWith('.js')) {
-          resolved = resolved.slice(0, -3) + '.scss'
-          if (!existsSync(resolved)) {
-            resolved = resolved.slice(0, -5) + '.sass'
-            if (!existsSync(resolved)) {
-              resolved = resolved.slice(0, -5) + '.css'
+        const resolved = require.resolve(id, opts)
+        if (!resolved.endsWith('.js')) {
+          return resolved
+        }
+        // require.resolve found a JS entry point — look for a stylesheet instead.
+        // First check package.json style/sass/scss fields, then try adjacent files.
+        try {
+          const parts = id.split('/')
+          const pkgName = id.startsWith('@') ? parts[0] + '/' + parts[1] : parts[0]
+          const pkgPath = require.resolve(pkgName + '/package.json', opts)
+          const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
+          for (const field of ['style', 'sass', 'scss']) {
+            if (typeof pkg[field] === 'string') {
+              const stylePath = resolve(dirname(pkgPath), pkg[field])
+              if (existsSync(stylePath)) return stylePath
             }
           }
+        } catch (ignored) {}
+        const base = resolved.slice(0, -3)
+        for (const ext of ['.scss', '.sass', '.css']) {
+          if (existsSync(base + ext)) return base + ext
         }
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        return resolved
+        return id
       } catch (ignored) {
         return id
       }

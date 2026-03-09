@@ -1,4 +1,4 @@
-import {dirname, parse, relative, resolve, sep} from 'path'
+import {dirname, isAbsolute, parse, relative, resolve, sep} from 'path'
 import fs, {readFileSync} from 'fs'
 import {createResolver, fileSyntax, sourceMappingURL, DEFAULT_FILTER} from './utils'
 import {PartialMessage} from 'esbuild'
@@ -177,6 +177,13 @@ export async function createRenderer(
             resolved = resolveRelativeImport(loadPath, filename)
             if (resolved) {
               return pathToFileURL(resolved)
+            }
+          }
+          // For bare module specifiers, fall back to require.resolve which honours package.json "exports"
+          if (!filename.startsWith('.') && !isAbsolute(filename)) {
+            const moduleResolved = resolveModule(filename, basedir)
+            if (moduleResolved !== filename && fs.existsSync(moduleResolved)) {
+              return pathToFileURL(moduleResolved)
             }
           }
           return null
